@@ -1,0 +1,66 @@
+{
+  "tabs": {
+    "home": "Home",
+    "guide": "Guide",
+    "coach": "Coach",
+    "books": "Books",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "Your Journey",
+    "progress": "Overall Progress",
+    "streak": "Day Streak",
+    "dailyTip": "Daily Tip",
+    "chapters": "chapters completed",
+    "books": "books read",
+    "tips": [
+      "Confidence starts with eye contact. Practice holding it for 3 seconds today.",
+      "The best conversations start with genuine curiosity. Ask 'why' more.",
+      "Your body language speaks before your words. Stand tall, shoulders back.",
+      "Rejection is redirection. Every 'no' brings you closer to the right 'yes'.",
+      "Listen more than you speak. The most attractive people make others feel heard.",
+      "Humor is your superpower. Don't take yourself too seriously.",
+      "A genuine compliment can make someone's entire day. Try it."
+    ]
+  },
+  "guide": {
+    "title": "The Guide",
+    "subtitle": "20 steps to finding your soulmate",
+    "markComplete": "Mark Complete",
+    "completed": "Completed",
+    "chapter": "Chapter"
+  },
+  "coach": {
+    "title": "Coach Hank",
+    "subtitle": "Your AI dating coach",
+    "placeholder": "Ask Hank anything...",
+    "greeting": "Hey! I'm Hank, your dating coach. Think of me as that friend who's brutally honest but always has your back. What's on your mind?",
+    "sending": "Hank is thinking..."
+  },
+  "booksScreen": {
+    "title": "Recommended Books",
+    "subtitle": "Level up your knowledge",
+    "markRead": "Mark as Read",
+    "read": "Read",
+    "by": "by"
+  },
+  "profile": {
+    "title": "Profile",
+    "achievements": "Achievements",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "settings": "Settings",
+    "language": "Language",
+    "graduate": "Graduate",
+    "graduateDesc": "Found your soulmate? Congratulations!",
+    "resetProgress": "Reset Progress",
+    "resetConfirm": "Are you sure? This will delete all your progress."
+  },
+  "graduate": {
+    "title": "Congratulations!",
+    "subtitle": "You've completed the journey",
+    "message": "You've grown so much. You don't need us anymore — go live your beautiful love story.",
+    "share": "Share Achievement",
+    "delete": "Graduate & Delete App"
+  }
+}

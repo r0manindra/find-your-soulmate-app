@@ -1,0 +1,66 @@
+{
+  "tabs": {
+    "home": "Start",
+    "guide": "Guide",
+    "coach": "Coach",
+    "books": "Bücher",
+    "profile": "Profil"
+  },
+  "home": {
+    "title": "Deine Reise",
+    "progress": "Gesamtfortschritt",
+    "streak": "Tage-Streak",
+    "dailyTip": "Tipp des Tages",
+    "chapters": "Kapitel abgeschlossen",
+    "books": "Bücher gelesen",
+    "tips": [
+      "Selbstbewusstsein beginnt mit Blickkontakt. Übe heute, ihn 3 Sekunden zu halten.",
+      "Die besten Gespräche beginnen mit echter Neugier. Frage öfter 'warum'.",
+      "Deine Körpersprache spricht bevor du es tust. Steh aufrecht, Schultern zurück.",
+      "Ablehnung ist Umleitung. Jedes 'Nein' bringt dich näher zum richtigen 'Ja'.",
+      "Höre mehr zu als du sprichst. Die attraktivsten Menschen geben anderen das Gefühl, gehört zu werden.",
+      "Humor ist deine Superkraft. Nimm dich selbst nicht zu ernst.",
+      "Ein ehrliches Kompliment kann jemandem den ganzen Tag verschönern. Probiere es."
+    ]
+  },
+  "guide": {
+    "title": "Der Guide",
+    "subtitle": "20 Schritte zum Finden deines Seelenverwandten",
+    "markComplete": "Als abgeschlossen markieren",
+    "completed": "Abgeschlossen",
+    "chapter": "Kapitel"
+  },
+  "coach": {
+    "title": "Coach Hank",
+    "subtitle": "Dein KI-Dating-Coach",
+    "placeholder": "Frag Hank etwas...",
+    "greeting": "Hey! Ich bin Hank, dein Dating-Coach. Denk an mich als den Freund, der brutal ehrlich ist, aber immer hinter dir steht. Was beschäftigt dich?",
+    "sending": "Hank denkt nach..."
+  },
+  "booksScreen": {
+    "title": "Buchempfehlungen",
+    "subtitle": "Erweitere dein Wissen",
+    "markRead": "Als gelesen markieren",
+    "read": "Gelesen",
+    "by": "von"
+  },
+  "profile": {
+    "title": "Profil",
+    "achievements": "Achievements",
+    "unlocked": "Freigeschaltet",
+    "locked": "Gesperrt",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "graduate": "Abschluss",
+    "graduateDesc": "Seelenverwandten gefunden? Herzlichen Glückwunsch!",
+    "resetProgress": "Fortschritt zurücksetzen",
+    "resetConfirm": "Bist du sicher? Dies löscht deinen gesamten Fortschritt."
+  },
+  "graduate": {
+    "title": "Herzlichen Glückwunsch!",
+    "subtitle": "Du hast die Reise abgeschlossen",
+    "message": "Du bist so sehr gewachsen. Du brauchst uns nicht mehr — lebe deine wunderschöne Liebesgeschichte.",
+    "share": "Achievement teilen",
+    "delete": "Abschluss & App löschen"
+  }
+}
