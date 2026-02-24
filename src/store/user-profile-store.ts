@@ -6,10 +6,12 @@ export type SocialEnergy = 'deep_introvert' | 'introvert' | 'ambivert' | 'extrov
 export type AgeGroup = 'age_18_24' | 'age_25_34' | 'age_35_44' | 'age_45_plus';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type Goal = 'social_confidence' | 'get_dates' | 'find_partner' | 'social_magnetism' | 'ambitious';
+export type BasicsLevel = 'basics_none' | 'basics_some' | 'basics_solid' | 'basics_mastered';
 
 interface UserProfileState {
   socialEnergy: SocialEnergy | null;
   ageGroup: AgeGroup | null;
+  basicsLevel: BasicsLevel | null;
   skillLevel: SkillLevel | null;
   goal: Goal | null;
   hasCompletedOnboarding: boolean;
@@ -19,6 +21,7 @@ interface UserProfileState {
 interface UserProfileActions {
   setSocialEnergy: (value: SocialEnergy) => void;
   setAgeGroup: (value: AgeGroup) => void;
+  setBasicsLevel: (value: BasicsLevel) => void;
   setSkillLevel: (value: SkillLevel) => void;
   setGoal: (value: Goal) => void;
   completeOnboarding: () => void;
@@ -31,6 +34,7 @@ type UserProfileStore = UserProfileState & UserProfileActions;
 const initialState: UserProfileState = {
   socialEnergy: null,
   ageGroup: null,
+  basicsLevel: null,
   skillLevel: null,
   goal: null,
   hasCompletedOnboarding: false,
@@ -44,6 +48,7 @@ export const useUserProfileStore = create<UserProfileStore>()(
 
       setSocialEnergy: (value) => set({ socialEnergy: value }),
       setAgeGroup: (value) => set({ ageGroup: value }),
+      setBasicsLevel: (value) => set({ basicsLevel: value }),
       setSkillLevel: (value) => set({ skillLevel: value }),
       setGoal: (value) => set({ goal: value }),
 

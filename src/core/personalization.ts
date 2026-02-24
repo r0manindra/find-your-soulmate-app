@@ -1,20 +1,39 @@
-import type { SocialEnergy, AgeGroup, SkillLevel, Goal } from '@/src/store/user-profile-store';
+import type { SocialEnergy, AgeGroup, SkillLevel, Goal, BasicsLevel } from '@/src/store/user-profile-store';
 
 export interface PersonalizationResult {
   suggestedStartChapter: number;
   recommendedCharacterId: string;
   bookPriority: number[];
   contentTone: 'gen_z' | 'millennial' | 'mature' | 'classic';
+  productCategories: string[];
 }
 
 interface ProfileInput {
   socialEnergy: SocialEnergy | null;
   ageGroup: AgeGroup | null;
+  basicsLevel: BasicsLevel | null;
   skillLevel: SkillLevel | null;
   goal: Goal | null;
 }
 
-function getSuggestedStartChapter(skillLevel: SkillLevel | null): number {
+function getSuggestedStartChapter(basicsLevel: BasicsLevel | null, skillLevel: SkillLevel | null): number {
+  // basics_none or basics_some → start at Phase 0
+  if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
+    return 21;
+  }
+
+  // basics_solid → skip basics, use skill level for Phase 1+
+  if (basicsLevel === 'basics_solid') {
+    switch (skillLevel) {
+      case 'beginner': return 1;
+      case 'intermediate': return 3;
+      case 'advanced':
+      case 'expert': return 5;
+      default: return 1;
+    }
+  }
+
+  // basics_mastered → same as original logic (skip basics entirely)
   switch (skillLevel) {
     case 'beginner': return 1;
     case 'intermediate': return 3;
@@ -22,6 +41,13 @@ function getSuggestedStartChapter(skillLevel: SkillLevel | null): number {
     case 'expert': return 9;
     default: return 1;
   }
+}
+
+function getProductCategories(basicsLevel: BasicsLevel | null): string[] {
+  if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
+    return ['grooming', 'skincare', 'fitness', 'fragrance', 'style'];
+  }
+  return ['fragrance', 'style', 'fitness', 'grooming', 'skincare'];
 }
 
 function getRecommendedCharacter(
@@ -103,9 +129,10 @@ function getContentTone(ageGroup: AgeGroup | null): PersonalizationResult['conte
 
 export function getPersonalization(profile: ProfileInput): PersonalizationResult {
   return {
-    suggestedStartChapter: getSuggestedStartChapter(profile.skillLevel),
+    suggestedStartChapter: getSuggestedStartChapter(profile.basicsLevel, profile.skillLevel),
     recommendedCharacterId: getRecommendedCharacter(profile.socialEnergy, profile.goal),
     bookPriority: getBookPriority(profile.skillLevel, profile.goal),
     contentTone: getContentTone(profile.ageGroup),
+    productCategories: getProductCategories(profile.basicsLevel),
   };
 }

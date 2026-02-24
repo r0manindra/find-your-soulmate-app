@@ -231,6 +231,14 @@ export default function ProfileScreen() {
                     {t(`onboarding.profile.labels.${userProfile.socialEnergy}`)}
                   </Text>
                 </View>
+                {userProfile.basicsLevel && (
+                  <View style={styles.charismoItem}>
+                    <Text style={styles.charismoLabel}>{t('onboarding.profile.basicsLevel')}</Text>
+                    <Text style={styles.charismoValue}>
+                      {t(`onboarding.profile.labels.${userProfile.basicsLevel}`)}
+                    </Text>
+                  </View>
+                )}
                 {userProfile.skillLevel && (
                   <View style={styles.charismoItem}>
                     <Text style={styles.charismoLabel}>{t('onboarding.profile.skillLevel')}</Text>

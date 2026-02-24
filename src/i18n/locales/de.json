@@ -20,12 +20,15 @@
       "Ablehnung ist Umleitung. Jedes 'Nein' bringt dich näher zum richtigen 'Ja'.",
       "Höre mehr zu als du sprichst. Die attraktivsten Menschen geben anderen das Gefühl, gehört zu werden.",
       "Humor ist deine Superkraft. Nimm dich selbst nicht zu ernst.",
-      "Ein ehrliches Kompliment kann jemandem den ganzen Tag verschönern. Probiere es."
+      "Ein ehrliches Kompliment kann jemandem den ganzen Tag verschönern. Probiere es.",
+      "Ein Nein ist besser als Unwissenheit.",
+      "Zu spät ist eine verpasste Chance.",
+      "'Ich spreche sie nächstes Mal an' — wirst du nicht."
     ]
   },
   "guide": {
     "title": "Der Guide",
-    "subtitle": "20 Schritte zum Finden deines Seelenverwandten",
+    "subtitle": "24 Schritte zum Finden deines Seelenverwandten",
     "markComplete": "Als abgeschlossen markieren",
     "completed": "Abgeschlossen",
     "chapter": "Kapitel"
@@ -84,6 +87,14 @@
       "age_35_44": "35-44 — Ich habe eine Altersvorsorge, aber niemanden zum Teilen.",
       "age_45_plus": "45+ — Ich habe Geschichten. Lehrt mich die neuen Regeln."
     },
+    "basics": {
+      "title": "Lass uns über die Basics reden.",
+      "subtitle": "Sei ehrlich. Niemand schaut zu.",
+      "none": "Was ist Feuchtigkeitscreme?",
+      "some": "Ich geb mir Mühe",
+      "solid": "Ich könnte auf dem GQ-Cover sein",
+      "mastered": "Ich BIN die Routine"
+    },
     "skillLevel": {
       "title": "Sei ehrlich. Niemand schaut zu.",
       "subtitle": "(Tun wir total.)",
@@ -115,6 +126,7 @@
       "coach": "Dein KI-Coach",
       "startingChapter": "Startkapitel",
       "skipNote": "Wir überspringen die Basics",
+      "basicsNote": "Wir starten mit den Grundlagen — vertrau dem Prozess",
       "cta": "Los geht's",
       "settingsNote": "Du kannst das alles in den Einstellungen ändern. Wir sind flexibel."
     },
@@ -123,6 +135,7 @@
       "retakeQuiz": "Quiz wiederholen",
       "socialEnergy": "Soziale Energie",
       "ageGroup": "Altersgruppe",
+      "basicsLevel": "Basics",
       "skillLevel": "Skill-Level",
       "goal": "Ziel",
       "labels": {
@@ -134,6 +147,10 @@
         "age_25_34": "25-34",
         "age_35_44": "35-44",
         "age_45_plus": "45+",
+        "basics_none": "Frischer Start",
+        "basics_some": "In Arbeit",
+        "basics_solid": "Sieht gut aus",
+        "basics_mastered": "GQ-Ready",
         "beginner": "Anfänger",
         "intermediate": "Fortgeschritten",
         "advanced": "Erfahren",
@@ -147,6 +164,15 @@
     },
     "recommended": "Empfohlen für dich",
     "startHere": "Starte hier"
+  },
+  "products": {
+    "title": "Empfohlen für dich",
+    "whyItWorks": "Warum es funktioniert",
+    "viewProduct": "Produkt ansehen",
+    "disclaimer": "Wir erhalten möglicherweise eine Provision für Käufe über diese Links."
+  },
+  "phases": {
+    "theBasics": "Die Grundlagen"
   },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",

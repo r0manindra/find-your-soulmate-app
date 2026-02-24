@@ -25,6 +25,19 @@ export interface Book {
   ionicon: string;
 }
 
+export interface Product {
+  id: number;
+  name: string;
+  brand: string;
+  category: 'fragrance' | 'grooming' | 'skincare' | 'style' | 'fitness';
+  emoji: string;
+  ionicon: string;
+  affiliateUrl: string;
+  chapterIds: number[];
+  description: { en: string; de: string };
+  whyItWorks: { en: string; de: string };
+}
+
 export interface Achievement {
   id: string;
   title: { en: string; de: string };

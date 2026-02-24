@@ -21,9 +21,9 @@ import { useProgressStore } from '@/src/store/progress-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { getCharacter } from '@/src/data/content/coach-characters';
 import { chapters } from '@/src/data/content/chapters';
-import type { SocialEnergy, AgeGroup, SkillLevel, Goal } from '@/src/store/user-profile-store';
+import type { SocialEnergy, AgeGroup, BasicsLevel, SkillLevel, Goal } from '@/src/store/user-profile-store';
 
-const TOTAL_PAGES = 6;
+const TOTAL_PAGES = 7;
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
@@ -36,8 +36,8 @@ export default function OnboardingScreen() {
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const {
-    socialEnergy, ageGroup, skillLevel, goal,
-    setSocialEnergy, setAgeGroup, setSkillLevel, setGoal,
+    socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
+    setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
     completeOnboarding, skipOnboarding,
   } = useUserProfileStore();
 
@@ -60,7 +60,7 @@ export default function OnboardingScreen() {
 
   const handleComplete = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const personalization = getPersonalization({ socialEnergy, ageGroup, skillLevel, goal });
+    const personalization = getPersonalization({ socialEnergy, ageGroup, basicsLevel, skillLevel, goal });
     const currentCharacterId = useSettingsStore.getState().selectedCharacterId;
     if (currentCharacterId === 'charismo') {
       setCharacterId(personalization.recommendedCharacterId);
@@ -70,8 +70,8 @@ export default function OnboardingScreen() {
   }, [socialEnergy, ageGroup, skillLevel, goal, completeOnboarding, setCharacterId, router]);
 
   const personalization = useMemo(
-    () => getPersonalization({ socialEnergy, ageGroup, skillLevel, goal }),
-    [socialEnergy, ageGroup, skillLevel, goal],
+    () => getPersonalization({ socialEnergy, ageGroup, basicsLevel, skillLevel, goal }),
+    [socialEnergy, ageGroup, basicsLevel, skillLevel, goal],
   );
 
   const recommendedCharacter = useMemo(
@@ -129,6 +129,25 @@ export default function OnboardingScreen() {
       case 3: return (
         <QuestionPage
           locale={locale}
+          title={t('onboarding.basics.title')}
+          subtitle={t('onboarding.basics.subtitle')}
+          options={[
+            { emoji: '🧼', label: t('onboarding.basics.none'), value: 'basics_none' as const },
+            { emoji: '🚿', label: t('onboarding.basics.some'), value: 'basics_some' as const },
+            { emoji: '💅', label: t('onboarding.basics.solid'), value: 'basics_solid' as const },
+            { emoji: '👑', label: t('onboarding.basics.mastered'), value: 'basics_mastered' as const },
+          ]}
+          selected={basicsLevel}
+          onSelect={(value) => {
+            setBasicsLevel(value as BasicsLevel);
+            setTimeout(advance, 400);
+          }}
+          width={width}
+        />
+      );
+      case 4: return (
+        <QuestionPage
+          locale={locale}
           title={t('onboarding.skillLevel.title')}
           subtitle={t('onboarding.skillLevel.subtitle')}
           question={t('onboarding.skillLevel.question')}
@@ -146,7 +165,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 4: return (
+      case 5: return (
         <QuestionPage
           locale={locale}
           title={t('onboarding.goal.title')}
@@ -166,7 +185,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 5: return (
+      case 6: return (
         <ProfileRevealPage
           locale={locale}
           t={t}
@@ -174,6 +193,7 @@ export default function OnboardingScreen() {
           recommendedCharacter={recommendedCharacter}
           suggestedChapter={suggestedChapter}
           socialEnergy={socialEnergy}
+          basicsLevel={basicsLevel}
           skillLevel={skillLevel}
           goal={goal}
           onComplete={handleComplete}
@@ -182,13 +202,13 @@ export default function OnboardingScreen() {
       default: return null;
     }
   }, [
-    locale, t, width, socialEnergy, ageGroup, skillLevel, goal,
+    locale, t, width, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
     personalization, recommendedCharacter, suggestedChapter,
     advance, handleSkip, handleComplete,
-    setSocialEnergy, setAgeGroup, setSkillLevel, setGoal,
+    setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
   ]);
 
-  const pages = useMemo(() => [0, 1, 2, 3, 4, 5], []);
+  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6], []);
 
   return (
     <View style={styles.screen}>
@@ -334,6 +354,7 @@ function ProfileRevealPage({
   recommendedCharacter,
   suggestedChapter,
   socialEnergy,
+  basicsLevel,
   skillLevel,
   goal,
   onComplete,
@@ -344,15 +365,20 @@ function ProfileRevealPage({
   recommendedCharacter: ReturnType<typeof getCharacter>;
   suggestedChapter: typeof chapters[number] | undefined;
   socialEnergy: string | null;
+  basicsLevel: string | null;
   skillLevel: string | null;
   goal: string | null;
   onComplete: () => void;
 }) {
   const { width } = useWindowDimensions();
   const showSkipNote = skillLevel === 'advanced' || skillLevel === 'expert';
+  const startsAtBasics = personalization.suggestedStartChapter === 21;
 
   const socialLabel = socialEnergy
     ? t(`onboarding.profile.labels.${socialEnergy}`)
+    : '—';
+  const basicsLabel = basicsLevel
+    ? t(`onboarding.profile.labels.${basicsLevel}`)
     : '—';
   const skillLabel = skillLevel
     ? t(`onboarding.profile.labels.${skillLevel}`)
@@ -380,6 +406,10 @@ function ProfileRevealPage({
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>⚡</Text>
                 <Text style={styles.revealStatValue}>{socialLabel}</Text>
+              </View>
+              <View style={styles.revealStat}>
+                <Text style={styles.revealStatEmoji}>🧼</Text>
+                <Text style={styles.revealStatValue}>{basicsLabel}</Text>
               </View>
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>📊</Text>
@@ -423,6 +453,9 @@ function ProfileRevealPage({
                   </Text>
                   {showSkipNote && (
                     <Text style={styles.planSkipNote}>{t('onboarding.profileReveal.skipNote')}</Text>
+                  )}
+                  {startsAtBasics && (
+                    <Text style={styles.planSkipNote}>{t('onboarding.profileReveal.basicsNote')}</Text>
                   )}
                 </View>
               </View>

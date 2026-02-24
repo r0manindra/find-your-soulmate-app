@@ -20,12 +20,15 @@
       "Rejection is redirection. Every 'no' brings you closer to the right 'yes'.",
       "Listen more than you speak. The most attractive people make others feel heard.",
       "Humor is your superpower. Don't take yourself too seriously.",
-      "A genuine compliment can make someone's entire day. Try it."
+      "A genuine compliment can make someone's entire day. Try it.",
+      "A no is better than not knowing.",
+      "Too late is a missed chance.",
+      "'I'll talk to her next time' — you won't."
     ]
   },
   "guide": {
     "title": "The Guide",
-    "subtitle": "20 steps to finding your soulmate",
+    "subtitle": "24 steps to finding your soulmate",
     "markComplete": "Mark Complete",
     "completed": "Completed",
     "chapter": "Chapter"
@@ -84,6 +87,14 @@
       "age_35_44": "35-44 — I have a 401k but no one to share it with.",
       "age_45_plus": "45+ — I've got stories. Teach me the new rules."
     },
+    "basics": {
+      "title": "Let's talk basics.",
+      "subtitle": "Be honest. Nobody's watching.",
+      "none": "What's moisturizer?",
+      "some": "I try my best",
+      "solid": "I could be on GQ",
+      "mastered": "I AM the routine"
+    },
     "skillLevel": {
       "title": "Be honest. No one's watching.",
       "subtitle": "(We totally are.)",
@@ -115,6 +126,7 @@
       "coach": "Your AI Coach",
       "startingChapter": "Starting Chapter",
       "skipNote": "We're skipping the baby stuff",
+      "basicsNote": "Starting with the fundamentals — trust the process",
       "cta": "Let's do this",
       "settingsNote": "You can change all of this in settings. We're flexible like that."
     },
@@ -123,6 +135,7 @@
       "retakeQuiz": "Retake Quiz",
       "socialEnergy": "Social Energy",
       "ageGroup": "Age Group",
+      "basicsLevel": "Basics",
       "skillLevel": "Skill Level",
       "goal": "Goal",
       "labels": {
@@ -134,6 +147,10 @@
         "age_25_34": "25-34",
         "age_35_44": "35-44",
         "age_45_plus": "45+",
+        "basics_none": "Starting Fresh",
+        "basics_some": "Work in Progress",
+        "basics_solid": "Looking Good",
+        "basics_mastered": "GQ Ready",
         "beginner": "Beginner",
         "intermediate": "Intermediate",
         "advanced": "Advanced",
@@ -147,6 +164,15 @@
     },
     "recommended": "Recommended for you",
     "startHere": "Start here"
+  },
+  "products": {
+    "title": "Recommended for you",
+    "whyItWorks": "Why it works",
+    "viewProduct": "View Product",
+    "disclaimer": "We may earn a commission from purchases made through these links."
+  },
+  "phases": {
+    "theBasics": "The Basics"
   },
   "graduate": {
     "title": "Congratulations!",

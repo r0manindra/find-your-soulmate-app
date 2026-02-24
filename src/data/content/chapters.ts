@@ -1,6 +1,7 @@
 import type { Chapter, Phase } from '@/src/core/entities/types';
 
 export const phases: Phase[] = [
+  { id: 0, title: { en: 'The Basics', de: 'Die Grundlagen' }, chapters: [21, 22, 23, 24] },
   { id: 1, title: { en: 'Know Yourself', de: 'Erkenne dich selbst' }, chapters: [1, 2, 3, 4] },
   { id: 2, title: { en: 'Make Your Move', de: 'Mach deinen Zug' }, chapters: [5, 6, 7, 8] },
   { id: 3, title: { en: 'The Connection', de: 'Die Verbindung' }, chapters: [9, 10, 11, 12] },
@@ -267,6 +268,58 @@ export const chapters: Chapter[] = [
     summary: {
       en: "Congratulations — you've completed the journey. This final chapter celebrates your growth and prepares you for the beautiful relationship ahead.",
       de: 'Herzlichen Glückwunsch — du hast die Reise abgeschlossen. Dieses letzte Kapitel feiert dein Wachstum.',
+    },
+  },
+  {
+    id: 21,
+    slug: 'the-foundation',
+    icon: '🧼',
+    ionicon: 'water-outline',
+    phase: 0,
+    title: { en: 'The Foundation', de: 'Das Fundament' },
+    subtitle: { en: 'Hygiene, skincare & grooming', de: 'Hygiene, Hautpflege & Pflege' },
+    summary: {
+      en: 'Before you can connect with someone else, you need the non-negotiables handled. Shower game, skincare routine, nails, teeth, hair — the foundation everything else is built on.',
+      de: 'Bevor du dich mit jemand anderem verbinden kannst, müssen die Basics stimmen. Dusch-Routine, Hautpflege, Nägel, Zähne, Haare — das Fundament für alles andere.',
+    },
+  },
+  {
+    id: 22,
+    slug: 'your-voice',
+    icon: '🎙️',
+    ionicon: 'mic-outline',
+    phase: 0,
+    title: { en: 'Your Voice', de: 'Deine Stimme' },
+    subtitle: { en: 'How you speak > what you say', de: 'Wie du sprichst > was du sagst' },
+    summary: {
+      en: "Tone, pace, depth, filler words. How you speak matters more than what you say. Deep voice exercises, eliminating 'um', and commanding a room with just your voice.",
+      de: "Ton, Tempo, Tiefe, Füllwörter. Wie du sprichst ist wichtiger als was du sagst. Stimmübungen, 'Ähm' eliminieren und einen Raum nur mit deiner Stimme beherrschen.",
+    },
+  },
+  {
+    id: 23,
+    slug: 'discipline-habits',
+    icon: '⚡',
+    ionicon: 'flash-outline',
+    phase: 0,
+    title: { en: 'Discipline & Habits', de: 'Disziplin & Gewohnheiten' },
+    subtitle: { en: 'The boring stuff that makes you magnetic', de: 'Das Langweilige, das dich magnetisch macht' },
+    summary: {
+      en: "Morning routines, fitness, reading, sleep. The boring stuff nobody talks about that separates the attractive from the forgettable. Discipline is the ultimate flex.",
+      de: 'Morgenroutinen, Fitness, Lesen, Schlaf. Das langweilige Zeug, über das niemand spricht, das aber Attraktive von Vergesslichen unterscheidet. Disziplin ist der ultimative Flex.',
+    },
+  },
+  {
+    id: 24,
+    slug: 'presence-manners',
+    icon: '👔',
+    ionicon: 'shirt-outline',
+    phase: 0,
+    title: { en: 'Presence & Manners', de: 'Auftreten & Manieren' },
+    subtitle: { en: 'How you carry yourself', de: 'Wie du dich trägst' },
+    summary: {
+      en: "Social etiquette, table manners, how you carry yourself. The difference between confident and cocky. The IDGAF mindset that's actually attractive, not the one that's just rude.",
+      de: 'Soziale Etikette, Tischmanieren, wie du dich trägst. Der Unterschied zwischen selbstbewusst und arrogant. Die IDGAF-Mentalität, die wirklich attraktiv ist, nicht die unhöfliche.',
     },
   },
 ];
