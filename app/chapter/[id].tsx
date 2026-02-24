@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
+import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { chapters } from '@/src/data/content/chapters';
@@ -122,6 +123,9 @@ export default function ChapterDetailScreen() {
           </Text>
           <Text style={styles.takeawayText}>"{lesson.keyTakeaway}"</Text>
         </GlassCard>
+
+        {/* Habit suggestions for this chapter */}
+        <ChapterHabitsSheet chapterId={chapterId} locale={locale} />
 
         {/* Action button */}
         <View style={styles.actionContainer}>

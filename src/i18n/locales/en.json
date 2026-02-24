@@ -2,6 +2,7 @@
   "tabs": {
     "home": "Home",
     "guide": "Guide",
+    "habits": "Habits",
     "coach": "Coach",
     "books": "Books",
     "profile": "Profile"
@@ -170,6 +171,42 @@
     "whyItWorks": "Why it works",
     "viewProduct": "View Product",
     "disclaimer": "We may earn a commission from purchases made through these links."
+  },
+  "habits": {
+    "title": "Habits",
+    "subtitle": "Build your daily practice",
+    "today": "Today",
+    "todayProgress": "{{done}} of {{total}} done",
+    "allDone": "All done for today!",
+    "streakDays": "{{count}}d streak",
+    "addHabit": "Add Habit",
+    "addToHabits": "Add to Habits",
+    "added": "Added",
+    "createCustom": "Create Custom",
+    "habitName": "Habit name",
+    "pickEmoji": "Pick an emoji",
+    "suggested": "Suggested",
+    "fromChapter": "From Chapter {{id}}",
+    "custom": "Custom",
+    "weeklyOverview": "This Week",
+    "weeklyRate": "Weekly completion",
+    "emptyTitle": "No habits yet",
+    "emptySubtitle": "Start building daily habits from the chapters you learn",
+    "emptyAction": "Add Your First Habit",
+    "buildHabit": "Build This Into a Habit",
+    "alreadyAdded": "Already added",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this habit? You can restore it later.",
+    "nudgeDismiss": "Got it",
+    "weekdays": {
+      "mon": "M",
+      "tue": "T",
+      "wed": "W",
+      "thu": "T",
+      "fri": "F",
+      "sat": "S",
+      "sun": "S"
+    }
   },
   "phases": {
     "theBasics": "The Basics"

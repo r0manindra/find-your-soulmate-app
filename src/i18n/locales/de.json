@@ -2,6 +2,7 @@
   "tabs": {
     "home": "Start",
     "guide": "Guide",
+    "habits": "Habits",
     "coach": "Coach",
     "books": "Bücher",
     "profile": "Profil"
@@ -170,6 +171,42 @@
     "whyItWorks": "Warum es funktioniert",
     "viewProduct": "Produkt ansehen",
     "disclaimer": "Wir erhalten möglicherweise eine Provision für Käufe über diese Links."
+  },
+  "habits": {
+    "title": "Habits",
+    "subtitle": "Baue deine tägliche Praxis auf",
+    "today": "Heute",
+    "todayProgress": "{{done}} von {{total}} erledigt",
+    "allDone": "Alles erledigt für heute!",
+    "streakDays": "{{count}}T Streak",
+    "addHabit": "Habit hinzufügen",
+    "addToHabits": "Zu Habits hinzufügen",
+    "added": "Hinzugefügt",
+    "createCustom": "Eigene erstellen",
+    "habitName": "Habit-Name",
+    "pickEmoji": "Emoji wählen",
+    "suggested": "Vorgeschlagen",
+    "fromChapter": "Aus Kapitel {{id}}",
+    "custom": "Eigene",
+    "weeklyOverview": "Diese Woche",
+    "weeklyRate": "Wöchentliche Erledigung",
+    "emptyTitle": "Noch keine Habits",
+    "emptySubtitle": "Beginne tägliche Gewohnheiten aus den Kapiteln aufzubauen",
+    "emptyAction": "Ersten Habit hinzufügen",
+    "buildHabit": "Mach daraus eine Gewohnheit",
+    "alreadyAdded": "Bereits hinzugefügt",
+    "archive": "Archivieren",
+    "archiveConfirm": "Diesen Habit archivieren? Du kannst ihn später wiederherstellen.",
+    "nudgeDismiss": "Verstanden",
+    "weekdays": {
+      "mon": "M",
+      "tue": "D",
+      "wed": "M",
+      "thu": "D",
+      "fri": "F",
+      "sat": "S",
+      "sun": "S"
+    }
   },
   "phases": {
     "theBasics": "Die Grundlagen"

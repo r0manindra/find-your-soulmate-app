@@ -20,6 +20,7 @@ type TabConfig = {
 const TAB_CONFIG: TabConfig[] = [
   { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home' },
   { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book' },
+  { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle' },
   { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles' },
   { name: 'books', ionicon: 'library-outline', ioniconFocused: 'library' },
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person' },
