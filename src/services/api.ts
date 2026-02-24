@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE = __DEV__
   ? 'http://localhost:3000/api'
-  : 'https://your-production-url.railway.app/api';
+  : 'https://find-your-soulmate-app-production.up.railway.app/api';
 
 const TOKEN_KEY = 'auth_token';
 

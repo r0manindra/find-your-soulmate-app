@@ -88,7 +88,7 @@ export default function ProfileScreen() {
     try {
       // Open PDF URL in browser — backend serves the PDF directly
       const token = await api.getToken?.() ?? '';
-      const baseUrl = __DEV__ ? 'http://localhost:3000/api' : 'https://your-production-url.railway.app/api';
+      const baseUrl = __DEV__ ? 'http://localhost:3000/api' : 'https://find-your-soulmate-app-production.up.railway.app/api';
       await Linking.openURL(`${baseUrl}/pdf/guide?token=${token}`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
