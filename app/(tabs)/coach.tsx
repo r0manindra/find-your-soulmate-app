@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  View, Text, TextInput, FlatList, Pressable, StyleSheet, KeyboardAvoidingView, Platform,
+  View, Text, TextInput, FlatList, Pressable, ScrollView, Modal, StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +8,11 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useSettingsStore } from '@/src/store/settings-store';
+import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
 import * as api from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 
@@ -28,7 +31,11 @@ export default function CoachScreen() {
   const incrementChatCount = useProgressStore((s) => s.incrementChatCount);
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const isPremium = useAuthStore((s) => s.isPremium);
+  const locale = useSettingsStore((s) => s.locale);
+  const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
+  const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
+  const [showCharacterPicker, setShowCharacterPicker] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '0',
@@ -41,6 +48,8 @@ export default function CoachScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [messagesUsed, setMessagesUsed] = useState(0);
   const [messagesLimit, setMessagesLimit] = useState<number | null>(5);
+
+  const activeCharacter = getCharacter(selectedCharacterId);
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -58,8 +67,21 @@ export default function CoachScreen() {
           ...mapped,
         ]);
       }
-    }).catch(() => { /* offline or no backend — use local only */ });
+    }).catch(() => {});
   }, [isLoggedIn]);
+
+  const handleSelectCharacter = (id: string) => {
+    const char = getCharacter(id);
+    if (char.isPremium && !isPremium) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      router.push('/paywall');
+      setShowCharacterPicker(false);
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCharacterId(id);
+    setShowCharacterPicker(false);
+  };
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -80,8 +102,7 @@ export default function CoachScreen() {
 
     try {
       if (isLoggedIn) {
-        // Use backend API (Claude-powered)
-        const data = await api.sendCoachMessage(userMessage.content);
+        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId);
         setMessagesUsed(data.messagesUsed);
         setMessagesLimit(data.messagesLimit);
 
@@ -93,7 +114,6 @@ export default function CoachScreen() {
         };
         setMessages((prev) => [...prev, aiMessage]);
       } else {
-        // Offline fallback
         await new Promise((resolve) => setTimeout(resolve, 1200));
         const response = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
         const aiMessage: ChatMessage = {
@@ -106,8 +126,10 @@ export default function CoachScreen() {
       }
     } catch (err: any) {
       const errorMsg = err?.status === 429
-        ? (t('coach.limitReached'))
-        : (t('coach.errorMessage'));
+        ? t('coach.limitReached')
+        : err?.status === 403
+          ? (locale === 'de' ? 'Premium erforderlich für diesen Charakter' : 'Premium required for this character')
+          : t('coach.errorMessage');
       const aiMessage: ChatMessage = {
         id: String(Date.now() + 1),
         role: 'assistant',
@@ -118,7 +140,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, t]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t]);
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
@@ -126,8 +148,8 @@ export default function CoachScreen() {
     return (
       <View style={[styles.messageRow, isUser && styles.messageRowUser]}>
         {!isUser && (
-          <View style={styles.avatarContainer}>
-            <Ionicons name="glasses-outline" size={18} color="#8B5CF6" />
+          <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
+            <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
           </View>
         )}
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
@@ -146,30 +168,31 @@ export default function CoachScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={90}
       >
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Header with character selector */}
+        <Pressable onPress={() => setShowCharacterPicker(true)} style={styles.header}>
           <LinearGradient
-            colors={['#8B5CF6', '#A78BFA']}
+            colors={[activeCharacter.color, `${activeCharacter.color}CC`]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.headerGradient}
           >
-            <Ionicons name="glasses-outline" size={32} color="#fff" />
+            <Ionicons name={activeCharacter.icon as any} size={32} color="#fff" />
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{t('coach.title')}</Text>
-              <Text style={styles.headerSubtitle}>{t('coach.subtitle')}</Text>
+              <Text style={styles.headerTitle}>{activeCharacter.name}</Text>
+              <Text style={styles.headerSubtitle}>{activeCharacter.subtitle[locale]}</Text>
             </View>
-            {!isPremium && messagesLimit && (
-              <View style={styles.limitBadge}>
-                <Text style={styles.limitText}>
-                  {messagesUsed}/{messagesLimit}
-                </Text>
-              </View>
-            )}
+            <View style={styles.headerRight}>
+              {!isPremium && messagesLimit && (
+                <View style={styles.limitBadge}>
+                  <Text style={styles.limitText}>{messagesUsed}/{messagesLimit}</Text>
+                </View>
+              )}
+              <Ionicons name="chevron-down" size={18} color="rgba(255,255,255,0.7)" />
+            </View>
           </LinearGradient>
-        </View>
+        </Pressable>
 
-        {/* Upgrade banner for non-logged-in or free users */}
+        {/* Upgrade banners */}
         {!isLoggedIn && (
           <Pressable onPress={() => router.push('/auth/register')} style={styles.upgradeBanner}>
             <Ionicons name="sparkles" size={16} color="#E8435A" />
@@ -197,8 +220,8 @@ export default function CoachScreen() {
           ListFooterComponent={
             isLoading ? (
               <View style={styles.messageRow}>
-                <View style={styles.avatarContainer}>
-                  <Ionicons name="glasses-outline" size={18} color="#8B5CF6" />
+                <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
+                  <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
                 </View>
                 <View style={styles.aiBubble}>
                   <Text style={styles.loadingText}>{t('coach.sending')}</Text>
@@ -223,12 +246,81 @@ export default function CoachScreen() {
           />
           <Pressable
             onPress={sendMessage}
-            style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
+            style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
             disabled={!input.trim() || isLoading}
           >
             <Ionicons name="arrow-up" size={20} color="#fff" />
           </Pressable>
         </View>
+
+        {/* Character Picker Modal */}
+        <Modal
+          visible={showCharacterPicker}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowCharacterPicker(false)}
+        >
+          <SafeAreaView style={styles.modalSafeArea}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {locale === 'de' ? 'Wähle deinen Coach' : 'Choose Your Coach'}
+              </Text>
+              <Pressable onPress={() => setShowCharacterPicker(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color="#737373" />
+              </Pressable>
+            </View>
+            <Text style={styles.modalSubtitle}>
+              {locale === 'de'
+                ? 'Jeder Coach hat seinen eigenen Stil. Finde den, der zu dir passt.'
+                : 'Each coach has their own style. Find the one that fits you.'}
+            </Text>
+            <ScrollView contentContainerStyle={styles.characterList} showsVerticalScrollIndicator={false}>
+              {coachCharacters.map((char) => {
+                const isSelected = char.id === selectedCharacterId;
+                const isLocked = char.isPremium && !isPremium;
+
+                return (
+                  <Pressable
+                    key={char.id}
+                    onPress={() => handleSelectCharacter(char.id)}
+                    style={[
+                      styles.characterCard,
+                      isSelected && { borderColor: char.color, borderWidth: 2 },
+                    ]}
+                  >
+                    <View style={styles.characterCardHeader}>
+                      <View style={[styles.characterIcon, { backgroundColor: `${char.color}15` }]}>
+                        <Ionicons name={char.icon as any} size={24} color={char.color} />
+                      </View>
+                      <View style={styles.characterInfo}>
+                        <View style={styles.characterNameRow}>
+                          <Text style={styles.characterName}>{char.name}</Text>
+                          {isLocked && (
+                            <View style={styles.proBadge}>
+                              <Ionicons name="lock-closed" size={10} color="#E8435A" />
+                              <Text style={styles.proBadgeText}>PRO</Text>
+                            </View>
+                          )}
+                          {isSelected && (
+                            <Ionicons name="checkmark-circle" size={20} color={char.color} />
+                          )}
+                        </View>
+                        <Text style={styles.characterSubtitle}>{char.subtitle[locale]}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.characterDescription}>{char.description[locale]}</Text>
+                    {char.inspiration && (
+                      <Text style={styles.characterInspiration}>
+                        {locale === 'de' ? 'Inspiriert von' : 'Inspired by'}: {char.inspiration}
+                      </Text>
+                    )}
+                  </Pressable>
+                );
+              })}
+              <View style={{ height: 40 }} />
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -245,19 +337,17 @@ const styles = StyleSheet.create({
   headerTextContainer: { flex: 1 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   limitBadge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10,
   },
   limitText: { fontSize: 12, fontWeight: '700', color: '#fff' },
   upgradeBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 20, marginBottom: 8,
     paddingHorizontal: 14, paddingVertical: 10,
-    backgroundColor: 'rgba(232,67,90,0.06)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 12,
   },
   upgradeBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#E8435A' },
   messageList: { paddingHorizontal: 20, paddingBottom: 8 },
@@ -265,23 +355,16 @@ const styles = StyleSheet.create({
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: 'rgba(139,92,246,0.1)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 4,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  messageBubble: {
-    maxWidth: '75%', padding: 14, borderRadius: 20,
-  },
+  messageBubble: { maxWidth: '75%', padding: 14, borderRadius: 20 },
   aiBubble: {
     backgroundColor: 'rgba(255,255,255,0.8)',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0,0,0,0.06)',
     borderBottomLeftRadius: 4,
   },
-  userBubble: {
-    backgroundColor: '#E8435A',
-    borderBottomRightRadius: 4,
-  },
+  userBubble: { backgroundColor: '#E8435A', borderBottomRightRadius: 4 },
   messageText: { fontSize: 16, lineHeight: 22, color: '#171717' },
   userText: { color: '#fff' },
   loadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
@@ -289,21 +372,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
     paddingHorizontal: 20, paddingVertical: 12, paddingBottom: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-    backgroundColor: '#FAFAFA',
+    borderTopColor: 'rgba(0,0,0,0.06)', backgroundColor: '#FAFAFA',
   },
   input: {
     flex: 1, minHeight: 40, maxHeight: 100,
     backgroundColor: 'rgba(255,255,255,0.8)',
     borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10,
     fontSize: 16, color: '#171717',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
   },
   sendButton: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: '#E8435A',
     alignItems: 'center', justifyContent: 'center',
   },
   sendButtonDisabled: { opacity: 0.4 },
+
+  // Character picker modal
+  modalSafeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  modalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4,
+  },
+  modalTitle: { fontSize: 28, fontWeight: '700', color: '#171717', letterSpacing: -0.5 },
+  modalClose: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 15, color: '#737373', paddingHorizontal: 20, marginTop: 4, marginBottom: 20,
+  },
+  characterList: { paddingHorizontal: 20, gap: 12 },
+  characterCard: {
+    backgroundColor: '#fff', borderRadius: 20, padding: 18,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  characterCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 10 },
+  characterIcon: {
+    width: 48, height: 48, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  characterInfo: { flex: 1 },
+  characterNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  characterName: { fontSize: 18, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
+  characterSubtitle: { fontSize: 13, color: '#737373', marginTop: 2 },
+  proBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8,
+  },
+  proBadgeText: { fontSize: 10, fontWeight: '800', color: '#E8435A' },
+  characterDescription: { fontSize: 14, lineHeight: 20, color: '#525252' },
+  characterInspiration: {
+    fontSize: 12, color: '#A3A3A3', fontStyle: 'italic', marginTop: 8,
+  },
 });

@@ -110,14 +110,14 @@ export async function syncProgress(progress: {
 }
 
 // Coach
-export async function sendCoachMessage(message: string) {
+export async function sendCoachMessage(message: string, characterId: string = 'charismo') {
   return request<{
     response: string;
     messagesUsed: number;
     messagesLimit: number | null;
   }>('/coach/message', {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, characterId }),
   });
 }
 

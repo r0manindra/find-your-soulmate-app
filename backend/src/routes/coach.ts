@@ -8,14 +8,29 @@ import { env } from '../config/env';
 const router = Router();
 router.use(authMiddleware);
 
+import { VALID_CHARACTER_IDS } from '../services/characters';
+
 const messageSchema = z.object({
   message: z.string().min(1).max(2000),
+  characterId: z.string().optional().default('charismo'),
 });
 
 // POST /api/coach/message
 router.post('/message', async (req: AuthRequest, res: Response) => {
   try {
-    const { message } = messageSchema.parse(req.body);
+    const { message, characterId } = messageSchema.parse(req.body);
+
+    // Premium characters require premium subscription
+    if (characterId !== 'charismo') {
+      const userForSub = await prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { subscriptionStatus: true },
+      });
+      if (userForSub?.subscriptionStatus !== 'PREMIUM') {
+        res.status(403).json({ error: 'Premium subscription required for this character', upgrade: true });
+        return;
+      }
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
@@ -62,10 +77,11 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     });
     history.reverse();
 
-    // Get AI response
+    // Get AI response with selected character
     const aiResponse = await getCoachResponse(
       history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-      message
+      message,
+      characterId
     );
 
     // Save both messages
