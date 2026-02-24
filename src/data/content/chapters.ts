@@ -1,10 +1,20 @@
-import type { Chapter } from '@/src/core/entities/types';
+import type { Chapter, Phase } from '@/src/core/entities/types';
+
+export const phases: Phase[] = [
+  { id: 1, title: { en: 'Know Yourself', de: 'Erkenne dich selbst' }, chapters: [1, 2, 3, 4] },
+  { id: 2, title: { en: 'Make Your Move', de: 'Mach deinen Zug' }, chapters: [5, 6, 7, 8] },
+  { id: 3, title: { en: 'The Connection', de: 'Die Verbindung' }, chapters: [9, 10, 11, 12] },
+  { id: 4, title: { en: 'Going Deeper', de: 'Tiefer gehen' }, chapters: [13, 14, 15, 16] },
+  { id: 5, title: { en: 'The Commitment', de: 'Das Commitment' }, chapters: [17, 18, 19, 20] },
+];
 
 export const chapters: Chapter[] = [
   {
     id: 1,
     slug: 'the-mirror',
     icon: '🪞',
+    ionicon: 'person-circle-outline',
+    phase: 1,
     title: { en: 'The Mirror', de: 'Der Spiegel' },
     subtitle: { en: 'Know yourself first', de: 'Erkenne dich selbst zuerst' },
     summary: {
@@ -16,6 +26,8 @@ export const chapters: Chapter[] = [
     id: 2,
     slug: 'confidence-bootcamp',
     icon: '💪',
+    ionicon: 'fitness-outline',
+    phase: 1,
     title: { en: 'Confidence Bootcamp', de: 'Selbstbewusstsein Bootcamp' },
     subtitle: { en: 'Body language & posture', de: 'Körpersprache & Haltung' },
     summary: {
@@ -27,6 +39,8 @@ export const chapters: Chapter[] = [
     id: 3,
     slug: 'eye-contact',
     icon: '👁️',
+    ionicon: 'eye-outline',
+    phase: 1,
     title: { en: 'The Art of Eye Contact', de: 'Die Kunst des Blickkontakts' },
     subtitle: { en: 'Making connection', de: 'Verbindung herstellen' },
     summary: {
@@ -38,6 +52,8 @@ export const chapters: Chapter[] = [
     id: 4,
     slug: 'starting-conversations',
     icon: '💬',
+    ionicon: 'chatbubble-outline',
+    phase: 1,
     title: { en: 'Starting Conversations', de: 'Gespräche beginnen' },
     subtitle: { en: 'The first word', de: 'Das erste Wort' },
     summary: {
@@ -49,6 +65,8 @@ export const chapters: Chapter[] = [
     id: 5,
     slug: 'the-approach',
     icon: '🚶',
+    ionicon: 'walk-outline',
+    phase: 2,
     title: { en: 'The Approach', de: 'Die Annäherung' },
     subtitle: { en: 'Walking up with confidence', de: 'Mit Selbstbewusstsein zugehen' },
     summary: {
@@ -60,6 +78,8 @@ export const chapters: Chapter[] = [
     id: 6,
     slug: 'reading-the-room',
     icon: '🎯',
+    ionicon: 'compass-outline',
+    phase: 2,
     title: { en: 'Reading the Room', de: 'Die Situation lesen' },
     subtitle: { en: 'Social awareness', de: 'Soziales Bewusstsein' },
     summary: {
@@ -71,6 +91,8 @@ export const chapters: Chapter[] = [
     id: 7,
     slug: 'active-listening',
     icon: '👂',
+    ionicon: 'ear-outline',
+    phase: 2,
     title: { en: 'Active Listening', de: 'Aktives Zuhören' },
     subtitle: { en: 'The most attractive skill', de: 'Die attraktivste Fähigkeit' },
     summary: {
@@ -82,6 +104,8 @@ export const chapters: Chapter[] = [
     id: 8,
     slug: 'humor-and-wit',
     icon: '😄',
+    ionicon: 'happy-outline',
+    phase: 2,
     title: { en: 'Humor & Wit', de: 'Humor & Schlagfertigkeit' },
     subtitle: { en: 'Making them laugh', de: 'Sie zum Lachen bringen' },
     summary: {
@@ -93,6 +117,8 @@ export const chapters: Chapter[] = [
     id: 9,
     slug: 'the-compliment',
     icon: '✨',
+    ionicon: 'sparkles-outline',
+    phase: 3,
     title: { en: 'The Compliment', de: 'Das Kompliment' },
     subtitle: { en: 'Genuine, not creepy', de: 'Ehrlich, nicht aufdringlich' },
     summary: {
@@ -104,6 +130,8 @@ export const chapters: Chapter[] = [
     id: 10,
     slug: 'digital-game',
     icon: '📱',
+    ionicon: 'phone-portrait-outline',
+    phase: 3,
     title: { en: 'Digital Game', de: 'Digitales Spiel' },
     subtitle: { en: 'Texting & dating apps', de: 'Texten & Dating Apps' },
     summary: {
@@ -115,6 +143,8 @@ export const chapters: Chapter[] = [
     id: 11,
     slug: 'first-date',
     icon: '🌹',
+    ionicon: 'rose-outline',
+    phase: 3,
     title: { en: 'The First Date', de: 'Das erste Date' },
     subtitle: { en: 'Planning & execution', de: 'Planung & Durchführung' },
     summary: {
@@ -126,6 +156,8 @@ export const chapters: Chapter[] = [
     id: 12,
     slug: 'conversation-flow',
     icon: '🌊',
+    ionicon: 'water-outline',
+    phase: 3,
     title: { en: 'Conversation Flow', de: 'Gesprächsfluss' },
     subtitle: { en: 'Never run out of things to say', de: 'Nie wieder sprachlos' },
     summary: {
@@ -137,6 +169,8 @@ export const chapters: Chapter[] = [
     id: 13,
     slug: 'touch-and-proximity',
     icon: '🤝',
+    ionicon: 'hand-left-outline',
+    phase: 4,
     title: { en: 'Touch & Proximity', de: 'Berührung & Nähe' },
     subtitle: { en: 'Physical escalation', de: 'Körperliche Annäherung' },
     summary: {
@@ -148,6 +182,8 @@ export const chapters: Chapter[] = [
     id: 14,
     slug: 'handling-rejection',
     icon: '🛡️',
+    ionicon: 'shield-outline',
+    phase: 4,
     title: { en: 'Handling Rejection', de: 'Mit Ablehnung umgehen' },
     subtitle: { en: 'Grace under fire', de: 'Anmut unter Druck' },
     summary: {
@@ -159,6 +195,8 @@ export const chapters: Chapter[] = [
     id: 15,
     slug: 'the-follow-up',
     icon: '📩',
+    ionicon: 'mail-outline',
+    phase: 4,
     title: { en: 'The Follow-Up', de: 'Das Follow-Up' },
     subtitle: { en: 'After the first date', de: 'Nach dem ersten Date' },
     summary: {
@@ -170,6 +208,8 @@ export const chapters: Chapter[] = [
     id: 16,
     slug: 'building-connection',
     icon: '🔗',
+    ionicon: 'link-outline',
+    phase: 4,
     title: { en: 'Building Connection', de: 'Verbindung aufbauen' },
     subtitle: { en: 'Going deeper', de: 'Tiefer gehen' },
     summary: {
@@ -181,6 +221,8 @@ export const chapters: Chapter[] = [
     id: 17,
     slug: 'reading-signals',
     icon: '📡',
+    ionicon: 'radio-outline',
+    phase: 5,
     title: { en: 'Reading Signals', de: 'Signale lesen' },
     subtitle: { en: 'Is she/he interested?', de: 'Ist sie/er interessiert?' },
     summary: {
@@ -192,6 +234,8 @@ export const chapters: Chapter[] = [
     id: 18,
     slug: 'relationship-talk',
     icon: '💑',
+    ionicon: 'people-outline',
+    phase: 5,
     title: { en: 'The Relationship Talk', de: 'Das Beziehungsgespräch' },
     subtitle: { en: 'When to commit', de: 'Wann man sich festlegt' },
     summary: {
@@ -203,6 +247,8 @@ export const chapters: Chapter[] = [
     id: 19,
     slug: 'keeping-the-spark',
     icon: '🔥',
+    ionicon: 'flame-outline',
+    phase: 5,
     title: { en: 'Keeping the Spark', de: 'Die Flamme am Leben halten' },
     subtitle: { en: 'Long-term flirting', de: 'Langzeit-Flirten' },
     summary: {
@@ -214,6 +260,8 @@ export const chapters: Chapter[] = [
     id: 20,
     slug: 'the-graduation',
     icon: '🎓',
+    ionicon: 'school-outline',
+    phase: 5,
     title: { en: 'The Graduation', de: 'Der Abschluss' },
     subtitle: { en: 'You found your soulmate', de: 'Du hast deinen Seelenverwandten gefunden' },
     summary: {

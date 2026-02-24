@@ -71,6 +71,8 @@ const styles = StyleSheet.create({
   labelContainer: {
     position: 'absolute',
     alignItems: 'center',
+    paddingHorizontal: 8,
+    width: '100%',
   },
   percentage: {
     fontSize: 28,
@@ -79,8 +81,9 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#737373',
     marginTop: 2,
+    textAlign: 'center',
   },
 });

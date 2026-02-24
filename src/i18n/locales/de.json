@@ -8,7 +8,7 @@
   },
   "home": {
     "title": "Deine Reise",
-    "progress": "Gesamtfortschritt",
+    "progress": "Gesamt-\nfortschritt",
     "streak": "Tage-Streak",
     "dailyTip": "Tipp des Tages",
     "chapters": "Kapitel abgeschlossen",
@@ -35,7 +35,11 @@
     "subtitle": "Dein KI-Dating-Coach",
     "placeholder": "Frag Hank etwas...",
     "greeting": "Hey! Ich bin Hank, dein Dating-Coach. Denk an mich als den Freund, der brutal ehrlich ist, aber immer hinter dir steht. Was beschäftigt dich?",
-    "sending": "Hank denkt nach..."
+    "sending": "Hank denkt nach...",
+    "limitReached": "Du hast alle kostenlosen Nachrichten für heute verbraucht. Upgrade auf Premium für unbegrenztes Coaching!",
+    "errorMessage": "Sorry, ich habe gerade ein Problem. Versuch es gleich nochmal.",
+    "signInForAI": "Anmelden für KI-gestütztes Coaching",
+    "upgradeForUnlimited": "Premium für unbegrenzte Nachrichten"
   },
   "booksScreen": {
     "title": "Buchempfehlungen",

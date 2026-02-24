@@ -1,23 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ProgressState } from '@/src/core/entities/types';
 
-const storage = createMMKV({ id: 'progress' });
-
-const mmkvStorage = {
-  getItem: (name: string) => {
-    return storage.getString(name) ?? null;
-  },
-  setItem: (name: string, value: string) => {
-    storage.set(name, value);
-  },
-  removeItem: (name: string) => {
-    storage.remove(name);
-  },
-};
-
 interface ProgressStore extends ProgressState {
+  achievementQueue: string[];
   completeChapter: (id: number) => void;
   uncompleteChapter: (id: number) => void;
   completeBook: (id: number) => void;
@@ -26,6 +13,9 @@ interface ProgressStore extends ProgressState {
   updateStreak: () => void;
   graduate: () => void;
   reset: () => void;
+  enqueueAchievement: (id: string) => void;
+  dequeueAchievement: () => void;
+  clearAchievementQueue: () => void;
 }
 
 const initialState: ProgressState = {
@@ -41,6 +31,7 @@ export const useProgressStore = create<ProgressStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+      achievementQueue: [],
 
       completeChapter: (id) =>
         set((state) => ({
@@ -88,11 +79,33 @@ export const useProgressStore = create<ProgressStore>()(
 
       graduate: () => set({ graduated: true }),
 
-      reset: () => set(initialState),
+      reset: () => set({ ...initialState, achievementQueue: [] }),
+
+      enqueueAchievement: (id) =>
+        set((state) => ({
+          achievementQueue: state.achievementQueue.includes(id)
+            ? state.achievementQueue
+            : [...state.achievementQueue, id],
+        })),
+
+      dequeueAchievement: () =>
+        set((state) => ({
+          achievementQueue: state.achievementQueue.slice(1),
+        })),
+
+      clearAchievementQueue: () => set({ achievementQueue: [] }),
     }),
     {
       name: 'progress-storage',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        completedChapters: state.completedChapters,
+        completedBooks: state.completedBooks,
+        chatMessageCount: state.chatMessageCount,
+        streak: state.streak,
+        lastActiveDate: state.lastActiveDate,
+        graduated: state.graduated,
+      }),
     }
   )
 );

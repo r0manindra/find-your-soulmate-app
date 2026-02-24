@@ -2,9 +2,17 @@ export interface Chapter {
   id: number;
   slug: string;
   icon: string;
+  ionicon: string;
+  phase: number;
   title: { en: string; de: string };
   subtitle: { en: string; de: string };
   summary: { en: string; de: string };
+}
+
+export interface Phase {
+  id: number;
+  title: { en: string; de: string };
+  chapters: number[];
 }
 
 export interface Book {
@@ -13,6 +21,8 @@ export interface Book {
   author: string;
   description: { en: string; de: string };
   emoji: string;
+  amazonUrl: string;
+  ionicon: string;
 }
 
 export interface Achievement {

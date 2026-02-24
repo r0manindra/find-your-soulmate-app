@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, type ViewProps } from 'react-native';
+import { View, StyleSheet, Platform, type ViewProps } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -9,17 +9,19 @@ interface GlassCardProps extends ViewProps {
 
 export function GlassCard({ children, style, intensity = 50, ...props }: GlassCardProps) {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <View style={[styles.container, style]} {...props}>
+    <View style={[styles.container, isDark && styles.containerDark, style]} {...props}>
       <BlurView
         intensity={intensity}
-        tint={colorScheme === 'dark' ? 'dark' : 'light'}
+        tint={isDark ? 'dark' : 'light'}
+        experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
         style={StyleSheet.absoluteFill}
       />
       <View style={[
         styles.overlay,
-        colorScheme === 'dark' ? styles.overlayDark : styles.overlayLight,
+        isDark ? styles.overlayDark : styles.overlayLight,
       ]} />
       <View style={styles.content}>
         {children}
@@ -33,7 +35,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.25)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  containerDark: {
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -42,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.72)',
   },
   overlayDark: {
-    backgroundColor: 'rgba(28,28,30,0.68)',
+    backgroundColor: 'rgba(28,28,30,0.72)',
   },
   content: {
     padding: 16,

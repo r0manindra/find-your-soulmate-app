@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, Linking, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
@@ -20,6 +21,11 @@ export default function BooksScreen() {
     } else {
       completeBook(id);
     }
+  };
+
+  const openAmazon = (url: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Linking.openURL(url);
   };
 
   return (
@@ -41,24 +47,35 @@ export default function BooksScreen() {
             <GlassCard style={[styles.card, isRead && styles.cardRead]}>
               <View style={styles.cardRow}>
                 <View style={styles.emojiContainer}>
-                  <Text style={styles.emoji}>{item.emoji}</Text>
+                  <Ionicons name={item.ionicon as any} size={24} color="#E8435A" />
                 </View>
                 <View style={styles.cardContent}>
                   <Text style={styles.bookTitle}>{item.title}</Text>
                   <Text style={styles.bookAuthor}>{t('booksScreen.by')} {item.author}</Text>
-                  <Text style={styles.bookDesc} numberOfLines={2}>
+                  <Text style={styles.bookDesc} numberOfLines={3}>
                     {item.description[locale]}
                   </Text>
                 </View>
               </View>
-              <Pressable
-                onPress={() => toggleBook(item.id)}
-                style={[styles.readButton, isRead && styles.readButtonDone]}
-              >
-                <Text style={[styles.readButtonText, isRead && styles.readButtonTextDone]}>
-                  {isRead ? `✓ ${t('booksScreen.read')}` : t('booksScreen.markRead')}
-                </Text>
-              </Pressable>
+              <View style={styles.buttonRow}>
+                <Pressable
+                  onPress={() => toggleBook(item.id)}
+                  style={[styles.readButton, isRead && styles.readButtonDone]}
+                >
+                  <Text style={[styles.readButtonText, isRead && styles.readButtonTextDone]}>
+                    {isRead ? `✓ ${t('booksScreen.read')}` : t('booksScreen.markRead')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => openAmazon(item.amazonUrl)}
+                  style={styles.amazonButton}
+                >
+                  <Ionicons name="cart-outline" size={16} color="#E8435A" />
+                  <Text style={styles.amazonButtonText}>
+                    {locale === 'de' ? 'Kaufen' : 'Buy'}
+                  </Text>
+                </Pressable>
+              </View>
             </GlassCard>
           );
         }}
@@ -81,17 +98,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,67,90,0.08)',
     alignItems: 'center', justifyContent: 'center',
   },
-  emoji: { fontSize: 24 },
   cardContent: { flex: 1 },
   bookTitle: { fontSize: 17, fontWeight: '600', color: '#171717', letterSpacing: -0.2 },
   bookAuthor: { fontSize: 14, fontWeight: '500', color: '#E8435A', marginTop: 2 },
   bookDesc: { fontSize: 14, color: '#525252', marginTop: 6, lineHeight: 20 },
+  buttonRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
   readButton: {
-    marginTop: 12, paddingVertical: 10,
+    flex: 1, paddingVertical: 10,
     borderRadius: 12, alignItems: 'center',
     backgroundColor: 'rgba(232,67,90,0.08)',
   },
   readButtonDone: { backgroundColor: 'rgba(232,67,90,0.04)' },
   readButtonText: { fontSize: 15, fontWeight: '600', color: '#E8435A' },
   readButtonTextDone: { color: '#A3A3A3' },
+  amazonButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 12, backgroundColor: 'rgba(232,67,90,0.08)',
+  },
+  amazonButtonText: { fontSize: 14, fontWeight: '600', color: '#E8435A' },
 });

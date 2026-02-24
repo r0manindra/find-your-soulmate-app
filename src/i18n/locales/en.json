@@ -35,7 +35,11 @@
     "subtitle": "Your AI dating coach",
     "placeholder": "Ask Hank anything...",
     "greeting": "Hey! I'm Hank, your dating coach. Think of me as that friend who's brutally honest but always has your back. What's on your mind?",
-    "sending": "Hank is thinking..."
+    "sending": "Hank is thinking...",
+    "limitReached": "You've used all your free messages for today. Upgrade to Premium for unlimited coaching!",
+    "errorMessage": "Sorry, I'm having trouble right now. Try again in a moment.",
+    "signInForAI": "Sign in for AI-powered coaching",
+    "upgradeForUnlimited": "Go Premium for unlimited messages"
   },
   "booksScreen": {
     "title": "Recommended Books",
