@@ -6,8 +6,7 @@ import Purchases, {
 import { Platform } from 'react-native';
 import { useAuthStore } from '@/src/store/auth-store';
 
-// RevenueCat API keys — replace with your actual keys
-const REVENUECAT_IOS_KEY = 'appl_YOUR_IOS_KEY_HERE';
+const REVENUECAT_IOS_KEY = 'appl_oEBYbSyaCrCchGgTgGBjYxPKKgV';
 const REVENUECAT_ANDROID_KEY = 'goog_YOUR_ANDROID_KEY_HERE';
 
 const ENTITLEMENT_ID = 'premium';

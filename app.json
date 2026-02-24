@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FlirtIQ",
-    "slug": "flirtiq",
+    "name": "Charismo",
+    "slug": "charismo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "flirtiq",
+    "scheme": "charismo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pulsify.flirtiq",
+      "bundleIdentifier": "com.flirtiq.app",
       "usesAppleSignIn": true
     },
     "android": {
@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.pulsify.flirtiq",
+      "package": "com.flirtiq.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },

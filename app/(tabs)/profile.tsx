@@ -219,30 +219,30 @@ export default function ProfileScreen() {
           </Pressable>
         </GlassCard>
 
-        {/* FlirtIQ Profile */}
+        {/* Charismo Profile */}
         {userProfile.hasCompletedOnboarding && userProfile.socialEnergy && (
           <>
             <Text style={styles.sectionTitle}>{t('onboarding.profile.title')}</Text>
-            <GlassCard style={styles.flirtiqCard}>
-              <View style={styles.flirtiqGrid}>
-                <View style={styles.flirtiqItem}>
-                  <Text style={styles.flirtiqLabel}>{t('onboarding.profile.socialEnergy')}</Text>
-                  <Text style={styles.flirtiqValue}>
+            <GlassCard style={styles.charismoCard}>
+              <View style={styles.charismoGrid}>
+                <View style={styles.charismoItem}>
+                  <Text style={styles.charismoLabel}>{t('onboarding.profile.socialEnergy')}</Text>
+                  <Text style={styles.charismoValue}>
                     {t(`onboarding.profile.labels.${userProfile.socialEnergy}`)}
                   </Text>
                 </View>
                 {userProfile.skillLevel && (
-                  <View style={styles.flirtiqItem}>
-                    <Text style={styles.flirtiqLabel}>{t('onboarding.profile.skillLevel')}</Text>
-                    <Text style={styles.flirtiqValue}>
+                  <View style={styles.charismoItem}>
+                    <Text style={styles.charismoLabel}>{t('onboarding.profile.skillLevel')}</Text>
+                    <Text style={styles.charismoValue}>
                       {t(`onboarding.profile.labels.${userProfile.skillLevel}`)}
                     </Text>
                   </View>
                 )}
                 {userProfile.goal && (
-                  <View style={styles.flirtiqItem}>
-                    <Text style={styles.flirtiqLabel}>{t('onboarding.profile.goal')}</Text>
-                    <Text style={styles.flirtiqValue}>
+                  <View style={styles.charismoItem}>
+                    <Text style={styles.charismoLabel}>{t('onboarding.profile.goal')}</Text>
+                    <Text style={styles.charismoValue}>
                       {t(`onboarding.profile.labels.${userProfile.goal}`)}
                     </Text>
                   </View>
@@ -385,17 +385,17 @@ const styles = StyleSheet.create({
   pdfButtonText: { fontSize: 15, fontWeight: '600', color: '#fff' },
   pdfButtonTextLocked: { color: '#A3A3A3' },
 
-  // FlirtIQ Profile
-  flirtiqCard: { marginBottom: 24 },
-  flirtiqGrid: {
+  // Charismo Profile
+  charismoCard: { marginBottom: 24 },
+  charismoGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 14,
   },
-  flirtiqItem: {
+  charismoItem: {
     backgroundColor: 'rgba(232,67,90,0.04)', borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 10, minWidth: '45%',
   },
-  flirtiqLabel: { fontSize: 11, fontWeight: '700', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: 0.5 },
-  flirtiqValue: { fontSize: 15, fontWeight: '600', color: '#171717', marginTop: 3 },
+  charismoLabel: { fontSize: 11, fontWeight: '700', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: 0.5 },
+  charismoValue: { fontSize: 15, fontWeight: '600', color: '#171717', marginTop: 3 },
   retakeButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 12,

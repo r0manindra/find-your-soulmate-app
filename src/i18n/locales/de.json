@@ -63,7 +63,7 @@
   "onboarding": {
     "welcome": {
       "title": "Oh, du hast eine Dating-App heruntergeladen.",
-      "body": "Keine Dating-App. DIE Dating-App.\nDie, die dir tatsächlich beibringt, wie du nicht schrecklich darin bist.\n\nWillkommen bei FlirtIQ. Wir verwandeln dein Liebesleben von einem Dumpster Fire in... naja, zumindest ein Lagerfeuer.",
+      "body": "Keine Dating-App. DIE Dating-App.\nDie, die dir tatsächlich beibringt, wie du nicht schrecklich darin bist.\n\nWillkommen bei Charismo. Wir verwandeln dein Liebesleben von einem Dumpster Fire in... naja, zumindest ein Lagerfeuer.",
       "cta": "Ich bin bereit, geröstet zu werden",
       "skip": "Überspringen — Ich bin bereits unwiderstehlich"
     },
@@ -110,7 +110,7 @@
     "profileReveal": {
       "title": "Okay, wir haben dich durchleuchtet.",
       "subtitle": "Keine Sorge, wir nutzen diese Macht nur zum Guten. Meistens.",
-      "profileTitle": "Dein FlirtIQ Profil",
+      "profileTitle": "Dein Charismo Profil",
       "planTitle": "Dein personalisierter Plan",
       "coach": "Dein KI-Coach",
       "startingChapter": "Startkapitel",
@@ -119,7 +119,7 @@
       "settingsNote": "Du kannst das alles in den Einstellungen ändern. Wir sind flexibel."
     },
     "profile": {
-      "title": "Dein FlirtIQ Profil",
+      "title": "Dein Charismo Profil",
       "retakeQuiz": "Quiz wiederholen",
       "socialEnergy": "Soziale Energie",
       "ageGroup": "Altersgruppe",

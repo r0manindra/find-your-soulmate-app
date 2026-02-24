@@ -10,5 +10,5 @@ export const env = {
   freeCoachMessagesPerDay: 5,
   freeChaptersCount: 4, // Phase 1 is free
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
-  appleBundleId: process.env.APPLE_BUNDLE_ID || 'com.pulsify.flirtiq',
+  appleBundleId: process.env.APPLE_BUNDLE_ID || 'com.flirtiq.app',
 };
