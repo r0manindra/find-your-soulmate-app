@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-buttons';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useSettingsStore } from '@/src/store/settings-store';
 import { useOAuth } from '@/src/hooks/useOAuth';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
@@ -14,6 +16,9 @@ import { loginRevenueCat } from '@/src/services/purchases';
 export default function RegisterScreen() {
   const router = useRouter();
   const setUser = useAuthStore((s) => s.setUser);
+  const locale = useSettingsStore((s) => s.locale);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,11 +39,11 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!email.trim() || !password) {
-      setFormError('Please fill in all fields');
+      setFormError(locale === 'de' ? 'Bitte alle Felder ausfüllen' : 'Please fill in all fields');
       return;
     }
     if (password.length < 8) {
-      setFormError('Password must be at least 8 characters');
+      setFormError(locale === 'de' ? 'Passwort muss mindestens 8 Zeichen lang sein' : 'Password must be at least 8 characters');
       return;
     }
     setFormError('');
@@ -51,7 +56,7 @@ export default function RegisterScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');
     } catch (err: any) {
-      setFormError(err.message || 'Registration failed');
+      setFormError(err.message || (locale === 'de' ? 'Registrierung fehlgeschlagen' : 'Registration failed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -59,7 +64,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -79,8 +84,12 @@ export default function RegisterScreen() {
               <Text style={styles.logoText}>S</Text>
             </LinearGradient>
 
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Start your journey to finding your soulmate</Text>
+            <Text style={[styles.title, isDark && styles.titleDark]}>
+              {locale === 'de' ? 'Konto erstellen' : 'Create Account'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {locale === 'de' ? 'Starte deine Reise zum Seelenverwandten' : 'Start your journey to finding your soulmate'}
+            </Text>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -95,7 +104,7 @@ export default function RegisterScreen() {
             <View style={styles.form}>
               <TextInput
                 style={styles.input}
-                placeholder="Name (optional)"
+                placeholder={locale === 'de' ? 'Name (optional)' : 'Name (optional)'}
                 placeholderTextColor="#A3A3A3"
                 value={name}
                 onChangeText={setName}
@@ -103,7 +112,7 @@ export default function RegisterScreen() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder={locale === 'de' ? 'E-Mail' : 'Email'}
                 placeholderTextColor="#A3A3A3"
                 value={email}
                 onChangeText={setEmail}
@@ -113,7 +122,7 @@ export default function RegisterScreen() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Password (8+ characters)"
+                placeholder={locale === 'de' ? 'Passwort (8+ Zeichen)' : 'Password (8+ characters)'}
                 placeholderTextColor="#A3A3A3"
                 value={password}
                 onChangeText={setPassword}
@@ -122,7 +131,9 @@ export default function RegisterScreen() {
               />
 
               <BrandButton
-                title={loading ? 'Creating account...' : 'Create Account'}
+                title={loading
+                  ? (locale === 'de' ? 'Konto wird erstellt...' : 'Creating account...')
+                  : (locale === 'de' ? 'Konto erstellen' : 'Create Account')}
                 onPress={handleRegister}
                 disabled={loading}
               />
@@ -130,12 +141,17 @@ export default function RegisterScreen() {
 
             <Pressable onPress={() => router.push('/auth/login')} style={styles.switchButton}>
               <Text style={styles.switchText}>
-                Already have an account? <Text style={styles.switchLink}>Sign In</Text>
+                {locale === 'de' ? 'Schon ein Konto? ' : 'Already have an account? '}
+                <Text style={styles.switchLink}>
+                  {locale === 'de' ? 'Anmelden' : 'Sign In'}
+                </Text>
               </Text>
             </Pressable>
 
             <Pressable onPress={() => router.replace('/(tabs)')} style={styles.skipButton}>
-              <Text style={styles.skipText}>Continue without account</Text>
+              <Text style={styles.skipText}>
+                {locale === 'de' ? 'Ohne Konto fortfahren' : 'Continue without account'}
+              </Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -146,6 +162,7 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center' },
   content: { flex: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 24 },
@@ -159,6 +176,7 @@ const styles = StyleSheet.create({
     fontSize: 28, fontWeight: '700', color: '#171717',
     textAlign: 'center', letterSpacing: -0.5, marginBottom: 4,
   },
+  titleDark: { color: '#F5F5F5' },
   subtitle: {
     fontSize: 15, color: '#737373', textAlign: 'center', marginBottom: 24,
   },

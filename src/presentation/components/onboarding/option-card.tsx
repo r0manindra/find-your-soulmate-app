@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet, Platform, View, Pressable } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -10,6 +11,8 @@ import Animated, {
 import { useColorScheme } from '@/components/useColorScheme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const useLiquidGlass = isLiquidGlassAvailable();
 
 interface OptionCardProps {
   emoji: string;
@@ -40,6 +43,47 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onSelect();
   };
+
+  if (useLiquidGlass) {
+    return (
+      <AnimatedPressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handlePress}
+        style={[animatedStyle]}
+      >
+        <GlassView
+          glassEffectStyle={selected ? 'clear' : 'regular'}
+          isInteractive
+          tintColor={selected ? '#E8435A' : undefined}
+          style={[
+            styles.container,
+            selected && styles.containerSelected,
+            isDark && styles.containerDark,
+          ]}
+        >
+          <View style={styles.content}>
+            <Text style={styles.emoji}>{emoji}</Text>
+            <View style={styles.textContainer}>
+              <Text style={[styles.label, isDark && styles.labelDark, selected && styles.labelSelected]}>
+                {label}
+              </Text>
+              {note && (
+                <Text style={[styles.note, selected && styles.noteSelected]}>
+                  {note}
+                </Text>
+              )}
+            </View>
+            {selected && (
+              <View style={styles.checkmark}>
+                <Text style={styles.checkmarkText}>✓</Text>
+              </View>
+            )}
+          </View>
+        </GlassView>
+      </AnimatedPressable>
+    );
+  }
 
   return (
     <AnimatedPressable
@@ -87,7 +131,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 18,
     overflow: 'hidden',
-    borderWidth: 1.5,
+    borderWidth: useLiquidGlass ? 0 : 1.5,
     borderColor: 'rgba(255,255,255,0.3)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -1,15 +1,38 @@
 import React from 'react';
 import { View, StyleSheet, Platform, type ViewProps } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useColorScheme } from '@/components/useColorScheme';
 
 interface GlassCardProps extends ViewProps {
   intensity?: number;
+  /** 'clear' = more transparent, 'regular' = frosted. Only applies on iOS 26+ */
+  glassEffectStyle?: 'clear' | 'regular';
 }
 
-export function GlassCard({ children, style, intensity = 50, ...props }: GlassCardProps) {
+const useLiquidGlass = isLiquidGlassAvailable();
+
+export function GlassCard({
+  children,
+  style,
+  intensity = 50,
+  glassEffectStyle = 'regular',
+  ...props
+}: GlassCardProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  if (useLiquidGlass) {
+    return (
+      <GlassView
+        glassEffectStyle={glassEffectStyle}
+        style={[styles.container, isDark && styles.containerDark, style]}
+        {...props}
+      >
+        <View style={styles.content}>{children}</View>
+      </GlassView>
+    );
+  }
 
   return (
     <View style={[styles.container, isDark && styles.containerDark, style]} {...props}>
@@ -34,7 +57,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: useLiquidGlass ? 0 : StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.25)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

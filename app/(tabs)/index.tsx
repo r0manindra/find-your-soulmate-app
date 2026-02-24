@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
 import { useProgressStore } from '@/src/store/progress-store';
@@ -134,6 +135,8 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { completedChapters, completedBooks, streak, updateStreak } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   useEffect(() => {
     updateStreak();
@@ -148,13 +151,13 @@ export default function HomeScreen() {
   }, [t]);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{t('home.title')}</Text>
+        <Text style={[styles.title, isDark && styles.titleDark]}>{t('home.title')}</Text>
 
         <ContinueCard locale={locale} />
 
@@ -205,9 +208,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 100 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717', marginBottom: 20 },
+  titleDark: { color: '#F5F5F5' },
 
   // Continue Card
   continueCard: {

@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
@@ -22,6 +23,8 @@ export default function ChapterDetailScreen() {
   const router = useRouter();
   const chapterId = parseInt(id || '1', 10);
   const locale = useSettingsStore((s) => s.locale);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const { completedChapters, completeChapter, uncompleteChapter } = useProgressStore();
 
   const chapter = useMemo(() => chapters.find((c) => c.id === chapterId), [chapterId]);
@@ -51,7 +54,7 @@ export default function ChapterDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -146,6 +149,7 @@ export default function ChapterDetailScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   scrollView: { flex: 1 },
   content: { paddingBottom: 120 },
   errorText: { fontSize: 16, color: '#737373', textAlign: 'center', marginTop: 40 },

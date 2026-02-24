@@ -100,41 +100,35 @@ export const useHabitStore = create<HabitStore>()(
 
       getStreak: (habitId) => {
         const { completions } = get();
-        const dates = completions
+        const habitDates = completions
           .filter((c) => c.habitId === habitId)
-          .map((c) => c.date)
-          .sort()
-          .reverse();
+          .map((c) => c.date);
 
-        if (dates.length === 0) return { current: 0, longest: 0 };
+        if (habitDates.length === 0) return { current: 0, longest: 0 };
 
-        const uniqueDates = [...new Set(dates)];
+        // Use Set for O(1) lookups instead of Array.includes O(n)
+        const dateSet = new Set(habitDates);
+        const sorted = [...dateSet].sort();
 
-        // Calculate current streak (consecutive days backward from today or yesterday)
+        // Current streak: count consecutive days backward from today or yesterday
         let current = 0;
         const today = getToday();
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        let checkDate = uniqueDates.includes(today) ? today : yesterday;
+        const startDate = dateSet.has(today) ? today : dateSet.has(yesterday) ? yesterday : null;
 
-        if (!uniqueDates.includes(checkDate)) {
-          // No completion today or yesterday — streak is broken
-          current = 0;
-        } else {
-          let d = new Date(checkDate);
-          while (uniqueDates.includes(d.toISOString().split('T')[0])) {
+        if (startDate) {
+          let d = new Date(startDate);
+          while (dateSet.has(d.toISOString().split('T')[0])) {
             current++;
             d = new Date(d.getTime() - 86400000);
           }
         }
 
-        // Calculate longest streak
-        let longest = 0;
+        // Longest streak: single pass O(n)
+        let longest = 1;
         let streak = 1;
-        const sorted = [...uniqueDates].sort();
         for (let i = 1; i < sorted.length; i++) {
-          const prev = new Date(sorted[i - 1]);
-          const curr = new Date(sorted[i]);
-          const diff = (curr.getTime() - prev.getTime()) / 86400000;
+          const diff = (new Date(sorted[i]).getTime() - new Date(sorted[i - 1]).getTime()) / 86400000;
           if (diff === 1) {
             streak++;
           } else {
@@ -156,7 +150,6 @@ export const useHabitStore = create<HabitStore>()(
 
         const today = new Date();
         const dayOfWeek = today.getDay();
-        // Monday = start of week
         const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         const monday = new Date(today.getTime() - mondayOffset * 86400000);
         monday.setHours(0, 0, 0, 0);
@@ -165,12 +158,13 @@ export const useHabitStore = create<HabitStore>()(
         const totalPossible = active.length * daysElapsed;
         if (totalPossible === 0) return 0;
 
+        // Use Set for O(1) lookups instead of nested .some() O(h) per completion
+        const activeIds = new Set(active.map((h) => h.id));
         const mondayStr = monday.toISOString().split('T')[0];
         const todayStr = today.toISOString().split('T')[0];
-        const weekCompletions = completions.filter((c) => {
-          const isActive = active.some((h) => h.id === c.habitId);
-          return isActive && c.date >= mondayStr && c.date <= todayStr;
-        });
+        const weekCompletions = completions.filter(
+          (c) => activeIds.has(c.habitId) && c.date >= mondayStr && c.date <= todayStr
+        );
 
         return weekCompletions.length / totalPossible;
       },
@@ -180,10 +174,11 @@ export const useHabitStore = create<HabitStore>()(
 
       getTodayCompletedCount: () => {
         const today = getToday();
-        const active = get().habits.filter((h) => !h.isArchived);
-        return active.filter((h) =>
-          get().completions.some((c) => c.habitId === h.id && c.date === today)
-        ).length;
+        const { habits, completions } = get();
+        const todayCompleted = new Set(
+          completions.filter((c) => c.date === today).map((c) => c.habitId)
+        );
+        return habits.filter((h) => !h.isArchived && todayCompleted.has(h.id)).length;
       },
 
       getTodayTotalCount: () => get().habits.filter((h) => !h.isArchived).length,

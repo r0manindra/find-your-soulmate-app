@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -56,6 +57,8 @@ export default function CoachScreen() {
   const [messagesUsed, setMessagesUsed] = useState(0);
   const [messagesLimit, setMessagesLimit] = useState<number | null>(5);
 
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const activeCharacter = getCharacter(selectedCharacterId);
 
   // Load chat history from backend if logged in
@@ -169,7 +172,7 @@ export default function CoachScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -343,6 +346,7 @@ export default function CoachScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   headerGradient: {
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
     paddingHorizontal: 20, paddingVertical: 12, paddingBottom: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)', backgroundColor: '#FAFAFA',
+    borderTopColor: 'rgba(0,0,0,0.06)',
   },
   input: {
     flex: 1, minHeight: 40, maxHeight: 100,

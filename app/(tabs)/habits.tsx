@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { AddHabitModal } from '@/src/presentation/components/habits/add-habit-modal';
@@ -14,7 +15,7 @@ import { getTopNudge } from '@/src/core/habit-nudges';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function HabitRow({
+const HabitRow = React.memo(function HabitRow({
   habit,
   locale,
   isCompleted,
@@ -72,41 +73,67 @@ function HabitRow({
       </GlassCard>
     </AnimatedPressable>
   );
-}
+});
 
 export default function HabitsScreen() {
   const locale = useSettingsStore((s) => s.locale);
   const characterId = useSettingsStore((s) => s.selectedCharacterId);
-  const {
-    getActiveHabits, toggleCompletion, isCompletedToday, getStreak,
-    getTodayCompletedCount, getTodayTotalCount, archiveHabit, completions,
-  } = useHabitStore();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  // Granular selectors — only re-render when these specific slices change
+  const habits = useHabitStore((s) => s.habits);
+  const completions = useHabitStore((s) => s.completions);
+  const toggleCompletion = useHabitStore((s) => s.toggleCompletion);
+  const archiveHabit = useHabitStore((s) => s.archiveHabit);
+  const isCompletedToday = useHabitStore((s) => s.isCompletedToday);
+  const getStreak = useHabitStore((s) => s.getStreak);
 
   const [showModal, setShowModal] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
-  const activeHabits = getActiveHabits();
-  const todayDone = getTodayCompletedCount();
-  const todayTotal = getTodayTotalCount();
-  const allDone = todayTotal > 0 && todayDone === todayTotal;
+  // Memoize derived data
+  const activeHabits = useMemo(
+    () => habits.filter((h) => !h.isArchived),
+    [habits]
+  );
 
-  // Compute nudge
+  const todayStats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayCompleted = new Set(
+      completions.filter((c) => c.date === today).map((c) => c.habitId)
+    );
+    const total = activeHabits.length;
+    const done = activeHabits.filter((h) => todayCompleted.has(h.id)).length;
+    return { done, total, allDone: total > 0 && done === total };
+  }, [activeHabits, completions]);
+
+  // Memoize nudge computation
   const nudge = useMemo(() => {
     if (nudgeDismissed || activeHabits.length === 0) return null;
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const contexts = activeHabits.map((h) => ({
-      habit: h,
-      streak: getStreak(h.id),
-      missedYesterday:
-        getStreak(h.id).current === 0 &&
-        !completions.some((c) => c.habitId === h.id && c.date === yesterday),
-      completedToday: isCompletedToday(h.id),
-    }));
+    const contexts = activeHabits.map((h) => {
+      const streak = getStreak(h.id);
+      return {
+        habit: h,
+        streak,
+        missedYesterday:
+          streak.current === 0 &&
+          !completions.some((c) => c.habitId === h.id && c.date === yesterday),
+        completedToday: isCompletedToday(h.id),
+      };
+    });
     return getTopNudge(contexts, characterId);
-  }, [activeHabits, completions, characterId, nudgeDismissed]);
+  }, [activeHabits, completions, characterId, nudgeDismissed, getStreak, isCompletedToday]);
+
+  // Stable callbacks for HabitRow (prevents re-renders)
+  const handleToggle = useCallback(
+    (habitId: string) => toggleCompletion(habitId),
+    [toggleCompletion]
+  );
 
   const handleArchive = useCallback(
-    (habitId: string, habitName: string) => {
+    (habitId: string) => {
       Alert.alert(
         locale === 'de' ? 'Archivieren' : 'Archive',
         locale === 'de'
@@ -125,41 +152,44 @@ export default function HabitsScreen() {
     [locale, archiveHabit]
   );
 
+  const openModal = useCallback(() => setShowModal(true), []);
+  const closeModal = useCallback(() => setShowModal(false), []);
+
   // Empty state
   if (activeHabits.length === 0) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📋</Text>
-          <Text style={styles.emptyTitle}>
+          <Text style={[styles.emptyTitle, isDark && styles.textDark]}>
             {locale === 'de' ? 'Noch keine Habits' : 'No habits yet'}
           </Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptySubtitle, isDark && styles.textMutedDark]}>
             {locale === 'de'
               ? 'Beginne tägliche Gewohnheiten aus den Kapiteln aufzubauen'
               : 'Start building daily habits from the chapters you learn'}
           </Text>
           <BrandButton
             title={locale === 'de' ? 'Ersten Habit hinzufügen' : 'Add Your First Habit'}
-            onPress={() => setShowModal(true)}
+            onPress={openModal}
             style={styles.emptyButton}
           />
         </View>
-        <AddHabitModal visible={showModal} onClose={() => setShowModal(false)} locale={locale} />
+        <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         {/* Title */}
-        <Text style={styles.screenTitle}>
-          {locale === 'de' ? 'Habits' : 'Habits'}
+        <Text style={[styles.screenTitle, isDark && styles.textDark]}>
+          Habits
         </Text>
 
         {/* Today's Progress */}
@@ -169,10 +199,10 @@ export default function HabitsScreen() {
               <Text style={styles.progressLabel}>
                 {locale === 'de' ? 'Heute' : 'Today'}
               </Text>
-              <Text style={styles.progressValue}>
-                {allDone
+              <Text style={[styles.progressValue, isDark && styles.textDark]}>
+                {todayStats.allDone
                   ? locale === 'de' ? 'Alles erledigt!' : 'All done!'
-                  : `${todayDone} / ${todayTotal}`}
+                  : `${todayStats.done} / ${todayStats.total}`}
               </Text>
             </View>
             <View style={styles.progressDots}>
@@ -193,7 +223,9 @@ export default function HabitsScreen() {
         {nudge && (
           <GlassCard style={styles.nudgeCard}>
             <View style={styles.nudgeRow}>
-              <Text style={styles.nudgeText}>{nudge[locale]}</Text>
+              <Text style={[styles.nudgeText, isDark && styles.textSecondaryDark]}>
+                {nudge[locale]}
+              </Text>
               <Pressable
                 onPress={() => setNudgeDismissed(true)}
                 style={styles.nudgeDismiss}
@@ -216,8 +248,8 @@ export default function HabitsScreen() {
                 locale={locale}
                 isCompleted={completed}
                 streak={current}
-                onToggle={() => toggleCompletion(habit.id)}
-                onArchive={() => handleArchive(habit.id, habit.title[locale])}
+                onToggle={() => handleToggle(habit.id)}
+                onArchive={() => handleArchive(habit.id)}
               />
             );
           })}
@@ -227,20 +259,21 @@ export default function HabitsScreen() {
         <BrandButton
           title={locale === 'de' ? 'Habit hinzufügen' : 'Add Habit'}
           variant="secondary"
-          onPress={() => setShowModal(true)}
+          onPress={openModal}
         />
 
         {/* Weekly Review */}
         <WeeklyReview locale={locale} />
       </ScrollView>
 
-      <AddHabitModal visible={showModal} onClose={() => setShowModal(false)} locale={locale} />
+      <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   scrollView: { flex: 1 },
   content: { paddingHorizontal: 20, paddingBottom: 120 },
 
@@ -248,6 +281,9 @@ const styles = StyleSheet.create({
     fontSize: 34, fontWeight: '700', color: '#171717',
     letterSpacing: -0.5, marginTop: 8, marginBottom: 20,
   },
+  textDark: { color: '#F5F5F5' },
+  textMutedDark: { color: '#A3A3A3' },
+  textSecondaryDark: { color: '#D4D4D4' },
 
   // Progress card
   progressCard: { marginBottom: 16 },

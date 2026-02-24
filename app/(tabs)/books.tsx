@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
@@ -16,6 +17,8 @@ export default function BooksScreen() {
   const { completedBooks, completeBook, uncompleteBook } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
   const userProfile = useUserProfileStore();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const sortedBooks = React.useMemo(() => {
     if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return books;
@@ -45,7 +48,7 @@ export default function BooksScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <FlatList
         data={sortedBooks}
         keyExtractor={(item) => String(item.id)}
@@ -110,6 +113,7 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   list: { padding: 20, paddingBottom: 100 },
   header: { marginBottom: 20 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717' },

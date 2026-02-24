@@ -109,18 +109,31 @@ function ProgressSync() {
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    // Debounced sync: wait 2s after last change before syncing
+    // Wait for store hydration before subscribing
+    if (!useProgressStore.persist.hasHydrated()) {
+      const unsub = useProgressStore.persist.onFinishHydration(() => {
+        unsub();
+      });
+    }
+
+    // Debounced sync: wait 2s after last change, compare to avoid unnecessary syncs
+    let lastSyncedJson = '';
     const unsubscribe = useProgressStore.subscribe((state) => {
+      const payload = {
+        completedChapters: state.completedChapters,
+        completedBooks: state.completedBooks,
+        chatMessageCount: state.chatMessageCount,
+        streak: state.streak,
+        lastActiveDate: state.lastActiveDate,
+        graduated: state.graduated,
+      };
+      const json = JSON.stringify(payload);
+      if (json === lastSyncedJson) return;
+
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
       syncTimeoutRef.current = setTimeout(() => {
-        api.syncProgress({
-          completedChapters: state.completedChapters,
-          completedBooks: state.completedBooks,
-          chatMessageCount: state.chatMessageCount,
-          streak: state.streak,
-          lastActiveDate: state.lastActiveDate,
-          graduated: state.graduated,
-        }).catch(() => { /* silent fail for offline */ });
+        lastSyncedJson = json;
+        api.syncProgress(payload).catch(() => { /* silent fail for offline */ });
       }, 2000);
     });
 

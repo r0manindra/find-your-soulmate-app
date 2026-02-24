@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -27,6 +28,8 @@ export default function PaywallScreen() {
   const locale = useSettingsStore((s) => s.locale);
   const [selectedPlan, setSelectedPlan] = useState<Plan>('yearly');
   const [loading, setLoading] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [monthlyPkg, setMonthlyPkg] = useState<PurchasesPackage | null>(null);
   const [annualPkg, setAnnualPkg] = useState<PurchasesPackage | null>(null);
 
@@ -115,7 +118,7 @@ export default function PaywallScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Close button */}
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
@@ -242,6 +245,7 @@ export default function PaywallScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 40 },
   closeButton: {
     width: 36, height: 36, borderRadius: 18,

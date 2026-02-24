@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { useProgressStore } from '@/src/store/progress-store';
@@ -23,6 +24,8 @@ export default function ProfileScreen() {
   const { locale, setLocale } = useSettingsStore();
   const { user, isLoggedIn, isPremium, logout } = useAuthStore();
   const userProfile = useUserProfileStore();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const unlockedAchievements = useMemo(
@@ -101,12 +104,12 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{t('profile.title')}</Text>
+        <Text style={[styles.title, isDark && styles.titleDark]}>{t('profile.title')}</Text>
 
         {/* Auth Section */}
         {isLoggedIn ? (
@@ -334,8 +337,10 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 120 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717', marginBottom: 24 },
+  titleDark: { color: '#F5F5F5' },
 
   // Auth
   authCard: { marginBottom: 16 },

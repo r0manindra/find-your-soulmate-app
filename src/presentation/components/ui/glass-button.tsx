@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, Platform, View, type PressableProps } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -11,6 +12,8 @@ interface GlassButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   icon?: React.ReactNode;
 }
+
+const useLiquidGlass = isLiquidGlassAvailable();
 
 export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) {
   const colorScheme = useColorScheme();
@@ -29,6 +32,28 @@ export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) 
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
+
+  if (useLiquidGlass) {
+    return (
+      <AnimatedPressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[animatedStyle, style as any]}
+        {...props}
+      >
+        <GlassView
+          glassEffectStyle="regular"
+          isInteractive
+          style={[styles.container, isDark && styles.containerDark]}
+        >
+          <View style={styles.content}>
+            {icon}
+            <Text style={[styles.text, isDark && styles.textDark]}>{title}</Text>
+          </View>
+        </GlassView>
+      </AnimatedPressable>
+    );
+  }
 
   return (
     <AnimatedPressable
@@ -56,7 +81,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 14,
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: useLiquidGlass ? 0 : StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.3)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

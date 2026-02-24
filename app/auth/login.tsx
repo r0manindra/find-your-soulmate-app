@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-buttons';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useSettingsStore } from '@/src/store/settings-store';
 import { useOAuth } from '@/src/hooks/useOAuth';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
@@ -14,6 +16,9 @@ import { loginRevenueCat } from '@/src/services/purchases';
 export default function LoginScreen() {
   const router = useRouter();
   const setUser = useAuthStore((s) => s.setUser);
+  const locale = useSettingsStore((s) => s.locale);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
@@ -33,7 +38,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      setFormError('Please fill in all fields');
+      setFormError(locale === 'de' ? 'Bitte alle Felder ausfüllen' : 'Please fill in all fields');
       return;
     }
     setFormError('');
@@ -46,7 +51,7 @@ export default function LoginScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');
     } catch (err: any) {
-      setFormError(err.message || 'Login failed');
+      setFormError(err.message || (locale === 'de' ? 'Anmeldung fehlgeschlagen' : 'Login failed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -54,7 +59,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -74,8 +79,12 @@ export default function LoginScreen() {
               <Text style={styles.logoText}>S</Text>
             </LinearGradient>
 
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+            <Text style={[styles.title, isDark && styles.titleDark]}>
+              {locale === 'de' ? 'Willkommen zurück' : 'Welcome Back'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {locale === 'de' ? 'Melde dich an, um deine Reise fortzusetzen' : 'Sign in to continue your journey'}
+            </Text>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -90,7 +99,7 @@ export default function LoginScreen() {
             <View style={styles.form}>
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder={locale === 'de' ? 'E-Mail' : 'Email'}
                 placeholderTextColor="#A3A3A3"
                 value={email}
                 onChangeText={setEmail}
@@ -100,7 +109,7 @@ export default function LoginScreen() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Password"
+                placeholder={locale === 'de' ? 'Passwort' : 'Password'}
                 placeholderTextColor="#A3A3A3"
                 value={password}
                 onChangeText={setPassword}
@@ -109,7 +118,9 @@ export default function LoginScreen() {
               />
 
               <BrandButton
-                title={loading ? 'Signing in...' : 'Sign In'}
+                title={loading
+                  ? (locale === 'de' ? 'Anmelden...' : 'Signing in...')
+                  : (locale === 'de' ? 'Anmelden' : 'Sign In')}
                 onPress={handleLogin}
                 disabled={loading}
               />
@@ -117,12 +128,17 @@ export default function LoginScreen() {
 
             <Pressable onPress={() => router.push('/auth/register')} style={styles.switchButton}>
               <Text style={styles.switchText}>
-                Don't have an account? <Text style={styles.switchLink}>Sign Up</Text>
+                {locale === 'de' ? 'Noch kein Konto? ' : "Don't have an account? "}
+                <Text style={styles.switchLink}>
+                  {locale === 'de' ? 'Registrieren' : 'Sign Up'}
+                </Text>
               </Text>
             </Pressable>
 
             <Pressable onPress={() => router.replace('/(tabs)')} style={styles.skipButton}>
-              <Text style={styles.skipText}>Continue without account</Text>
+              <Text style={styles.skipText}>
+                {locale === 'de' ? 'Ohne Konto fortfahren' : 'Continue without account'}
+              </Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -133,6 +149,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center' },
   content: { flex: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 24 },
@@ -146,6 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 28, fontWeight: '700', color: '#171717',
     textAlign: 'center', letterSpacing: -0.5, marginBottom: 4,
   },
+  titleDark: { color: '#F5F5F5' },
   subtitle: {
     fontSize: 15, color: '#737373', textAlign: 'center', marginBottom: 24,
   },

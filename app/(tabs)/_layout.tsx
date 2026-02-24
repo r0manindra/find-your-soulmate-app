@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Platform, StyleSheet, View, Pressable, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+  interpolate,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/components/useColorScheme';
 import '@/src/i18n/config';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const useLiquidGlass = isLiquidGlassAvailable();
 
 type TabConfig = {
   name: string;
@@ -26,51 +34,85 @@ const TAB_CONFIG: TabConfig[] = [
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person' },
 ];
 
-function AnimatedTabIcon({
-  name,
+/** Bubble spring config — low damping for overshoot bounce */
+const BUBBLE_SPRING = { damping: 8, stiffness: 320, mass: 0.6 };
+const SETTLE_SPRING = { damping: 14, stiffness: 300 };
+
+function BubbleTabButton({
+  config,
+  label,
   focused,
-  color,
+  onPress,
+  isDark,
 }: {
-  name: keyof typeof Ionicons.glyphMap;
+  config: TabConfig;
+  label: string;
   focused: boolean;
-  color: string;
+  onPress: () => void;
+  isDark: boolean;
 }) {
-  const scale = useSharedValue(1);
+  const bubble = useSharedValue(0);
+
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [
+      { scale: interpolate(bubble.value, [0, 1], [1, 1.25]) },
+      { translateY: interpolate(bubble.value, [0, 1], [0, -4]) },
+    ],
   }));
 
-  React.useEffect(() => {
-    if (focused) {
-      scale.value = withSpring(1.15, { damping: 12, stiffness: 300 });
-    } else {
-      scale.value = withSpring(1, { damping: 12, stiffness: 300 });
-    }
-  }, [focused]);
+  const handlePress = useCallback(() => {
+    // Bubble pop: overshoot to 1 then settle back to 0
+    bubble.value = withSequence(
+      withSpring(1, BUBBLE_SPRING),
+      withSpring(0, SETTLE_SPRING),
+    );
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  }, [onPress]);
+
+  const color = focused ? '#E8435A' : isDark ? '#737373' : '#A3A3A3';
 
   return (
-    <Animated.View style={animatedStyle}>
-      <Ionicons name={name} size={24} color={color} />
-    </Animated.View>
+    <Pressable onPress={handlePress} style={s.tab}>
+      <Animated.View style={animatedStyle}>
+        <Ionicons
+          name={focused ? config.ioniconFocused : config.ionicon}
+          size={23}
+          color={color}
+        />
+      </Animated.View>
+      <Text style={[s.tabLabel, { color }]} numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
-function AndroidGlassTabBar({ state, descriptors, navigation }: any) {
+function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   return (
-    <View style={[androidStyles.wrapper, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-      <View style={[androidStyles.container, isDark && androidStyles.containerDark]}>
-        <BlurView
-          intensity={70}
-          tint={isDark ? 'dark' : 'light'}
-          experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={[androidStyles.overlay, isDark ? androidStyles.overlayDark : androidStyles.overlayLight]} />
-        <View style={androidStyles.tabs}>
+    <View style={[s.wrapper, { paddingBottom: Math.max(insets.bottom, 6) }]}>
+      <View style={[s.pill, isDark && s.pillDark]}>
+        {/* Glass / blur background */}
+        {useLiquidGlass ? (
+          <GlassView glassEffectStyle="regular" style={StyleSheet.absoluteFill} />
+        ) : (
+          <>
+            <BlurView
+              intensity={75}
+              tint={isDark ? 'dark' : 'light'}
+              experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={[s.overlay, isDark ? s.overlayDark : s.overlayLight]} />
+          </>
+        )}
+
+        {/* Tab buttons */}
+        <View style={s.tabs}>
           {state.routes.map((route: any, index: number) => {
             const { options } = descriptors[route.key];
             const focused = state.index === index;
@@ -89,25 +131,14 @@ function AndroidGlassTabBar({ state, descriptors, navigation }: any) {
             };
 
             return (
-              <Pressable
+              <BubbleTabButton
                 key={route.key}
+                config={config}
+                label={label}
+                focused={focused}
                 onPress={onPress}
-                style={androidStyles.tab}
-              >
-                <AnimatedTabIcon
-                  name={focused ? config.ioniconFocused : config.ionicon}
-                  focused={focused}
-                  color={focused ? '#E8435A' : isDark ? '#737373' : '#A3A3A3'}
-                />
-                <Text
-                  style={[
-                    androidStyles.tabLabel,
-                    { color: focused ? '#E8435A' : isDark ? '#737373' : '#A3A3A3' },
-                  ]}
-                >
-                  {label}
-                </Text>
-              </Pressable>
+                isDark={isDark}
+              />
             );
           })}
         </View>
@@ -118,58 +149,18 @@ function AndroidGlassTabBar({ state, descriptors, navigation }: any) {
 
 export default function TabLayout() {
   const { t } = useTranslation();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  const isAndroid = Platform.OS === 'android';
 
   return (
     <Tabs
-      tabBar={isAndroid ? (props) => <AndroidGlassTabBar {...props} /> : undefined}
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: '#E8435A',
-        tabBarInactiveTintColor: isDark ? '#737373' : '#A3A3A3',
-        ...(isAndroid
-          ? {}
-          : {
-              tabBarStyle: {
-                position: 'absolute' as const,
-                borderTopWidth: StyleSheet.hairlineWidth,
-                borderTopColor: isDark
-                  ? 'rgba(255,255,255,0.1)'
-                  : 'rgba(0,0,0,0.1)',
-                backgroundColor: 'transparent',
-                elevation: 0,
-              },
-              tabBarBackground: () => (
-                <BlurView
-                  intensity={80}
-                  tint={isDark ? 'dark' : 'light'}
-                  style={StyleSheet.absoluteFill}
-                />
-              ),
-              tabBarLabelStyle: {
-                fontSize: 11,
-                fontWeight: '600' as const,
-                letterSpacing: -0.2,
-              },
-            }),
-      }}
+      tabBar={(props) => <FloatingGlassTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      {TAB_CONFIG.map((tab, idx) => (
+      {TAB_CONFIG.map((tab) => (
         <Tabs.Screen
           key={tab.name}
           name={tab.name}
           options={{
             title: t(`tabs.${tab.name === 'index' ? 'home' : tab.name}`),
-            tabBarIcon: ({ focused, color }) => (
-              <AnimatedTabIcon
-                name={focused ? tab.ioniconFocused : tab.ionicon}
-                focused={focused}
-                color={color}
-              />
-            ),
           }}
         />
       ))}
@@ -177,49 +168,49 @@ export default function TabLayout() {
   );
 }
 
-const androidStyles = StyleSheet.create({
+const s = StyleSheet.create({
   wrapper: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
-  container: {
+  pill: {
     borderRadius: 28,
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderWidth: useLiquidGlass ? 0 : StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.3)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
     width: '100%',
   },
-  containerDark: {
+  pillDark: {
     borderColor: 'rgba(255,255,255,0.1)',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
   },
   overlayLight: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'rgba(255,255,255,0.78)',
   },
   overlayDark: {
-    backgroundColor: 'rgba(28,28,30,0.75)',
+    backgroundColor: 'rgba(28,28,30,0.78)',
   },
   tabs: {
     flexDirection: 'row',
     paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
+    paddingVertical: 4,
     gap: 2,
   },
   tabLabel: {
