@@ -13,6 +13,8 @@ import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { getPersonalization } from '@/src/core/personalization';
 import * as api from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 
@@ -34,6 +36,11 @@ export default function CoachScreen() {
   const locale = useSettingsStore((s) => s.locale);
   const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
+
+  const userProfile = useUserProfileStore();
+  const recommendedCharacterId = userProfile.hasCompletedOnboarding
+    ? getPersonalization(userProfile).recommendedCharacterId
+    : null;
 
   const [showCharacterPicker, setShowCharacterPicker] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -295,6 +302,14 @@ export default function CoachScreen() {
                       <View style={styles.characterInfo}>
                         <View style={styles.characterNameRow}>
                           <Text style={styles.characterName}>{char.name}</Text>
+                          {char.id === recommendedCharacterId && !isSelected && (
+                            <View style={styles.recommendedBadge}>
+                              <Ionicons name="sparkles" size={10} color="#F59E0B" />
+                              <Text style={styles.recommendedBadgeText}>
+                                {locale === 'de' ? 'Empfohlen' : 'Recommended'}
+                              </Text>
+                            </View>
+                          )}
                           {isLocked && (
                             <View style={styles.proBadge}>
                               <Ionicons name="lock-closed" size={10} color="#E8435A" />
@@ -418,6 +433,12 @@ const styles = StyleSheet.create({
   characterNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   characterName: { fontSize: 18, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
   characterSubtitle: { fontSize: 13, color: '#737373', marginTop: 2 },
+  recommendedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: 'rgba(245,158,11,0.1)',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8,
+  },
+  recommendedBadgeText: { fontSize: 10, fontWeight: '700', color: '#F59E0B' },
   proBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: 'rgba(232,67,90,0.08)',

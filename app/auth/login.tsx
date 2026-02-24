@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
+import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-buttons';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useOAuth } from '@/src/hooks/useOAuth';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
 
@@ -14,15 +16,28 @@ export default function LoginScreen() {
   const setUser = useAuthStore((s) => s.setUser);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const {
+    signInWithGoogle,
+    signInWithApple,
+    googleLoading,
+    appleLoading,
+    error: oauthError,
+    setError: setOAuthError,
+    googleReady,
+  } = useOAuth();
+
+  const error = formError || oauthError;
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      setError('Please fill in all fields');
+      setFormError('Please fill in all fields');
       return;
     }
-    setError('');
+    setFormError('');
+    setOAuthError('');
     setLoading(true);
     try {
       const { user } = await api.login(email.trim(), password);
@@ -31,7 +46,7 @@ export default function LoginScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setFormError(err.message || 'Login failed');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -44,59 +59,73 @@ export default function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
-          <LinearGradient
-            colors={['#E8435A', '#FF7854']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.logoContainer}
-          >
-            <Text style={styles.logoText}>S</Text>
-          </LinearGradient>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            <LinearGradient
+              colors={['#E8435A', '#FF7854']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.logoContainer}
+            >
+              <Text style={styles.logoText}>S</Text>
+            </LinearGradient>
 
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue your journey</Text>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#A3A3A3"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#A3A3A3"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
+            <SocialAuthButtons
+              onGooglePress={signInWithGoogle}
+              onApplePress={signInWithApple}
+              googleLoading={googleLoading}
+              appleLoading={appleLoading}
+              googleReady={googleReady}
             />
 
-            <BrandButton
-              title={loading ? 'Signing in...' : 'Sign In'}
-              onPress={handleLogin}
-              disabled={loading}
-            />
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#A3A3A3"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#A3A3A3"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+              />
+
+              <BrandButton
+                title={loading ? 'Signing in...' : 'Sign In'}
+                onPress={handleLogin}
+                disabled={loading}
+              />
+            </View>
+
+            <Pressable onPress={() => router.push('/auth/register')} style={styles.switchButton}>
+              <Text style={styles.switchText}>
+                Don't have an account? <Text style={styles.switchLink}>Sign Up</Text>
+              </Text>
+            </Pressable>
+
+            <Pressable onPress={() => router.replace('/(tabs)')} style={styles.skipButton}>
+              <Text style={styles.skipText}>Continue without account</Text>
+            </Pressable>
           </View>
-
-          <Pressable onPress={() => router.push('/auth/register')} style={styles.switchButton}>
-            <Text style={styles.switchText}>
-              Don't have an account? <Text style={styles.switchLink}>Sign Up</Text>
-            </Text>
-          </Pressable>
-
-          <Pressable onPress={() => router.replace('/(tabs)')} style={styles.skipButton}>
-            <Text style={styles.skipText}>Continue without account</Text>
-          </Pressable>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -105,7 +134,8 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   container: { flex: 1 },
-  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 32 },
+  scrollContent: { flexGrow: 1, justifyContent: 'center' },
+  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 24 },
   logoContainer: {
     width: 64, height: 64, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center',

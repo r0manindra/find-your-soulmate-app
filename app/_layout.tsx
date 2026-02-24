@@ -1,7 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import 'react-native-reanimated';
@@ -10,6 +10,7 @@ import '@/src/i18n/config';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { achievements } from '@/src/data/content/achievements';
 import { AchievementModal } from '@/src/presentation/components/celebration/achievement-modal';
 import * as api from '@/src/services/api';
@@ -160,6 +161,42 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+/** Redirects to onboarding if user hasn't completed it */
+function OnboardingGate() {
+  const router = useRouter();
+  const segments = useSegments();
+  const hasCompletedOnboarding = useUserProfileStore((s) => s.hasCompletedOnboarding);
+  const completedChapters = useProgressStore((s) => s.completedChapters);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Wait for zustand hydration
+  useEffect(() => {
+    const unsub = useUserProfileStore.persist.onFinishHydration(() => setHydrated(true));
+    // If already hydrated
+    if (useUserProfileStore.persist.hasHydrated()) setHydrated(true);
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    const inOnboarding = segments[0] === 'onboarding';
+
+    // Skip onboarding for existing users who already have progress
+    if (!hasCompletedOnboarding && completedChapters.length > 0) {
+      useUserProfileStore.getState().skipOnboarding();
+      return;
+    }
+
+    // Redirect to onboarding if not completed and not already there
+    if (!hasCompletedOnboarding && !inOnboarding) {
+      router.replace('/onboarding');
+    }
+  }, [hydrated, hasCompletedOnboarding, segments, completedChapters.length, router]);
+
+  return null;
+}
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
@@ -167,6 +204,7 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="auth/register" options={{ headerShown: false }} />
         <Stack.Screen name="chapter/[id]" options={{ headerShown: false }} />
@@ -179,6 +217,7 @@ function RootLayoutNav() {
           }}
         />
       </Stack>
+      <OnboardingGate />
       <AchievementListener />
       <ProgressSync />
     </ThemeProvider>

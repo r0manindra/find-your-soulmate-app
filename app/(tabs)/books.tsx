@@ -7,12 +7,28 @@ import * as Haptics from 'expo-haptics';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { getPersonalization } from '@/src/core/personalization';
 import { books } from '@/src/data/content/books';
 
 export default function BooksScreen() {
   const { t } = useTranslation();
   const { completedBooks, completeBook, uncompleteBook } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
+  const userProfile = useUserProfileStore();
+
+  const sortedBooks = React.useMemo(() => {
+    if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return books;
+    const personalization = getPersonalization(userProfile);
+    const priority = personalization.bookPriority;
+    return [...books].sort((a, b) => priority.indexOf(a.id) - priority.indexOf(b.id));
+  }, [userProfile]);
+
+  const recommendedBookIds = React.useMemo(() => {
+    if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return new Set<number>();
+    const personalization = getPersonalization(userProfile);
+    return new Set(personalization.bookPriority.slice(0, 3));
+  }, [userProfile]);
 
   const toggleBook = (id: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -31,7 +47,7 @@ export default function BooksScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <FlatList
-        data={books}
+        data={sortedBooks}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
@@ -43,6 +59,7 @@ export default function BooksScreen() {
         }
         renderItem={({ item }) => {
           const isRead = completedBooks.includes(item.id);
+          const isRecommended = recommendedBookIds.has(item.id);
           return (
             <GlassCard style={[styles.card, isRead && styles.cardRead]}>
               <View style={styles.cardRow}>
@@ -50,7 +67,14 @@ export default function BooksScreen() {
                   <Ionicons name={item.ionicon as any} size={24} color="#E8435A" />
                 </View>
                 <View style={styles.cardContent}>
-                  <Text style={styles.bookTitle}>{item.title}</Text>
+                  <View style={styles.bookTitleRow}>
+                    <Text style={[styles.bookTitle, { flex: 1 }]}>{item.title}</Text>
+                    {isRecommended && !isRead && (
+                      <View style={styles.recommendedBadge}>
+                        <Ionicons name="sparkles" size={10} color="#F59E0B" />
+                      </View>
+                    )}
+                  </View>
                   <Text style={styles.bookAuthor}>{t('booksScreen.by')} {item.author}</Text>
                   <Text style={styles.bookDesc} numberOfLines={3}>
                     {item.description[locale]}
@@ -99,6 +123,12 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   cardContent: { flex: 1 },
+  bookTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  recommendedBadge: {
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: 'rgba(245,158,11,0.1)',
+    alignItems: 'center', justifyContent: 'center',
+  },
   bookTitle: { fontSize: 17, fontWeight: '600', color: '#171717', letterSpacing: -0.2 },
   bookAuthor: { fontSize: 14, fontWeight: '500', color: '#E8435A', marginTop: 2 },
   bookDesc: { fontSize: 14, color: '#525252', marginTop: 6, lineHeight: 20 },

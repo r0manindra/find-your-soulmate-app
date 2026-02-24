@@ -15,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pulsify.flirtiq"
+      "bundleIdentifier": "com.pulsify.flirtiq",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +34,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-localization"
+      "expo-localization",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { PhaseHeader } from './phase-header';
 import { ChapterNode } from './chapter-node';
@@ -37,8 +39,14 @@ export function JourneyPath() {
   const { t } = useTranslation();
   const { completedChapters } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
+  const userProfile = useUserProfileStore();
   const router = useRouter();
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const suggestedStart = useMemo(() => {
+    if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return 1;
+    return getPersonalization(userProfile).suggestedStartChapter;
+  }, [userProfile]);
 
   const toggleExpand = useCallback((id: number) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -90,6 +98,8 @@ export function JourneyPath() {
                 {phaseChapters.map((chapter, idx) => {
                   const status = getChapterStatus(chapter.id, completedChapters);
                   const position = getNodePosition(idx);
+                  const isStartHere = chapter.id === suggestedStart && completedChapters.length === 0;
+                  const isSkippable = chapter.id < suggestedStart && completedChapters.length === 0 && suggestedStart > 1;
 
                   return (
                     <View key={chapter.id}>
@@ -101,15 +111,24 @@ export function JourneyPath() {
                           ]}
                         />
                       )}
-                      <ChapterNode
-                        chapter={chapter}
-                        status={status}
-                        locale={locale}
-                        position={position}
-                        isExpanded={expandedId === chapter.id}
-                        onPress={() => toggleExpand(chapter.id)}
-                        onAction={() => handleAction(chapter.id)}
-                      />
+                      {isStartHere && (
+                        <View style={styles.startHereBadge}>
+                          <Text style={styles.startHereText}>
+                            {locale === 'de' ? 'Starte hier' : 'Start here'} →
+                          </Text>
+                        </View>
+                      )}
+                      <View style={isSkippable ? styles.skippableContainer : undefined}>
+                        <ChapterNode
+                          chapter={chapter}
+                          status={status}
+                          locale={locale}
+                          position={position}
+                          isExpanded={expandedId === chapter.id}
+                          onPress={() => toggleExpand(chapter.id)}
+                          onAction={() => handleAction(chapter.id)}
+                        />
+                      </View>
                     </View>
                   );
                 })}
@@ -165,5 +184,22 @@ const styles = StyleSheet.create({
   },
   connectorCompleted: {
     backgroundColor: '#E8435A',
+  },
+  startHereBadge: {
+    alignSelf: 'center',
+    backgroundColor: '#E8435A',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 6,
+  },
+  startHereText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.3,
+  },
+  skippableContainer: {
+    opacity: 0.45,
   },
 });

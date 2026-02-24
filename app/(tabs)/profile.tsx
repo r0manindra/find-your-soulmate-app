@@ -11,6 +11,7 @@ import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { achievements } from '@/src/data/content/achievements';
 import * as api from '@/src/services/api';
 import { logoutRevenueCat } from '@/src/services/purchases';
@@ -21,6 +22,7 @@ export default function ProfileScreen() {
   const progress = useProgressStore();
   const { locale, setLocale } = useSettingsStore();
   const { user, isLoggedIn, isPremium, logout } = useAuthStore();
+  const userProfile = useUserProfileStore();
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const unlockedAchievements = useMemo(
@@ -217,6 +219,50 @@ export default function ProfileScreen() {
           </Pressable>
         </GlassCard>
 
+        {/* FlirtIQ Profile */}
+        {userProfile.hasCompletedOnboarding && userProfile.socialEnergy && (
+          <>
+            <Text style={styles.sectionTitle}>{t('onboarding.profile.title')}</Text>
+            <GlassCard style={styles.flirtiqCard}>
+              <View style={styles.flirtiqGrid}>
+                <View style={styles.flirtiqItem}>
+                  <Text style={styles.flirtiqLabel}>{t('onboarding.profile.socialEnergy')}</Text>
+                  <Text style={styles.flirtiqValue}>
+                    {t(`onboarding.profile.labels.${userProfile.socialEnergy}`)}
+                  </Text>
+                </View>
+                {userProfile.skillLevel && (
+                  <View style={styles.flirtiqItem}>
+                    <Text style={styles.flirtiqLabel}>{t('onboarding.profile.skillLevel')}</Text>
+                    <Text style={styles.flirtiqValue}>
+                      {t(`onboarding.profile.labels.${userProfile.skillLevel}`)}
+                    </Text>
+                  </View>
+                )}
+                {userProfile.goal && (
+                  <View style={styles.flirtiqItem}>
+                    <Text style={styles.flirtiqLabel}>{t('onboarding.profile.goal')}</Text>
+                    <Text style={styles.flirtiqValue}>
+                      {t(`onboarding.profile.labels.${userProfile.goal}`)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  userProfile.resetProfile();
+                  router.replace('/onboarding');
+                }}
+                style={styles.retakeButton}
+              >
+                <Ionicons name="refresh" size={16} color="#E8435A" />
+                <Text style={styles.retakeText}>{t('onboarding.profile.retakeQuiz')}</Text>
+              </Pressable>
+            </GlassCard>
+          </>
+        )}
+
         {/* Achievements */}
         <Text style={styles.sectionTitle}>{t('profile.achievements')}</Text>
         <View style={styles.achievementsGrid}>
@@ -338,6 +384,25 @@ const styles = StyleSheet.create({
   pdfButtonLocked: { backgroundColor: 'rgba(0,0,0,0.04)' },
   pdfButtonText: { fontSize: 15, fontWeight: '600', color: '#fff' },
   pdfButtonTextLocked: { color: '#A3A3A3' },
+
+  // FlirtIQ Profile
+  flirtiqCard: { marginBottom: 24 },
+  flirtiqGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 14,
+  },
+  flirtiqItem: {
+    backgroundColor: 'rgba(232,67,90,0.04)', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 10, minWidth: '45%',
+  },
+  flirtiqLabel: { fontSize: 11, fontWeight: '700', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: 0.5 },
+  flirtiqValue: { fontSize: 15, fontWeight: '600', color: '#171717', marginTop: 3 },
+  retakeButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    paddingVertical: 12, borderRadius: 12,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(0,0,0,0.06)',
+    marginTop: 2,
+  },
+  retakeText: { fontSize: 15, fontWeight: '600', color: '#E8435A' },
 
   // Section title
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginBottom: 12, marginTop: 8 },

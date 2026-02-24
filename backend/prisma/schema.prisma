@@ -10,10 +10,14 @@ datasource db {
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
-  passwordHash   String
+  passwordHash   String?
   name           String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // OAuth
+  authProvider     AuthProvider @default(EMAIL)
+  authProviderId   String?
 
   // Subscription
   subscriptionStatus  SubscriptionStatus @default(FREE)
@@ -32,6 +36,8 @@ model User {
   lastCoachResetDate  String   @default("")
 
   chatMessages        ChatMessage[]
+
+  @@index([authProvider, authProviderId])
 }
 
 model ChatMessage {
@@ -50,4 +56,10 @@ enum SubscriptionStatus {
   FREE
   PREMIUM
   EXPIRED
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  APPLE
 }

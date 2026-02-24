@@ -11,18 +11,26 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   const { completedChapters } = useProgressStore();
+  const profile = useUserProfileStore();
   const router = useRouter();
   const scale = useSharedValue(1);
 
   const nextChapter = useMemo(() => {
+    // If user has no progress yet, use personalized start chapter
+    if (completedChapters.length === 0 && profile.hasCompletedOnboarding && profile.skillLevel) {
+      const personalization = getPersonalization(profile);
+      return chapters.find((c) => c.id === personalization.suggestedStartChapter) ?? chapters[0];
+    }
     return chapters.find((c) => !completedChapters.includes(c.id));
-  }, [completedChapters]);
+  }, [completedChapters, profile]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

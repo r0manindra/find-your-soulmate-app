@@ -78,6 +78,34 @@ export async function login(email: string, password: string) {
   return data;
 }
 
+export async function loginWithGoogle(idToken: string) {
+  const data = await request<{
+    token: string;
+    user: { id: string; email: string; name: string | null; subscriptionStatus: string };
+  }>('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  });
+  await setToken(data.token);
+  return data;
+}
+
+export async function loginWithApple(
+  identityToken: string,
+  fullName?: string,
+  email?: string
+) {
+  const data = await request<{
+    token: string;
+    user: { id: string; email: string; name: string | null; subscriptionStatus: string };
+  }>('/auth/apple', {
+    method: 'POST',
+    body: JSON.stringify({ identityToken, fullName, email }),
+  });
+  await setToken(data.token);
+  return data;
+}
+
 export async function getMe() {
   return request<{
     user: {

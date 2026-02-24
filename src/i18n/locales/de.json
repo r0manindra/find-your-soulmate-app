@@ -60,6 +60,94 @@
     "resetProgress": "Fortschritt zurücksetzen",
     "resetConfirm": "Bist du sicher? Dies löscht deinen gesamten Fortschritt."
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Oh, du hast eine Dating-App heruntergeladen.",
+      "body": "Keine Dating-App. DIE Dating-App.\nDie, die dir tatsächlich beibringt, wie du nicht schrecklich darin bist.\n\nWillkommen bei FlirtIQ. Wir verwandeln dein Liebesleben von einem Dumpster Fire in... naja, zumindest ein Lagerfeuer.",
+      "cta": "Ich bin bereit, geröstet zu werden",
+      "skip": "Überspringen — Ich bin bereits unwiderstehlich"
+    },
+    "socialEnergy": {
+      "title": "Kurze Frage zu deinem natürlichen Lebensraum.",
+      "subtitle": "Wo tankst du Energie auf?",
+      "introvert": "Meine Couch, meine Katze, mein Netflix. Menschen sind... anstrengend.",
+      "ambivert": "Ich bin okay in Gruppen, aber ich brauche Zeit allein um mich zu erholen.",
+      "extrovert": "Wenn es keine Party gibt, BIN ICH die Party. Ich sammle Menschen.",
+      "deepIntrovert": "Ich gehe manchmal raus. Wenn mein WLAN ausfällt.",
+      "footnote": "Kein Urteil. Okay, ein bisschen Urteil."
+    },
+    "ageGroup": {
+      "title": "Wie lange versagst du schon dabei?",
+      "subtitle": "(Spaß. Irgendwie.)",
+      "age_18_24": "18-24 — Ich denke immer noch, 'Na, wach?' ist ein Gesprächseröffner.",
+      "age_25_34": "25-34 — Ich wurde genug verletzt, um diese App herunterzuladen.",
+      "age_35_44": "35-44 — Ich habe eine Altersvorsorge, aber niemanden zum Teilen.",
+      "age_45_plus": "45+ — Ich habe Geschichten. Lehrt mich die neuen Regeln."
+    },
+    "skillLevel": {
+      "title": "Sei ehrlich. Niemand schaut zu.",
+      "subtitle": "(Tun wir total.)",
+      "question": "Wie würdest du dein Flirt-Game gerade bewerten?",
+      "beginner": "Was ist Flirten? Ich habe mal einem Mädchen zugewunken und sie hat den Sicherheitsdienst gerufen.",
+      "beginnerNote": "Wir lieben eine leere Leinwand",
+      "intermediate": "Ich kann ein Gespräch führen, aber abschließen? Da mache ich lieber meine Steuern.",
+      "intermediateNote": "Du hast Potenzial. Beängstigendes Potenzial.",
+      "advanced": "Läuft ganz okay. Ich hatte Dates. Einige sogar mit zweitem Date.",
+      "advancedNote": "Sieh dich an, Überflieger",
+      "expert": "Ich bin im Grunde eine Gefahr. Ich will nur leveln.",
+      "expertNote": "Lass auch was für die anderen übrig"
+    },
+    "goal": {
+      "title": "Letzte Frage. Wofür bist du wirklich hier?",
+      "subtitle": "(Wähle die, die dich am wenigsten angreift.)",
+      "socialConfidence": "Ich will einfach mit Leuten reden können, ohne dass meine Stimme bricht.",
+      "getDates": "Ich will tatsächlich Dates bekommen. Echte. Persönlich.",
+      "findPartner": "Ich will jemand Besonderen finden. Am besten bevor ich 80 bin.",
+      "socialMagnetism": "Ich will die Person sein, mit der jeder auf der Party reden will.",
+      "ambitious": "Ehrlich? Ich will Victoria's Secret Models aufreißen.",
+      "ambitiousNote": "Greif nach den Sternen, King. Respekt."
+    },
+    "profileReveal": {
+      "title": "Okay, wir haben dich durchleuchtet.",
+      "subtitle": "Keine Sorge, wir nutzen diese Macht nur zum Guten. Meistens.",
+      "profileTitle": "Dein FlirtIQ Profil",
+      "planTitle": "Dein personalisierter Plan",
+      "coach": "Dein KI-Coach",
+      "startingChapter": "Startkapitel",
+      "skipNote": "Wir überspringen die Basics",
+      "cta": "Los geht's",
+      "settingsNote": "Du kannst das alles in den Einstellungen ändern. Wir sind flexibel."
+    },
+    "profile": {
+      "title": "Dein FlirtIQ Profil",
+      "retakeQuiz": "Quiz wiederholen",
+      "socialEnergy": "Soziale Energie",
+      "ageGroup": "Altersgruppe",
+      "skillLevel": "Skill-Level",
+      "goal": "Ziel",
+      "labels": {
+        "deep_introvert": "Tiefer Introvertiert",
+        "introvert": "Introvertiert",
+        "ambivert": "Ambivertiert",
+        "extrovert": "Extrovertiert",
+        "age_18_24": "18-24",
+        "age_25_34": "25-34",
+        "age_35_44": "35-44",
+        "age_45_plus": "45+",
+        "beginner": "Anfänger",
+        "intermediate": "Fortgeschritten",
+        "advanced": "Erfahren",
+        "expert": "Experte",
+        "social_confidence": "Soziales Selbstbewusstsein",
+        "get_dates": "Dates bekommen",
+        "find_partner": "Partner finden",
+        "social_magnetism": "Soziale Anziehung",
+        "ambitious": "Ambitioniert"
+      }
+    },
+    "recommended": "Empfohlen für dich",
+    "startHere": "Starte hier"
+  },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",
     "subtitle": "Du hast die Reise abgeschlossen",

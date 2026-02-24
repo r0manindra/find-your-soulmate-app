@@ -60,6 +60,94 @@
     "resetProgress": "Reset Progress",
     "resetConfirm": "Are you sure? This will delete all your progress."
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Oh, you downloaded a dating app.",
+      "body": "Not a dating app. THE dating app.\nThe one that actually teaches you how to not be terrible at this.\n\nWelcome to FlirtIQ. We're about to turn your love life from a dumpster fire into... well, at least a campfire.",
+      "cta": "I'm ready to be roasted",
+      "skip": "Skip — I'm already irresistible"
+    },
+    "socialEnergy": {
+      "title": "Quick question about your natural habitat.",
+      "subtitle": "Where do you recharge?",
+      "introvert": "My couch, my cat, my Netflix. People are... a lot.",
+      "ambivert": "I'm okay in groups but I need alone time to recover.",
+      "extrovert": "If there's no party, I AM the party. I collect humans.",
+      "deepIntrovert": "I go outside sometimes. When my WiFi is down.",
+      "footnote": "No judgment. Okay, a little judgment."
+    },
+    "ageGroup": {
+      "title": "How long have you been failing at this?",
+      "subtitle": "(Kidding. Sort of.)",
+      "age_18_24": "18-24 — I still think 'U up?' is a conversation starter.",
+      "age_25_34": "25-34 — I've been hurt enough to download this app.",
+      "age_35_44": "35-44 — I have a 401k but no one to share it with.",
+      "age_45_plus": "45+ — I've got stories. Teach me the new rules."
+    },
+    "skillLevel": {
+      "title": "Be honest. No one's watching.",
+      "subtitle": "(We totally are.)",
+      "question": "How would you rate your flirting game right now?",
+      "beginner": "What is flirting? I once waved at a girl and she called security.",
+      "beginnerNote": "We love a blank canvas",
+      "intermediate": "I can hold a conversation but closing? I'd rather do my taxes.",
+      "intermediateNote": "You have potential. Scary potential.",
+      "advanced": "I do alright. I've had dates. Some even had second dates.",
+      "advancedNote": "Look at you, overachiever",
+      "expert": "I'm basically a menace. I just want to level up.",
+      "expertNote": "Save some for the rest of us"
+    },
+    "goal": {
+      "title": "Last one. What are you actually here for?",
+      "subtitle": "(Pick the one that makes you feel the least attacked.)",
+      "socialConfidence": "I just want to talk to people without my voice cracking.",
+      "getDates": "I want to actually get dates. Like, real ones. In person.",
+      "findPartner": "I want to find someone special. Preferably before I'm 80.",
+      "socialMagnetism": "I want to be the person everyone wants to talk to at the party.",
+      "ambitious": "Honestly? I want to pick up Victoria's Secret models.",
+      "ambitiousNote": "Aim for the stars, king. We respect it."
+    },
+    "profileReveal": {
+      "title": "Alright, we've profiled you.",
+      "subtitle": "Don't worry, we only use this power for good. Mostly.",
+      "profileTitle": "Your FlirtIQ Profile",
+      "planTitle": "Your Personalized Plan",
+      "coach": "Your AI Coach",
+      "startingChapter": "Starting Chapter",
+      "skipNote": "We're skipping the baby stuff",
+      "cta": "Let's do this",
+      "settingsNote": "You can change all of this in settings. We're flexible like that."
+    },
+    "profile": {
+      "title": "Your FlirtIQ Profile",
+      "retakeQuiz": "Retake Quiz",
+      "socialEnergy": "Social Energy",
+      "ageGroup": "Age Group",
+      "skillLevel": "Skill Level",
+      "goal": "Goal",
+      "labels": {
+        "deep_introvert": "Deep Introvert",
+        "introvert": "Introvert",
+        "ambivert": "Ambivert",
+        "extrovert": "Extrovert",
+        "age_18_24": "18-24",
+        "age_25_34": "25-34",
+        "age_35_44": "35-44",
+        "age_45_plus": "45+",
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "expert": "Expert",
+        "social_confidence": "Social Confidence",
+        "get_dates": "Get Dates",
+        "find_partner": "Find Partner",
+        "social_magnetism": "Social Magnetism",
+        "ambitious": "Ambitious"
+      }
+    },
+    "recommended": "Recommended for you",
+    "startHere": "Start here"
+  },
   "graduate": {
     "title": "Congratulations!",
     "subtitle": "You've completed the journey",
