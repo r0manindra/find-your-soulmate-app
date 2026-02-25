@@ -13,6 +13,7 @@ import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { useHabitStore } from '@/src/store/habit-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 
@@ -138,6 +139,10 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
+  // Habits data
+  const habitsCompletedToday = useHabitStore((s) => s.getTodayCompletedCount());
+  const habitsTotalToday = useHabitStore((s) => s.getTodayTotalCount());
+
   useEffect(() => {
     updateStreak();
   }, []);
@@ -178,6 +183,12 @@ export default function HomeScreen() {
                 <Text style={styles.statNumber}>{completedBooks.length}/10</Text>
                 <Text style={styles.statLabel}>{t('home.books')}</Text>
               </View>
+              {habitsTotalToday > 0 && (
+                <View>
+                  <Text style={styles.statNumber}>{habitsCompletedToday}/{habitsTotalToday}</Text>
+                  <Text style={styles.statLabel}>{locale === 'de' ? 'Habits heute' : 'Habits today'}</Text>
+                </View>
+              )}
             </View>
           </View>
           <JourneyMiniMap completedChapters={completedChapters} />

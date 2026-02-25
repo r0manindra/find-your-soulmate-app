@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TextInput, FlatList, Pressable, ScrollView, Modal, StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -60,6 +60,11 @@ export default function CoachScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const activeCharacter = getCharacter(selectedCharacterId);
+  const insets = useSafeAreaInsets();
+
+  // Calculate bottom padding to account for floating tab bar
+  // Tab bar height is approximately 64px (48 item + 8*2 padding) + insets.bottom + 12
+  const tabBarHeight = 64 + insets.bottom + 12;
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -242,7 +247,7 @@ export default function CoachScreen() {
         />
 
         {/* Input */}
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { paddingBottom: tabBarHeight + 8 }, isDark && styles.inputContainerDark]}>
           <TextInput
             style={styles.input}
             value={input}
@@ -389,9 +394,14 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
   inputContainer: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    paddingHorizontal: 20, paddingVertical: 12, paddingBottom: 20,
+    paddingHorizontal: 20, paddingTop: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: '#FAFAFA',
+  },
+  inputContainerDark: {
+    backgroundColor: '#171717',
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   input: {
     flex: 1, minHeight: 40, maxHeight: 100,

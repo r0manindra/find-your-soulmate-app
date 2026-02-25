@@ -128,7 +128,7 @@ export default function ProfileScreen() {
                 </Text>
               </LinearGradient>
               <View style={styles.authInfo}>
-                {user?.name ? <Text style={styles.authName}>{user.name}</Text> : null}
+                {user?.name ? <Text style={[styles.authName, isDark && styles.textDark]}>{user.name}</Text> : null}
                 <Text style={styles.authEmail}>{user?.email}</Text>
                 <View style={styles.subscriptionBadge}>
                   <Ionicons
@@ -164,7 +164,7 @@ export default function ProfileScreen() {
           <GlassCard style={styles.authCard}>
             <View style={styles.signInPrompt}>
               <Ionicons name="person-circle-outline" size={48} color="#D4D4D4" />
-              <Text style={styles.signInTitle}>
+              <Text style={[styles.signInTitle, isDark && styles.textDark]}>
                 {locale === 'de' ? 'Anmelden' : 'Sign In'}
               </Text>
               <Text style={styles.signInDesc}>
@@ -189,73 +189,66 @@ export default function ProfileScreen() {
 
         {/* Premium PDF Download */}
         <GlassCard style={styles.pdfCard}>
-          <View style={styles.pdfRow}>
+          <Pressable
+            onPress={handleDownloadPdf}
+            disabled={downloadingPdf}
+            style={styles.pdfContent}
+          >
             <View style={styles.pdfIconContainer}>
               <Ionicons name="document-text" size={24} color="#E8435A" />
             </View>
             <View style={styles.pdfInfo}>
-              <Text style={styles.pdfTitle}>
+              <Text style={[styles.pdfTitle, isDark && styles.textDark]}>
                 {locale === 'de' ? 'Premium PDF Guide' : 'Premium PDF Guide'}
               </Text>
               <Text style={styles.pdfDesc}>
-                {locale === 'de'
-                  ? 'Lade den kompletten Guide als PDF herunter'
-                  : 'Download the complete guide as a PDF'}
+                {downloadingPdf
+                  ? (locale === 'de' ? 'Wird geladen...' : 'Loading...')
+                  : isPremium
+                    ? (locale === 'de' ? 'Tippen zum Herunterladen' : 'Tap to download')
+                    : (locale === 'de' ? 'Premium erforderlich' : 'Premium required')}
               </Text>
             </View>
-          </View>
-          <Pressable
-            onPress={handleDownloadPdf}
-            style={[styles.pdfButton, !isPremium && styles.pdfButtonLocked]}
-            disabled={downloadingPdf}
-          >
             <Ionicons
               name={isPremium ? 'download-outline' : 'lock-closed'}
-              size={16}
-              color={isPremium ? '#fff' : '#A3A3A3'}
+              size={20}
+              color={isPremium ? '#E8435A' : '#A3A3A3'}
             />
-            <Text style={[styles.pdfButtonText, !isPremium && styles.pdfButtonTextLocked]}>
-              {downloadingPdf
-                ? (locale === 'de' ? 'Wird geladen...' : 'Loading...')
-                : isPremium
-                  ? (locale === 'de' ? 'Herunterladen' : 'Download')
-                  : (locale === 'de' ? 'Premium erforderlich' : 'Premium Required')}
-            </Text>
           </Pressable>
         </GlassCard>
 
         {/* Charismo Profile */}
         {userProfile.hasCompletedOnboarding && userProfile.socialEnergy && (
           <>
-            <Text style={styles.sectionTitle}>{t('onboarding.profile.title')}</Text>
+            <Text style={[styles.sectionTitle, isDark && styles.textDark]}>{t('onboarding.profile.title')}</Text>
             <GlassCard style={styles.charismoCard}>
               <View style={styles.charismoGrid}>
-                <View style={styles.charismoItem}>
+                <View style={[styles.charismoItem, isDark && styles.charismoItemDark]}>
                   <Text style={styles.charismoLabel}>{t('onboarding.profile.socialEnergy')}</Text>
-                  <Text style={styles.charismoValue}>
+                  <Text style={[styles.charismoValue, isDark && styles.textDark]}>
                     {t(`onboarding.profile.labels.${userProfile.socialEnergy}`)}
                   </Text>
                 </View>
                 {userProfile.basicsLevel && (
-                  <View style={styles.charismoItem}>
+                  <View style={[styles.charismoItem, isDark && styles.charismoItemDark]}>
                     <Text style={styles.charismoLabel}>{t('onboarding.profile.basicsLevel')}</Text>
-                    <Text style={styles.charismoValue}>
+                    <Text style={[styles.charismoValue, isDark && styles.textDark]}>
                       {t(`onboarding.profile.labels.${userProfile.basicsLevel}`)}
                     </Text>
                   </View>
                 )}
                 {userProfile.skillLevel && (
-                  <View style={styles.charismoItem}>
+                  <View style={[styles.charismoItem, isDark && styles.charismoItemDark]}>
                     <Text style={styles.charismoLabel}>{t('onboarding.profile.skillLevel')}</Text>
-                    <Text style={styles.charismoValue}>
+                    <Text style={[styles.charismoValue, isDark && styles.textDark]}>
                       {t(`onboarding.profile.labels.${userProfile.skillLevel}`)}
                     </Text>
                   </View>
                 )}
                 {userProfile.goal && (
-                  <View style={styles.charismoItem}>
+                  <View style={[styles.charismoItem, isDark && styles.charismoItemDark]}>
                     <Text style={styles.charismoLabel}>{t('onboarding.profile.goal')}</Text>
-                    <Text style={styles.charismoValue}>
+                    <Text style={[styles.charismoValue, isDark && styles.textDark]}>
                       {t(`onboarding.profile.labels.${userProfile.goal}`)}
                     </Text>
                   </View>
@@ -276,44 +269,32 @@ export default function ProfileScreen() {
           </>
         )}
 
-        {/* Books */}
-        <Text style={styles.sectionTitle}>
-          {locale === 'de' ? 'Bücher' : 'Books'} ({progress.completedBooks.length}/{books.length})
-        </Text>
-        <GlassCard style={styles.booksCard}>
-          {books.map((book) => {
-            const isRead = progress.completedBooks.includes(book.id);
-            return (
-              <Pressable
-                key={book.id}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (isRead) {
-                    progress.uncompleteBook(book.id);
-                  } else {
-                    progress.completeBook(book.id);
-                  }
-                }}
-                style={[styles.bookRow, isRead && styles.bookRowRead]}
-              >
-                <Ionicons
-                  name={isRead ? 'checkmark-circle' : 'ellipse-outline'}
-                  size={20}
-                  color={isRead ? '#E8435A' : '#D4D4D4'}
-                />
-                <View style={styles.bookInfo}>
-                  <Text style={[styles.bookTitle, isRead && styles.bookTitleRead]} numberOfLines={1}>
-                    {book.title}
-                  </Text>
-                  <Text style={styles.bookAuthor} numberOfLines={1}>{book.author}</Text>
-                </View>
-              </Pressable>
-            );
-          })}
+        {/* Books Link */}
+        <GlassCard style={styles.booksLinkCard}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/books');
+            }}
+            style={styles.booksLinkContent}
+          >
+            <View style={styles.booksIconContainer}>
+              <Ionicons name="book" size={24} color="#E8435A" />
+            </View>
+            <View style={styles.booksLinkInfo}>
+              <Text style={[styles.booksLinkTitle, isDark && styles.textDark]}>
+                {locale === 'de' ? 'Buchempfehlungen' : 'Book Recommendations'}
+              </Text>
+              <Text style={styles.booksLinkSubtitle}>
+                {progress.completedBooks.length}/{books.length} {locale === 'de' ? 'gelesen' : 'read'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#A3A3A3" />
+          </Pressable>
         </GlassCard>
 
         {/* Achievements */}
-        <Text style={styles.sectionTitle}>{t('profile.achievements')}</Text>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>{t('profile.achievements')}</Text>
         <View style={styles.achievementsGrid}>
           {achievements.map((achievement) => {
             const unlocked = achievement.condition(progress);
@@ -338,11 +319,11 @@ export default function ProfileScreen() {
         </View>
 
         {/* Settings */}
-        <Text style={styles.sectionTitle}>{t('profile.settings')}</Text>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>{t('profile.settings')}</Text>
 
         <GlassCard style={styles.settingCard}>
           <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>{t('profile.language')}</Text>
+            <Text style={[styles.settingLabel, isDark && styles.textDark]}>{t('profile.language')}</Text>
             <Pressable onPress={toggleLanguage} style={styles.languageToggle}>
               <View style={[styles.langOption, locale === 'en' && styles.langActive]}>
                 <Text style={[styles.langText, locale === 'en' && styles.langTextActive]}>EN</Text>
@@ -357,11 +338,14 @@ export default function ProfileScreen() {
         {/* Graduate button */}
         <GlassCard style={styles.graduateCard}>
           <Ionicons name="school" size={48} color="#E8435A" />
-          <Text style={styles.graduateTitle}>{t('profile.graduate')}</Text>
+          <Text style={[styles.graduateTitle, isDark && styles.textDark]}>{t('profile.graduate')}</Text>
           <Text style={styles.graduateDesc}>{t('profile.graduateDesc')}</Text>
-          <Pressable onPress={handleGraduate} style={styles.graduateButton}>
-            <Text style={styles.graduateButtonText}>{t('profile.graduate')}</Text>
-          </Pressable>
+          <BrandButton
+            title={t('profile.graduate')}
+            variant="glass"
+            onPress={handleGraduate}
+            icon={<Ionicons name="ribbon" size={18} color={isDark ? '#F5F5F5' : '#171717'} />}
+          />
         </GlassCard>
 
         {/* Reset */}
@@ -418,8 +402,8 @@ const styles = StyleSheet.create({
   loginButtonText: { fontSize: 16, fontWeight: '600', color: '#E8435A' },
 
   // PDF
-  pdfCard: { marginBottom: 24 },
-  pdfRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 },
+  pdfCard: { marginBottom: 16 },
+  pdfContent: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pdfIconContainer: {
     width: 48, height: 48, borderRadius: 14,
     backgroundColor: 'rgba(232,67,90,0.08)',
@@ -428,13 +412,6 @@ const styles = StyleSheet.create({
   pdfInfo: { flex: 1 },
   pdfTitle: { fontSize: 17, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
   pdfDesc: { fontSize: 13, color: '#737373', marginTop: 2 },
-  pdfButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#E8435A', paddingVertical: 12, borderRadius: 12,
-  },
-  pdfButtonLocked: { backgroundColor: 'rgba(0,0,0,0.04)' },
-  pdfButtonText: { fontSize: 15, fontWeight: '600', color: '#fff' },
-  pdfButtonTextLocked: { color: '#A3A3A3' },
 
   // Charismo Profile
   charismoCard: { marginBottom: 24 },
@@ -444,6 +421,9 @@ const styles = StyleSheet.create({
   charismoItem: {
     backgroundColor: 'rgba(232,67,90,0.04)', borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 10, minWidth: '45%',
+  },
+  charismoItemDark: {
+    backgroundColor: 'rgba(232,67,90,0.12)',
   },
   charismoLabel: { fontSize: 11, fontWeight: '700', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: 0.5 },
   charismoValue: { fontSize: 15, fontWeight: '600', color: '#171717', marginTop: 3 },
@@ -455,19 +435,19 @@ const styles = StyleSheet.create({
   },
   retakeText: { fontSize: 15, fontWeight: '600', color: '#E8435A' },
 
-  // Books
-  booksCard: { marginBottom: 24 },
-  bookRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+  // Books Link
+  booksLinkCard: { marginBottom: 24 },
+  booksLinkContent: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
   },
-  bookRowRead: { opacity: 0.6 },
-  bookInfo: { flex: 1 },
-  bookTitle: { fontSize: 15, fontWeight: '600', color: '#171717', letterSpacing: -0.2 },
-  bookTitleRead: { textDecorationLine: 'line-through', color: '#737373' },
-  bookAuthor: { fontSize: 12, color: '#A3A3A3', marginTop: 1 },
+  booksIconContainer: {
+    width: 48, height: 48, borderRadius: 14,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  booksLinkInfo: { flex: 1 },
+  booksLinkTitle: { fontSize: 17, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
+  booksLinkSubtitle: { fontSize: 13, color: '#737373', marginTop: 2 },
 
   // Section title
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginBottom: 12, marginTop: 8 },
@@ -496,10 +476,9 @@ const styles = StyleSheet.create({
   graduateCard: { marginBottom: 20, alignItems: 'center', paddingVertical: 24 },
   graduateTitle: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginTop: 12 },
   graduateDesc: { fontSize: 14, color: '#737373', textAlign: 'center', marginTop: 6, marginBottom: 16, paddingHorizontal: 16 },
-  graduateButton: {
-    backgroundColor: '#E8435A', paddingHorizontal: 32, paddingVertical: 12, borderRadius: 14,
-  },
-  graduateButtonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+
+  // Text variants
+  textDark: { color: '#F5F5F5' },
 
   // Reset
   resetButton: { alignItems: 'center', paddingVertical: 16 },
