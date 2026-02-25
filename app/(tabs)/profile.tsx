@@ -14,6 +14,7 @@ import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { achievements } from '@/src/data/content/achievements';
+import { books } from '@/src/data/content/books';
 import * as api from '@/src/services/api';
 import { logoutRevenueCat } from '@/src/services/purchases';
 
@@ -62,8 +63,9 @@ export default function ProfileScreen() {
 
   const handleGraduate = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    progress.graduate();
     router.push('/modal');
+    // Delay graduate() so the modal is presented before the achievement listener fires
+    setTimeout(() => progress.graduate(), 600);
   };
 
   const handleReset = () => {
@@ -274,6 +276,42 @@ export default function ProfileScreen() {
           </>
         )}
 
+        {/* Books */}
+        <Text style={styles.sectionTitle}>
+          {locale === 'de' ? 'Bücher' : 'Books'} ({progress.completedBooks.length}/{books.length})
+        </Text>
+        <GlassCard style={styles.booksCard}>
+          {books.map((book) => {
+            const isRead = progress.completedBooks.includes(book.id);
+            return (
+              <Pressable
+                key={book.id}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (isRead) {
+                    progress.uncompleteBook(book.id);
+                  } else {
+                    progress.completeBook(book.id);
+                  }
+                }}
+                style={[styles.bookRow, isRead && styles.bookRowRead]}
+              >
+                <Ionicons
+                  name={isRead ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={20}
+                  color={isRead ? '#E8435A' : '#D4D4D4'}
+                />
+                <View style={styles.bookInfo}>
+                  <Text style={[styles.bookTitle, isRead && styles.bookTitleRead]} numberOfLines={1}>
+                    {book.title}
+                  </Text>
+                  <Text style={styles.bookAuthor} numberOfLines={1}>{book.author}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </GlassCard>
+
         {/* Achievements */}
         <Text style={styles.sectionTitle}>{t('profile.achievements')}</Text>
         <View style={styles.achievementsGrid}>
@@ -416,6 +454,20 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   retakeText: { fontSize: 15, fontWeight: '600', color: '#E8435A' },
+
+  // Books
+  booksCard: { marginBottom: 24 },
+  bookRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  bookRowRead: { opacity: 0.6 },
+  bookInfo: { flex: 1 },
+  bookTitle: { fontSize: 15, fontWeight: '600', color: '#171717', letterSpacing: -0.2 },
+  bookTitleRead: { textDecorationLine: 'line-through', color: '#737373' },
+  bookAuthor: { fontSize: 12, color: '#A3A3A3', marginTop: 1 },
 
   // Section title
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginBottom: 12, marginTop: 8 },

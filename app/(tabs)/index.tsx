@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withTiming, FadeIn } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
@@ -161,11 +161,12 @@ export default function HomeScreen() {
 
         <ContinueCard locale={locale} />
 
+        <Animated.View entering={FadeIn.delay(200).duration(500)}>
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <ProgressRing
               progress={overallProgress}
-              size={110}
+              size={130}
               label={t('home.progress')}
             />
             <View style={styles.statsColumn}>
@@ -181,6 +182,7 @@ export default function HomeScreen() {
           </View>
           <JourneyMiniMap completedChapters={completedChapters} />
         </GlassCard>
+        </Animated.View>
 
         <GlassCard style={styles.streakCard}>
           <LinearGradient

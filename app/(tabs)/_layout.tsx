@@ -30,7 +30,6 @@ const TAB_CONFIG: TabConfig[] = [
   { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book' },
   { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle' },
   { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles' },
-  { name: 'books', ionicon: 'library-outline', ioniconFocused: 'library' },
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person' },
 ];
 
@@ -93,16 +92,21 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
+  // Only render tabs that are in TAB_CONFIG (filter out hidden screens like books)
+  const visibleRoutes = state.routes.filter((route: any) =>
+    TAB_CONFIG.some((tab) => tab.name === route.name)
+  );
+
   return (
-    <View style={[s.wrapper, { paddingBottom: Math.max(insets.bottom, 6) }]}>
-      <View style={[s.pill, isDark && s.pillDark]}>
+    <View style={[s.wrapper, { paddingBottom: Math.max(insets.bottom, 0) }]}>
+      <View style={[s.bar, isDark && s.barDark]}>
         {/* Glass / blur background */}
         {useLiquidGlass ? (
           <GlassView glassEffectStyle="regular" style={StyleSheet.absoluteFill} />
         ) : (
           <>
             <BlurView
-              intensity={75}
+              intensity={80}
               tint={isDark ? 'dark' : 'light'}
               experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
               style={StyleSheet.absoluteFill}
@@ -111,12 +115,17 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
           </>
         )}
 
+        {/* Top separator */}
+        <View style={[s.separator, isDark && s.separatorDark]} />
+
         {/* Tab buttons */}
         <View style={s.tabs}>
-          {state.routes.map((route: any, index: number) => {
+          {visibleRoutes.map((route: any) => {
+            const realIndex = state.routes.indexOf(route);
             const { options } = descriptors[route.key];
-            const focused = state.index === index;
-            const config = TAB_CONFIG[index];
+            const focused = state.index === realIndex;
+            const configIndex = TAB_CONFIG.findIndex((tab) => tab.name === route.name);
+            const config = TAB_CONFIG[configIndex];
             const label = options.title ?? route.name;
 
             const onPress = () => {
@@ -164,6 +173,11 @@ export default function TabLayout() {
           }}
         />
       ))}
+      {/* Books screen still exists but hidden from tab bar */}
+      <Tabs.Screen
+        name="books"
+        options={{ href: null, title: t('tabs.books') }}
+      />
     </Tabs>
   );
 }
@@ -174,44 +188,38 @@ const s = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    alignItems: 'center',
-    paddingHorizontal: 12,
   },
-  pill: {
-    borderRadius: 28,
+  bar: {
     overflow: 'hidden',
-    borderWidth: useLiquidGlass ? 0 : StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 10,
-    width: '100%',
   },
-  pillDark: {
-    borderColor: 'rgba(255,255,255,0.1)',
+  barDark: {},
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+  },
+  separatorDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
   },
   overlayLight: {
-    backgroundColor: 'rgba(255,255,255,0.78)',
+    backgroundColor: 'rgba(255,255,255,0.82)',
   },
   overlayDark: {
-    backgroundColor: 'rgba(28,28,30,0.78)',
+    backgroundColor: 'rgba(28,28,30,0.82)',
   },
   tabs: {
     flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 2,
+    paddingVertical: 6,
+    paddingTop: 8,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 4,
-    gap: 2,
+    gap: 3,
   },
   tabLabel: {
     fontSize: 10,

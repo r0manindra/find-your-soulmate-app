@@ -16,6 +16,7 @@ interface ProgressRingProps {
 export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
+  const innerDiameter = size - strokeWidth * 2 - 8;
   const animatedProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: P
   }));
 
   const percentage = Math.round(progress * 100);
+  const isSmall = size < 140;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -55,9 +57,9 @@ export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: P
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
-      <View style={styles.labelContainer}>
-        <Text style={styles.percentage}>{percentage}%</Text>
-        {label && <Text style={styles.label}>{label}</Text>}
+      <View style={[styles.labelContainer, { width: innerDiameter }]}>
+        <Text style={[styles.percentage, isSmall && styles.percentageSmall]}>{percentage}%</Text>
+        {label && <Text style={[styles.label, isSmall && styles.labelSmall]} numberOfLines={1}>{label}</Text>}
       </View>
     </View>
   );
@@ -71,8 +73,7 @@ const styles = StyleSheet.create({
   labelContainer: {
     position: 'absolute',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    width: '100%',
+    justifyContent: 'center',
   },
   percentage: {
     fontSize: 28,
@@ -80,10 +81,16 @@ const styles = StyleSheet.create({
     color: '#171717',
     letterSpacing: -1,
   },
+  percentageSmall: {
+    fontSize: 22,
+  },
   label: {
     fontSize: 11,
     color: '#737373',
     marginTop: 2,
     textAlign: 'center',
+  },
+  labelSmall: {
+    fontSize: 10,
   },
 });
