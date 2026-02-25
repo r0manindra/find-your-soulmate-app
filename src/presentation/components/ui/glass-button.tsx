@@ -1,19 +1,25 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, Platform, View, type PressableProps } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
+import { GLASS, supportsLiquidGlass } from '@/src/theme/glass';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+let LiquidGlassView: any = null;
+const hasLiquidGlass = supportsLiquidGlass();
+if (hasLiquidGlass) {
+  try {
+    LiquidGlassView = require('@callstack/liquid-glass').LiquidGlassView;
+  } catch {}
+}
 
 interface GlassButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   icon?: React.ReactNode;
 }
-
-const useLiquidGlass = isLiquidGlassAvailable();
 
 export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) {
   const colorScheme = useColorScheme();
@@ -33,7 +39,7 @@ export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) 
     scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
-  if (useLiquidGlass) {
+  if (hasLiquidGlass && LiquidGlassView) {
     return (
       <AnimatedPressable
         onPressIn={handlePressIn}
@@ -41,16 +47,17 @@ export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) 
         style={[animatedStyle, style as any]}
         {...props}
       >
-        <GlassView
-          glassEffectStyle="regular"
-          isInteractive
-          style={[styles.container, isDark && styles.containerDark]}
+        <LiquidGlassView
+          effect="regular"
+          interactive
+          colorScheme={isDark ? 'dark' : 'light'}
+          style={styles.container}
         >
           <View style={styles.content}>
             {icon}
             <Text style={[styles.text, isDark && styles.textDark]}>{title}</Text>
           </View>
-        </GlassView>
+        </LiquidGlassView>
       </AnimatedPressable>
     );
   }
@@ -63,7 +70,7 @@ export function GlassButton({ title, icon, style, ...props }: GlassButtonProps) 
       {...props}
     >
       <BlurView
-        intensity={60}
+        intensity={GLASS.blur.medium}
         tint={isDark ? 'dark' : 'light'}
         experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
         style={StyleSheet.absoluteFill}
@@ -81,7 +88,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 14,
     overflow: 'hidden',
-    borderWidth: useLiquidGlass ? 0 : StyleSheet.hairlineWidth,
+    borderWidth: hasLiquidGlass ? 0 : GLASS.border.width,
     borderColor: 'rgba(255,255,255,0.3)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

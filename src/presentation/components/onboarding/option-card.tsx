@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, Platform, View, Pressable } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
@@ -9,10 +8,17 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
+import { GLASS, supportsLiquidGlass } from '@/src/theme/glass';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const useLiquidGlass = isLiquidGlassAvailable();
+const hasLiquidGlass = supportsLiquidGlass();
+let LiquidGlassView: any = null;
+if (hasLiquidGlass) {
+  try {
+    LiquidGlassView = require('@callstack/liquid-glass').LiquidGlassView;
+  } catch {}
+}
 
 interface OptionCardProps {
   emoji: string;
@@ -44,7 +50,7 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
     onSelect();
   };
 
-  if (useLiquidGlass) {
+  if (hasLiquidGlass && LiquidGlassView) {
     return (
       <AnimatedPressable
         onPressIn={handlePressIn}
@@ -52,10 +58,11 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
         onPress={handlePress}
         style={[animatedStyle]}
       >
-        <GlassView
-          glassEffectStyle={selected ? 'clear' : 'regular'}
-          isInteractive
+        <LiquidGlassView
+          effect={selected ? 'clear' : 'regular'}
+          interactive
           tintColor={selected ? '#E8435A' : undefined}
+          colorScheme={isDark ? 'dark' : 'light'}
           style={[
             styles.container,
             selected && styles.containerSelected,
@@ -80,7 +87,7 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
               </View>
             )}
           </View>
-        </GlassView>
+        </LiquidGlassView>
       </AnimatedPressable>
     );
   }
@@ -131,7 +138,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 18,
     overflow: 'hidden',
-    borderWidth: useLiquidGlass ? 0 : 1.5,
+    borderWidth: hasLiquidGlass ? 0 : 1.5,
     borderColor: 'rgba(255,255,255,0.3)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -3,7 +3,6 @@ import { Platform, StyleSheet, View, Pressable, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -15,27 +14,94 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/components/useColorScheme';
+import { GLASS, BORDER_RADIUS, SHADOWS, withOpacity, supportsLiquidGlass } from '@/src/theme/glass';
 import '@/src/i18n/config';
 
-const useLiquidGlass = isLiquidGlassAvailable();
+const hasLiquidGlass = supportsLiquidGlass();
+
+// Conditionally load NativeTabs for iOS 26+
+let NativeTabs: any = null;
+let NativeLabel: any = null;
+let NativeIcon: any = null;
+if (hasLiquidGlass) {
+  try {
+    const mod = require('expo-router/unstable-native-tabs');
+    NativeTabs = mod.NativeTabs;
+    NativeLabel = mod.Label;
+    NativeIcon = mod.Icon;
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
+// Tab configuration
+// ---------------------------------------------------------------------------
 
 type TabConfig = {
   name: string;
   ionicon: keyof typeof Ionicons.glyphMap;
   ioniconFocused: keyof typeof Ionicons.glyphMap;
+  sfSymbol?: string;
+  sfSymbolFocused?: string;
 };
 
 const TAB_CONFIG: TabConfig[] = [
-  { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home' },
-  { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book' },
-  { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle' },
-  { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles' },
-  { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person' },
+  { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home', sfSymbol: 'house', sfSymbolFocused: 'house.fill' },
+  { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book', sfSymbol: 'book', sfSymbolFocused: 'book.fill' },
+  { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle', sfSymbol: 'checkmark.circle', sfSymbolFocused: 'checkmark.circle.fill' },
+  { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles', sfSymbol: 'bubble.left.and.bubble.right', sfSymbolFocused: 'bubble.left.and.bubble.right.fill' },
+  { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person', sfSymbol: 'person', sfSymbolFocused: 'person.fill' },
 ];
 
-/** Bubble spring config — low damping for overshoot bounce */
+// ---------------------------------------------------------------------------
+// Path A: iOS 26+ — Native liquid glass tab bar
+// ---------------------------------------------------------------------------
+
+function NativeLiquidGlassLayout() {
+  const { t } = useTranslation();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const foreground = isDark ? '#F5F5F5' : '#171717';
+  const muted = isDark ? '#737373' : '#A3A3A3';
+
+  return (
+    <NativeTabs
+      tintColor={foreground}
+      iconColor={{ default: muted, selected: foreground }}
+      labelVisibilityMode="unlabeled"
+      backgroundColor={null}
+      screenOptions={{ headerShown: false }}
+    >
+      {TAB_CONFIG.map((tab) => (
+        <NativeTabs.Trigger
+          key={tab.name}
+          name={tab.name}
+          href={tab.name === 'index' ? '/' : `/${tab.name}`}
+        >
+          <NativeLabel hidden />
+          <NativeIcon
+            sf={{
+              default: tab.sfSymbol as any,
+              selected: tab.sfSymbolFocused as any,
+            }}
+          />
+        </NativeTabs.Trigger>
+      ))}
+      <NativeTabs.Trigger name="books" href={null}>
+        <NativeLabel hidden />
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Path B: Older iOS / Android — Floating glass pill tab bar
+// ---------------------------------------------------------------------------
+
 const BUBBLE_SPRING = { damping: 8, stiffness: 320, mass: 0.6 };
 const SETTLE_SPRING = { damping: 14, stiffness: 300 };
+const TAB_ITEM_SIZE = 48;
+const ACTIVE_INDICATOR_SIZE = 40;
 
 function BubbleTabButton({
   config,
@@ -54,13 +120,12 @@ function BubbleTabButton({
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { scale: interpolate(bubble.value, [0, 1], [1, 1.25]) },
-      { translateY: interpolate(bubble.value, [0, 1], [0, -4]) },
+      { scale: interpolate(bubble.value, [0, 1], [1, 1.15]) },
+      { translateY: interpolate(bubble.value, [0, 1], [0, -2]) },
     ],
   }));
 
   const handlePress = useCallback(() => {
-    // Bubble pop: overshoot to 1 then settle back to 0
     bubble.value = withSequence(
       withSpring(1, BUBBLE_SPRING),
       withSpring(0, SETTLE_SPRING),
@@ -69,10 +134,15 @@ function BubbleTabButton({
     onPress();
   }, [onPress]);
 
-  const color = focused ? '#E8435A' : isDark ? '#737373' : '#A3A3A3';
+  const activeColor = isDark ? '#B794F6' : '#8B5CF6';
+  const inactiveColor = isDark ? '#737373' : '#A3A3A3';
+  const color = focused ? activeColor : inactiveColor;
 
   return (
     <Pressable onPress={handlePress} style={s.tab}>
+      {focused && (
+        <View style={[s.activeIndicator, { backgroundColor: withOpacity(activeColor, 0.15) }]} />
+      )}
       <Animated.View style={animatedStyle}>
         <Ionicons
           name={focused ? config.ioniconFocused : config.ionicon}
@@ -80,9 +150,6 @@ function BubbleTabButton({
           color={color}
         />
       </Animated.View>
-      <Text style={[s.tabLabel, { color }]} numberOfLines={1}>
-        {label}
-      </Text>
     </Pressable>
   );
 }
@@ -91,35 +158,46 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const isIOS = Platform.OS === 'ios';
 
-  // Only render tabs that are in TAB_CONFIG (filter out hidden screens like books)
   const visibleRoutes = state.routes.filter((route: any) =>
     TAB_CONFIG.some((tab) => tab.name === route.name)
   );
 
   return (
-    <View style={[s.wrapper, { paddingBottom: Math.max(insets.bottom, 0) }]}>
-      <View style={[s.bar, isDark && s.barDark]}>
-        {/* Glass / blur background */}
-        {useLiquidGlass ? (
-          <GlassView glassEffectStyle="regular" style={StyleSheet.absoluteFill} />
-        ) : (
-          <>
-            <BlurView
-              intensity={80}
-              tint={isDark ? 'dark' : 'light'}
-              experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
-              style={StyleSheet.absoluteFill}
-            />
-            <View style={[s.overlay, isDark ? s.overlayDark : s.overlayLight]} />
-          </>
+    <View
+      style={[s.wrapper, { paddingBottom: insets.bottom + 12 }]}
+      pointerEvents="box-none"
+    >
+      <View
+        style={[
+          s.pillContainer,
+          isIOS && !isDark && SHADOWS.medium,
+        ]}
+      >
+        {/* Blur background (iOS only) */}
+        {isIOS && (
+          <BlurView
+            intensity={GLASS.blur.heavy}
+            tint={isDark ? 'dark' : 'systemChromeMaterialLight'}
+            style={StyleSheet.absoluteFill}
+          />
         )}
 
-        {/* Top separator */}
-        <View style={[s.separator, isDark && s.separatorDark]} />
-
-        {/* Tab buttons */}
-        <View style={s.tabs}>
+        {/* Inner container with tabs */}
+        <View
+          style={[
+            s.pillInner,
+            {
+              backgroundColor: isIOS
+                ? (isDark ? 'rgba(20,20,20,0.7)' : 'rgba(255,255,255,0.6)')
+                : (isDark ? '#1C1C1E' : '#FFFFFF'),
+              borderColor: isDark
+                ? 'rgba(255,255,255,0.15)'
+                : 'rgba(0,0,0,0.08)',
+            },
+          ]}
+        >
           {visibleRoutes.map((route: any) => {
             const realIndex = state.routes.indexOf(route);
             const { options } = descriptors[route.key];
@@ -156,7 +234,7 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
   );
 }
 
-export default function TabLayout() {
+function FloatingTabLayout() {
   const { t } = useTranslation();
 
   return (
@@ -173,7 +251,6 @@ export default function TabLayout() {
           }}
         />
       ))}
-      {/* Books screen still exists but hidden from tab bar */}
       <Tabs.Screen
         name="books"
         options={{ href: null, title: t('tabs.books') }}
@@ -182,48 +259,56 @@ export default function TabLayout() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Export: choose path based on platform
+// ---------------------------------------------------------------------------
+
+export default function TabLayout() {
+  if (hasLiquidGlass && NativeTabs) {
+    return <NativeLiquidGlassLayout />;
+  }
+  return <FloatingTabLayout />;
+}
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const s = StyleSheet.create({
+  // Floating pill wrapper (Path B)
   wrapper: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
-  bar: {
+  pillContainer: {
+    borderRadius: BORDER_RADIUS.pill,
     overflow: 'hidden',
   },
-  barDark: {},
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(0,0,0,0.12)',
-  },
-  separatorDark: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlayLight: {
-    backgroundColor: 'rgba(255,255,255,0.82)',
-  },
-  overlayDark: {
-    backgroundColor: 'rgba(28,28,30,0.82)',
-  },
-  tabs: {
+  pillInner: {
     flexDirection: 'row',
-    paddingVertical: 6,
-    paddingTop: 8,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: GLASS.border.width,
+    borderRadius: BORDER_RADIUS.pill,
+    gap: 16,
   },
+
+  // Tab item
   tab: {
-    flex: 1,
+    width: TAB_ITEM_SIZE,
+    height: TAB_ITEM_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 4,
-    gap: 3,
   },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: -0.2,
+  activeIndicator: {
+    position: 'absolute',
+    width: ACTIVE_INDICATOR_SIZE,
+    height: ACTIVE_INDICATOR_SIZE,
+    borderRadius: ACTIVE_INDICATOR_SIZE / 2,
   },
 });

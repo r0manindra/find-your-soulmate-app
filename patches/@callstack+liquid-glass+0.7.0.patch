@@ -1,0 +1,81 @@
+diff --git a/node_modules/@callstack/liquid-glass/src/LiquidGlassViewContainerNativeComponent.ts b/node_modules/@callstack/liquid-glass/src/LiquidGlassViewContainerNativeComponent.ts
+index 40dae13..9c1a7ca 100644
+--- a/node_modules/@callstack/liquid-glass/src/LiquidGlassViewContainerNativeComponent.ts
++++ b/node_modules/@callstack/liquid-glass/src/LiquidGlassViewContainerNativeComponent.ts
+@@ -1,15 +1,13 @@
+-import {
+-  codegenNativeComponent,
+-  type ViewProps,
+-  type CodegenTypes,
+-} from 'react-native';
++import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
++import type { ViewProps } from 'react-native';
++import type { Float } from 'react-native/Libraries/Types/CodegenTypes';
+ 
+ export interface NativeProps extends ViewProps {
+   /**
+    * The distance between elements at which they begin to merge.
+    * Defaults to 0.
+    */
+-  spacing?: CodegenTypes.Float;
++  spacing?: Float;
+ }
+ 
+ export default codegenNativeComponent<NativeProps>('LiquidGlassContainerView');
+diff --git a/node_modules/@callstack/liquid-glass/src/LiquidGlassViewNativeComponent.ts b/node_modules/@callstack/liquid-glass/src/LiquidGlassViewNativeComponent.ts
+index 9c0839d..6e758e7 100644
+--- a/node_modules/@callstack/liquid-glass/src/LiquidGlassViewNativeComponent.ts
++++ b/node_modules/@callstack/liquid-glass/src/LiquidGlassViewNativeComponent.ts
+@@ -1,9 +1,6 @@
+-import {
+-  codegenNativeComponent,
+-  type ViewProps,
+-  type ColorValue,
+-  type CodegenTypes,
+-} from 'react-native';
++import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
++import type { ViewProps, ColorValue } from 'react-native';
++import type { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
+ 
+ export interface NativeProps extends ViewProps {
+   /**
+@@ -19,7 +16,7 @@ export interface NativeProps extends ViewProps {
+    *
+    * Defaults to 'regular'.
+    */
+-  effect?: CodegenTypes.WithDefault<'clear' | 'regular' | 'none', 'regular'>;
++  effect?: WithDefault<'clear' | 'regular' | 'none', 'regular'>;
+   /**
+    * The color of the glass effect.
+    *
+@@ -32,7 +29,7 @@ export interface NativeProps extends ViewProps {
+    *
+    * Defaults to 'system'.
+    */
+-  colorScheme?: CodegenTypes.WithDefault<'light' | 'dark' | 'system', 'system'>;
++  colorScheme?: WithDefault<'light' | 'dark' | 'system', 'system'>;
+ }
+ 
+ export default codegenNativeComponent<NativeProps>('LiquidGlassView');
+diff --git a/node_modules/@callstack/liquid-glass/src/NativeLiquidGlassModule.ts b/node_modules/@callstack/liquid-glass/src/NativeLiquidGlassModule.ts
+index 3607b8b..2dc613f 100644
+--- a/node_modules/@callstack/liquid-glass/src/NativeLiquidGlassModule.ts
++++ b/node_modules/@callstack/liquid-glass/src/NativeLiquidGlassModule.ts
+@@ -8,6 +8,6 @@ export interface Spec extends TurboModule {
+   getConstants(): LiquidGlassModuleConstants;
+ }
+ 
+-export default TurboModuleRegistry.getEnforcing<Spec>(
++export default TurboModuleRegistry.get<Spec>(
+   'NativeLiquidGlassModule'
+ );
+diff --git a/node_modules/@callstack/liquid-glass/src/isLiquidGlassSupported.ios.ts b/node_modules/@callstack/liquid-glass/src/isLiquidGlassSupported.ios.ts
+index 0f1dd99..c61f4db 100644
+--- a/node_modules/@callstack/liquid-glass/src/isLiquidGlassSupported.ios.ts
++++ b/node_modules/@callstack/liquid-glass/src/isLiquidGlassSupported.ios.ts
+@@ -1,4 +1,4 @@
+ import NativeLiquidGlassModule from './NativeLiquidGlassModule';
+ 
+ export const isLiquidGlassSupported =
+-  NativeLiquidGlassModule.getConstants().isLiquidGlassSupported;
++  NativeLiquidGlassModule?.getConstants()?.isLiquidGlassSupported ?? false;
