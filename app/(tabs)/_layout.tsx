@@ -87,9 +87,6 @@ function NativeLiquidGlassLayout() {
           />
         </NativeTabs.Trigger>
       ))}
-      <NativeTabs.Trigger name="books" href={null}>
-        <NativeLabel hidden />
-      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -251,10 +248,6 @@ function FloatingTabLayout() {
           }}
         />
       ))}
-      <Tabs.Screen
-        name="books"
-        options={{ href: null, title: t('tabs.books') }}
-      />
     </Tabs>
   );
 }

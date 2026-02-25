@@ -335,6 +335,40 @@ export default function ProfileScreen() {
           </View>
         </GlassCard>
 
+        {/* Legal */}
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+          {locale === 'de' ? 'Rechtliches' : 'Legal'}
+        </Text>
+        <GlassCard style={styles.settingCard}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/privacy');
+            }}
+            style={styles.legalRow}
+          >
+            <Ionicons name="shield-checkmark-outline" size={20} color="#737373" />
+            <Text style={[styles.legalText, isDark && styles.textDark]}>
+              {locale === 'de' ? 'Datenschutzerklärung' : 'Privacy Policy'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color="#A3A3A3" />
+          </Pressable>
+          <View style={styles.legalDivider} />
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/terms');
+            }}
+            style={styles.legalRow}
+          >
+            <Ionicons name="document-text-outline" size={20} color="#737373" />
+            <Text style={[styles.legalText, isDark && styles.textDark]}>
+              {locale === 'de' ? 'Nutzungsbedingungen' : 'Terms of Service'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color="#A3A3A3" />
+          </Pressable>
+        </GlassCard>
+
         {/* Graduate button */}
         <GlassCard style={styles.graduateCard}>
           <Ionicons name="school" size={48} color="#E8435A" />
@@ -471,6 +505,17 @@ const styles = StyleSheet.create({
   langActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
   langText: { fontSize: 14, fontWeight: '600', color: '#A3A3A3' },
   langTextActive: { color: '#171717' },
+
+  // Legal
+  legalRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 14,
+  },
+  legalText: { flex: 1, fontSize: 16, fontWeight: '500', color: '#171717' },
+  legalDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+  },
 
   // Graduate
   graduateCard: { marginBottom: 20, alignItems: 'center', paddingVertical: 24 },

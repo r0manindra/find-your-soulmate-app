@@ -221,6 +221,9 @@ function RootLayoutNav() {
         <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="auth/register" options={{ headerShown: false }} />
         <Stack.Screen name="chapter/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="books" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy" options={{ headerShown: false }} />
+        <Stack.Screen name="terms" options={{ headerShown: false }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen
           name="modal"

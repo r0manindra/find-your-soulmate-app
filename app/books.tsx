@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, FlatList, Pressable, Linking, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -14,6 +15,7 @@ import { books } from '@/src/data/content/books';
 
 export default function BooksScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { completedBooks, completeBook, uncompleteBook } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
   const userProfile = useUserProfileStore();
@@ -56,7 +58,19 @@ export default function BooksScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.title}>{t('booksScreen.title')}</Text>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back();
+              }}
+              style={styles.backButton}
+            >
+              <Ionicons name="chevron-back" size={24} color={isDark ? '#F5F5F5' : '#171717'} />
+              <Text style={[styles.backText, isDark && { color: '#F5F5F5' }]}>
+                {locale === 'de' ? 'Zurück' : 'Back'}
+              </Text>
+            </Pressable>
+            <Text style={[styles.title, isDark && { color: '#F5F5F5' }]}>{t('booksScreen.title')}</Text>
             <Text style={styles.subtitle}>{t('booksScreen.subtitle')}</Text>
           </View>
         }
@@ -115,6 +129,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   list: { padding: 20, paddingBottom: 100 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 16 },
+  backText: { fontSize: 17, color: '#171717', fontWeight: '500' },
   header: { marginBottom: 20 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717' },
   subtitle: { fontSize: 15, color: '#737373', marginTop: 4 },
