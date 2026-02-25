@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withTiming, FadeIn } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withTiming, FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
@@ -16,6 +16,28 @@ import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { useHabitStore } from '@/src/store/habit-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
+
+function getGreeting(locale: 'en' | 'de'): string {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return locale === 'de' ? 'Guten Morgen' : 'Good Morning';
+  if (hour >= 12 && hour < 17) return locale === 'de' ? 'Guten Nachmittag' : 'Good Afternoon';
+  return locale === 'de' ? 'Guten Abend' : 'Good Evening';
+}
+
+const MOTIVATIONAL_LINES_EN = [
+  'Your future self is counting on you.',
+  'Small steps, big transformation.',
+  "Today's effort is tomorrow's confidence.",
+  'Every conversation is practice.',
+  'You got this.',
+];
+const MOTIVATIONAL_LINES_DE = [
+  'Dein zukünftiges Ich zählt auf dich.',
+  'Kleine Schritte, große Veränderung.',
+  'Die Mühe von heute ist das Selbstbewusstsein von morgen.',
+  'Jedes Gespräch ist Übung.',
+  'Du schaffst das.',
+];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -51,10 +73,8 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
       }}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        if (nextChapter && nextChapter.id <= 4) {
+        if (nextChapter) {
           router.push(`/chapter/${nextChapter.id}`);
-        } else if (nextChapter) {
-          router.push('/paywall');
         }
       }}
     >
@@ -88,7 +108,7 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   );
 }
 
-function JourneyMiniMap({ completedChapters }: { completedChapters: number[] }) {
+function JourneyMiniMap({ completedChapters, isDark }: { completedChapters: number[]; isDark: boolean }) {
   const locale = useSettingsStore((s) => s.locale);
 
   return (
@@ -107,6 +127,7 @@ function JourneyMiniMap({ completedChapters }: { completedChapters: number[] }) 
             <View
               style={[
                 styles.miniMapDot,
+                isDark && styles.miniMapDotDark,
                 isComplete && styles.miniMapDotComplete,
                 isActive && styles.miniMapDotActive,
               ]}
@@ -122,7 +143,7 @@ function JourneyMiniMap({ completedChapters }: { completedChapters: number[] }) 
                 />
               ) : null}
             </View>
-            <Text style={[styles.miniMapLabel, (isComplete || isActive) && styles.miniMapLabelActive]}>
+            <Text style={[styles.miniMapLabel, isDark && styles.miniMapLabelDark, (isComplete || isActive) && styles.miniMapLabelActive]}>
               {phase.id}
             </Text>
           </View>
@@ -132,12 +153,37 @@ function JourneyMiniMap({ completedChapters }: { completedChapters: number[] }) 
   );
 }
 
+function QuickActionButton({ icon, label, onPress, isDark, delay }: { icon: string; label: string; onPress: () => void; isDark: boolean; delay: number }) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400).springify()}>
+      <AnimatedPressable
+        style={[animatedStyle, styles.quickAction, isDark && styles.quickActionDark]}
+        onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 400 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+      >
+        <Ionicons name={icon as any} size={22} color="#E8435A" />
+        <Text style={[styles.quickActionLabel, isDark && styles.quickActionLabelDark]}>{label}</Text>
+      </AnimatedPressable>
+    </Animated.View>
+  );
+}
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { completedChapters, completedBooks, streak, updateStreak } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const router = useRouter();
 
   // Habits data
   const habitsCompletedToday = useHabitStore((s) => s.getTodayCompletedCount());
@@ -148,6 +194,12 @@ export default function HomeScreen() {
   }, []);
 
   const overallProgress = completedChapters.length / chapters.length;
+
+  const greeting = useMemo(() => getGreeting(locale), [locale]);
+  const motivationalLine = useMemo(() => {
+    const lines = locale === 'de' ? MOTIVATIONAL_LINES_DE : MOTIVATIONAL_LINES_EN;
+    return lines[new Date().getDate() % lines.length];
+  }, [locale]);
 
   const dailyTip = useMemo(() => {
     const tips = t('home.tips', { returnObjects: true }) as string[];
@@ -162,11 +214,41 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.title, isDark && styles.titleDark]}>{t('home.title')}</Text>
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Text style={[styles.title, isDark && styles.titleDark]}>{greeting}</Text>
+          <Text style={[styles.greetingSubtitle, isDark && styles.greetingSubtitleDark]}>{motivationalLine}</Text>
+        </Animated.View>
 
-        <ContinueCard locale={locale} />
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <ContinueCard locale={locale} />
+        </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(200).duration(500)}>
+        {/* Quick Actions */}
+        <View style={styles.quickActionsRow}>
+          <QuickActionButton
+            icon="book-outline"
+            label={locale === 'de' ? 'Guide' : 'Guide'}
+            onPress={() => router.push('/guide' as any)}
+            isDark={isDark}
+            delay={200}
+          />
+          <QuickActionButton
+            icon="checkmark-circle-outline"
+            label="Habits"
+            onPress={() => router.push('/habits' as any)}
+            isDark={isDark}
+            delay={250}
+          />
+          <QuickActionButton
+            icon="chatbubble-outline"
+            label="Coach"
+            onPress={() => router.push('/coach' as any)}
+            isDark={isDark}
+            delay={300}
+          />
+        </View>
+
+        <Animated.View entering={FadeInDown.delay(350).duration(400)}>
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <ProgressRing
@@ -176,25 +258,26 @@ export default function HomeScreen() {
             />
             <View style={styles.statsColumn}>
               <View>
-                <Text style={styles.statNumber}>{completedChapters.length}/20</Text>
-                <Text style={styles.statLabel}>{t('home.chapters')}</Text>
+                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedChapters.length}/{chapters.length}</Text>
+                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.chapters')}</Text>
               </View>
               <View>
-                <Text style={styles.statNumber}>{completedBooks.length}/10</Text>
-                <Text style={styles.statLabel}>{t('home.books')}</Text>
+                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedBooks.length}/10</Text>
+                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.books')}</Text>
               </View>
               {habitsTotalToday > 0 && (
                 <View>
-                  <Text style={styles.statNumber}>{habitsCompletedToday}/{habitsTotalToday}</Text>
-                  <Text style={styles.statLabel}>{locale === 'de' ? 'Habits heute' : 'Habits today'}</Text>
+                  <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{habitsCompletedToday}/{habitsTotalToday}</Text>
+                  <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{locale === 'de' ? 'Habits heute' : 'Habits today'}</Text>
                 </View>
               )}
             </View>
           </View>
-          <JourneyMiniMap completedChapters={completedChapters} />
+          <JourneyMiniMap completedChapters={completedChapters} isDark={isDark} />
         </GlassCard>
         </Animated.View>
 
+        <Animated.View entering={FadeInDown.delay(450).duration(400)}>
         <GlassCard style={styles.streakCard}>
           <LinearGradient
             colors={['#E8435A', '#FF7854']}
@@ -209,11 +292,14 @@ export default function HomeScreen() {
             </View>
           </LinearGradient>
         </GlassCard>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.delay(550).duration(400)}>
         <GlassCard style={styles.tipCard}>
           <Text style={styles.tipTitle}>{t('home.dailyTip')}</Text>
-          <Text style={styles.tipText}>{dailyTip}</Text>
+          <Text style={[styles.tipText, isDark && styles.tipTextDark]}>{dailyTip}</Text>
         </GlassCard>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -224,8 +310,10 @@ const styles = StyleSheet.create({
   safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 100 },
-  title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717', marginBottom: 20 },
+  title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717', marginBottom: 4 },
   titleDark: { color: '#F5F5F5' },
+  greetingSubtitle: { fontSize: 15, color: '#737373', marginBottom: 20 },
+  greetingSubtitleDark: { color: '#A3A3A3' },
 
   // Continue Card
   continueCard: {
@@ -287,7 +375,9 @@ const styles = StyleSheet.create({
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 24 },
   statsColumn: { flex: 1, gap: 16 },
   statNumber: { fontSize: 24, fontWeight: '700', color: '#171717', letterSpacing: -0.5 },
+  statNumberDark: { color: '#F5F5F5' },
   statLabel: { fontSize: 13, color: '#737373', marginTop: 2 },
+  statLabelDark: { color: '#A3A3A3' },
 
   // Journey mini-map
   miniMap: {
@@ -311,6 +401,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  miniMapDotDark: {
+    backgroundColor: '#404040',
+  },
   miniMapDotComplete: {
     backgroundColor: '#E8435A',
   },
@@ -331,8 +424,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#A3A3A3',
   },
+  miniMapLabelDark: {
+    color: '#737373',
+  },
   miniMapLabelActive: {
     color: '#E8435A',
+  },
+
+  // Quick Actions
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  quickAction: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(232,67,90,0.06)',
+    gap: 6,
+  },
+  quickActionDark: {
+    backgroundColor: 'rgba(232,67,90,0.12)',
+  },
+  quickActionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#525252',
+  },
+  quickActionLabelDark: {
+    color: '#A3A3A3',
   },
 
   // Streak
@@ -345,4 +468,5 @@ const styles = StyleSheet.create({
   tipCard: { marginBottom: 16 },
   tipTitle: { fontSize: 15, fontWeight: '600', color: '#E8435A', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   tipText: { fontSize: 17, lineHeight: 24, color: '#404040' },
+  tipTextDark: { color: '#D4D4D4' },
 });

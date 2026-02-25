@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -12,7 +13,6 @@ import { chapters, phases } from '@/src/data/content/chapters';
 import { PhaseHeader } from './phase-header';
 import { ChapterNode } from './chapter-node';
 
-const FREE_CHAPTERS = 4;
 
 const ZIGZAG_PATTERN: ('left' | 'center' | 'right')[] = [
   'center',
@@ -41,6 +41,8 @@ export function JourneyPath() {
   const locale = useSettingsStore((s) => s.locale);
   const userProfile = useUserProfileStore();
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const suggestedStart = useMemo(() => {
@@ -55,18 +57,13 @@ export function JourneyPath() {
   const handleAction = useCallback(
     (id: number) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      // TODO: check subscription status for premium chapters
-      if (id > FREE_CHAPTERS) {
-        router.push('/paywall');
-        return;
-      }
       router.push(`/chapter/${id}`);
     },
     [router]
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -74,8 +71,8 @@ export function JourneyPath() {
       >
         <View style={styles.header}>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>{t('guide.title')}</Text>
-            <Text style={styles.subtitle}>{t('guide.subtitle')}</Text>
+            <Text style={[styles.title, isDark && styles.titleDark]}>{t('guide.title')}</Text>
+            <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>{t('guide.subtitle')}</Text>
           </View>
         </View>
 
@@ -92,6 +89,7 @@ export function JourneyPath() {
                 locale={locale}
                 completedCount={completedInPhase}
                 totalCount={phaseChapters.length}
+                isDark={isDark}
               />
 
               <View style={styles.nodesContainer}>
@@ -107,6 +105,7 @@ export function JourneyPath() {
                         <View
                           style={[
                             styles.connector,
+                            isDark && styles.connectorDark,
                             completedChapters.includes(chapter.id) && styles.connectorCompleted,
                           ]}
                         />
@@ -125,6 +124,7 @@ export function JourneyPath() {
                           locale={locale}
                           position={position}
                           isExpanded={expandedId === chapter.id}
+                          isDark={isDark}
                           onPress={() => toggleExpand(chapter.id)}
                           onAction={() => handleAction(chapter.id)}
                         />
@@ -146,6 +146,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
+  safeAreaDark: {
+    backgroundColor: '#171717',
+  },
   scrollView: {
     flex: 1,
   },
@@ -164,10 +167,16 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     color: '#171717',
   },
+  titleDark: {
+    color: '#F5F5F5',
+  },
   subtitle: {
     fontSize: 15,
     color: '#737373',
     marginTop: 4,
+  },
+  subtitleDark: {
+    color: '#A3A3A3',
   },
   phaseSection: {
     marginBottom: 8,
@@ -181,6 +190,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E5E5',
     alignSelf: 'center',
     borderRadius: 1,
+  },
+  connectorDark: {
+    backgroundColor: '#404040',
   },
   connectorCompleted: {
     backgroundColor: '#E8435A',

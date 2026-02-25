@@ -25,6 +25,11 @@ export const presetHabits: PresetHabit[] = [
   { id: 'p24-2', emoji: '📵', title: { en: 'Phone-free meal', de: 'Handyfreie Mahlzeit' }, chapterId: 24 },
   { id: 'p24-3', emoji: '👔', title: { en: 'Dress with intention', de: 'Bewusst kleiden' }, chapterId: 24 },
 
+  // Ch 25: Social Practice
+  { id: 'p25-1', emoji: '👋', title: { en: 'Talk to a stranger', de: 'Mit einem Fremden sprechen' }, chapterId: 25 },
+  { id: 'p25-2', emoji: '✨', title: { en: 'Compliment someone', de: 'Jemandem ein Kompliment machen' }, chapterId: 25 },
+  { id: 'p25-3', emoji: '😂', title: { en: 'Make someone laugh', de: 'Jemanden zum Lachen bringen' }, chapterId: 25 },
+
   // Phase 1: Know Yourself (ch 1-4) — 2 per chapter
 
   // Ch 1: The Mirror

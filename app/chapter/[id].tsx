@@ -12,6 +12,7 @@ import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { chapters } from '@/src/data/content/chapters';
 import { chapterLessons } from '@/src/data/content/chapter-lessons';
 import { chapterLessonsDe } from '@/src/data/content/chapter-lessons-de';
@@ -23,17 +24,26 @@ export default function ChapterDetailScreen() {
   const router = useRouter();
   const chapterId = parseInt(id || '1', 10);
   const locale = useSettingsStore((s) => s.locale);
+  const userGender = useUserProfileStore((s) => s.userGender);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { completedChapters, completeChapter, uncompleteChapter } = useProgressStore();
 
   const chapter = useMemo(() => chapters.find((c) => c.id === chapterId), [chapterId]);
   const lesson = useMemo(() => {
+    let base;
     if (locale === 'de' && chapterLessonsDe.length > 0) {
-      return chapterLessonsDe.find((l) => l.chapterId === chapterId) ?? chapterLessons.find((l) => l.chapterId === chapterId);
+      base = chapterLessonsDe.find((l) => l.chapterId === chapterId) ?? chapterLessons.find((l) => l.chapterId === chapterId);
+    } else {
+      base = chapterLessons.find((l) => l.chapterId === chapterId);
     }
-    return chapterLessons.find((l) => l.chapterId === chapterId);
-  }, [chapterId, locale]);
+    if (!base) return base;
+    // Use female variant if available and user is female
+    if (userGender === 'female' && base.femaleVariant) {
+      return { ...base, ...base.femaleVariant };
+    }
+    return base;
+  }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);
 
   if (!chapter || !lesson) {
@@ -62,8 +72,8 @@ export default function ChapterDetailScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#171717" />
+          <Pressable onPress={() => router.back()} style={[styles.backButton, isDark && styles.backButtonDark]}>
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#F5F5F5' : '#171717'} />
           </Pressable>
         </View>
 
@@ -86,11 +96,11 @@ export default function ChapterDetailScreen() {
 
         {/* Summary */}
         <GlassCard style={styles.summaryCard}>
-          <Text style={styles.summaryText}>{chapter.summary[locale]}</Text>
+          <Text style={[styles.summaryText, isDark && styles.summaryTextDark]}>{chapter.summary[locale]}</Text>
         </GlassCard>
 
         {/* Lessons */}
-        <Text style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
           {locale === 'de' ? 'Lektionen' : 'Lessons'}
         </Text>
         {lesson.lessons.map((l, idx) => (
@@ -99,23 +109,23 @@ export default function ChapterDetailScreen() {
               <View style={styles.lessonNumber}>
                 <Text style={styles.lessonNumberText}>{idx + 1}</Text>
               </View>
-              <Text style={styles.lessonTitle}>{l.title}</Text>
+              <Text style={[styles.lessonTitle, isDark && styles.lessonTitleDark]}>{l.title}</Text>
             </View>
-            <Text style={styles.lessonContent}>{l.content}</Text>
+            <Text style={[styles.lessonContent, isDark && styles.lessonContentDark]}>{l.content}</Text>
           </GlassCard>
         ))}
 
         {/* Exercises */}
-        <Text style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
           {locale === 'de' ? 'Übungen' : 'Exercises'}
         </Text>
         {lesson.exercises.map((ex, idx) => (
           <GlassCard key={idx} style={styles.exerciseCard}>
             <View style={styles.exerciseHeader}>
               <Ionicons name="flash" size={18} color="#E8435A" />
-              <Text style={styles.exerciseTitle}>{ex.title}</Text>
+              <Text style={[styles.exerciseTitle, isDark && styles.exerciseTitleDark]}>{ex.title}</Text>
             </View>
-            <Text style={styles.exerciseDescription}>{ex.description}</Text>
+            <Text style={[styles.exerciseDescription, isDark && styles.exerciseDescriptionDark]}>{ex.description}</Text>
           </GlassCard>
         ))}
 
@@ -124,7 +134,7 @@ export default function ChapterDetailScreen() {
           <Text style={styles.takeawayLabel}>
             {locale === 'de' ? 'Wichtigste Erkenntnis' : 'Key Takeaway'}
           </Text>
-          <Text style={styles.takeawayText}>"{lesson.keyTakeaway}"</Text>
+          <Text style={[styles.takeawayText, isDark && styles.takeawayTextDark]}>"{lesson.keyTakeaway}"</Text>
         </GlassCard>
 
         {/* Habit suggestions for this chapter */}
@@ -167,6 +177,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  backButtonDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
 
   // Intro card
@@ -211,6 +224,7 @@ const styles = StyleSheet.create({
   // Summary
   summaryCard: { marginHorizontal: 20, marginBottom: 24 },
   summaryText: { fontSize: 16, lineHeight: 24, color: '#404040' },
+  summaryTextDark: { color: '#D4D4D4' },
 
   // Section title
   sectionTitle: {
@@ -221,6 +235,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 12,
     marginTop: 8,
+  },
+  sectionTitleDark: {
+    color: '#F5F5F5',
   },
 
   // Lessons
@@ -251,10 +268,16 @@ const styles = StyleSheet.create({
     color: '#171717',
     letterSpacing: -0.2,
   },
+  lessonTitleDark: {
+    color: '#F5F5F5',
+  },
   lessonContent: {
     fontSize: 15,
     lineHeight: 23,
     color: '#404040',
+  },
+  lessonContentDark: {
+    color: '#D4D4D4',
   },
 
   // Exercises
@@ -270,10 +293,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#171717',
   },
+  exerciseTitleDark: {
+    color: '#F5F5F5',
+  },
   exerciseDescription: {
     fontSize: 15,
     lineHeight: 22,
     color: '#525252',
+  },
+  exerciseDescriptionDark: {
+    color: '#D4D4D4',
   },
 
   // Takeaway
@@ -298,6 +327,9 @@ const styles = StyleSheet.create({
     color: '#171717',
     fontStyle: 'italic',
     lineHeight: 24,
+  },
+  takeawayTextDark: {
+    color: '#F5F5F5',
   },
 
   // Action

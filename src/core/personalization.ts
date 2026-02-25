@@ -1,4 +1,4 @@
-import type { SocialEnergy, AgeGroup, SkillLevel, Goal, BasicsLevel } from '@/src/store/user-profile-store';
+import type { SocialEnergy, AgeGroup, SkillLevel, Goal, BasicsLevel, UserGender } from '@/src/store/user-profile-store';
 
 export interface PersonalizationResult {
   suggestedStartChapter: number;
@@ -9,6 +9,7 @@ export interface PersonalizationResult {
 }
 
 interface ProfileInput {
+  userGender: UserGender | null;
   socialEnergy: SocialEnergy | null;
   ageGroup: AgeGroup | null;
   basicsLevel: BasicsLevel | null;
@@ -43,7 +44,13 @@ function getSuggestedStartChapter(basicsLevel: BasicsLevel | null, skillLevel: S
   }
 }
 
-function getProductCategories(basicsLevel: BasicsLevel | null): string[] {
+function getProductCategories(basicsLevel: BasicsLevel | null, userGender: UserGender | null): string[] {
+  if (userGender === 'female') {
+    if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
+      return ['style', 'skincare', 'fragrance', 'accessories', 'fitness'];
+    }
+    return ['fragrance', 'style', 'accessories', 'skincare', 'fitness'];
+  }
   if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
     return ['grooming', 'skincare', 'fitness', 'fragrance', 'style'];
   }
@@ -53,10 +60,18 @@ function getProductCategories(basicsLevel: BasicsLevel | null): string[] {
 function getRecommendedCharacter(
   socialEnergy: SocialEnergy | null,
   goal: Goal | null,
+  userGender: UserGender | null,
 ): string {
   const isIntrovert = socialEnergy === 'introvert' || socialEnergy === 'deep_introvert';
   const isExtrovert = socialEnergy === 'extrovert';
   const isAmbivert = socialEnergy === 'ambivert';
+
+  if (userGender === 'female') {
+    if (isIntrovert) return 'bestfriend';
+    if (isExtrovert && (goal === 'social_magnetism' || goal === 'ambitious')) return 'queen';
+    if (isAmbivert && goal === 'find_partner') return 'enchantress';
+    return 'bestfriend';
+  }
 
   if (isIntrovert && goal === 'social_confidence') return 'gentleman';
   if (isIntrovert && goal === 'find_partner') return 'charismo';
@@ -130,9 +145,9 @@ function getContentTone(ageGroup: AgeGroup | null): PersonalizationResult['conte
 export function getPersonalization(profile: ProfileInput): PersonalizationResult {
   return {
     suggestedStartChapter: getSuggestedStartChapter(profile.basicsLevel, profile.skillLevel),
-    recommendedCharacterId: getRecommendedCharacter(profile.socialEnergy, profile.goal),
+    recommendedCharacterId: getRecommendedCharacter(profile.socialEnergy, profile.goal, profile.userGender),
     bookPriority: getBookPriority(profile.skillLevel, profile.goal),
     contentTone: getContentTone(profile.ageGroup),
-    productCategories: getProductCategories(profile.basicsLevel),
+    productCategories: getProductCategories(profile.basicsLevel, profile.userGender),
   };
 }

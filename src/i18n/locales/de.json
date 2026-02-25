@@ -29,7 +29,7 @@
   },
   "guide": {
     "title": "Der Guide",
-    "subtitle": "24 Schritte zum Finden deines Seelenverwandten",
+    "subtitle": "25 Schritte zum Finden deines Seelenverwandten",
     "markComplete": "Als abgeschlossen markieren",
     "completed": "Abgeschlossen",
     "chapter": "Kapitel"
@@ -71,6 +71,15 @@
       "cta": "Ich bin bereit, geröstet zu werden",
       "skip": "Überspringen — Ich bin bereits unwiderstehlich"
     },
+    "gender": {
+      "title": "Eine wichtige Sache zuerst.",
+      "subtitle": "Das ändert alles. (Wirklich, die ganze App.)",
+      "male": "Guy Mode",
+      "maleNote": "Lerne Ansprechen, Charme und nicht peinlich sein",
+      "female": "Girl Mode",
+      "femaleNote": "Lerne Anziehen, Signale senden und ihn zu dir kommen lassen",
+      "footnote": "Anderes Spiel, anderes Playbook. Gleiches Selbstbewusstsein."
+    },
     "socialEnergy": {
       "title": "Kurze Frage zu deinem natürlichen Lebensraum.",
       "subtitle": "Wo tankst du Energie auf?",
@@ -89,35 +98,67 @@
       "age_45_plus": "45+ — Ich habe Geschichten. Lehrt mich die neuen Regeln."
     },
     "basics": {
-      "title": "Lass uns über die Basics reden.",
-      "subtitle": "Sei ehrlich. Niemand schaut zu.",
-      "none": "Was ist Feuchtigkeitscreme?",
-      "some": "Ich geb mir Mühe",
-      "solid": "Ich könnte auf dem GQ-Cover sein",
-      "mastered": "Ich BIN die Routine"
+      "male": {
+        "title": "Klartext: Wie steht's um dein Pflege-Game?",
+        "subtitle": "Hygiene, Hautpflege, Style — das, was sie zuerst bemerkt.",
+        "none": "Was ist Feuchtigkeitscreme? Ich benutze 3-in-1 Shampoo für alles.",
+        "some": "Ich dusche täglich und besitze Deo. Zählt das?",
+        "solid": "Hautpflege-Routine, gute Klamotten, ich rieche gut.",
+        "mastered": "Ich BIN die Routine. Sie fragt MICH nach Produkttipps."
+      },
+      "female": {
+        "title": "Klartext: Wie steht's um deine Confidence-Routine?",
+        "subtitle": "Self-Care, Style, die Energie die du in den Raum bringst.",
+        "none": "Ich rolle aus dem Bett und hoffe das Beste.",
+        "some": "Ich versuche es, aber mein Selbstbewusstsein ist... wechselhaft.",
+        "solid": "Ich fühle mich an den meisten Tagen gut. Mein Vibe stimmt.",
+        "mastered": "Ich betrete den Raum und er passt sich an."
+      }
     },
     "skillLevel": {
-      "title": "Sei ehrlich. Niemand schaut zu.",
+      "title": "Wie würdest du dein Game bewerten?",
       "subtitle": "(Tun wir total.)",
       "question": "Wie würdest du dein Flirt-Game gerade bewerten?",
-      "beginner": "Was ist Flirten? Ich habe mal einem Mädchen zugewunken und sie hat den Sicherheitsdienst gerufen.",
-      "beginnerNote": "Wir lieben eine leere Leinwand",
-      "intermediate": "Ich kann ein Gespräch führen, aber abschließen? Da mache ich lieber meine Steuern.",
-      "intermediateNote": "Du hast Potenzial. Beängstigendes Potenzial.",
-      "advanced": "Läuft ganz okay. Ich hatte Dates. Einige sogar mit zweitem Date.",
-      "advancedNote": "Sieh dich an, Überflieger",
-      "expert": "Ich bin im Grunde eine Gefahr. Ich will nur leveln.",
-      "expertNote": "Lass auch was für die anderen übrig"
+      "male": {
+        "beginner": "Was ist Flirten? Ich habe mal einem Mädchen zugewunken und sie hat den Sicherheitsdienst gerufen.",
+        "beginnerNote": "Wir lieben eine leere Leinwand",
+        "intermediate": "Ich kann ein Gespräch führen, aber abschließen? Da mache ich lieber meine Steuern.",
+        "intermediateNote": "Du hast Potenzial. Beängstigendes Potenzial.",
+        "advanced": "Läuft ganz okay. Ich hatte Dates. Einige sogar mit zweitem Date.",
+        "advancedNote": "Sieh dich an, Überflieger",
+        "expert": "Ich bin im Grunde eine Gefahr. Ich will nur leveln.",
+        "expertNote": "Lass auch was für die anderen übrig"
+      },
+      "female": {
+        "beginner": "Ich lächle auf mein Handy wenn er vorbeigeht. Zählt das?",
+        "beginnerNote": "Jeder fängt irgendwo an, Babe",
+        "intermediate": "Ich kann 2 Sekunden Blickkontakt halten bevor ich in Panik gerate.",
+        "intermediateNote": "Du hast Potenzial. Gefährliches Potenzial.",
+        "advanced": "Ich habe Jungs dazu gebracht, mich anzusprechen. Manche erinnerten sich sogar an meinen Namen.",
+        "advancedNote": "Sieh dich an, Herzensbrecher",
+        "expert": "Ich bin eine Gefahr. Ich will einfach mein Game aufleveln.",
+        "expertNote": "Lass auch was für die anderen übrig, Queen"
+      }
     },
     "goal": {
       "title": "Letzte Frage. Wofür bist du wirklich hier?",
       "subtitle": "(Wähle die, die dich am wenigsten angreift.)",
-      "socialConfidence": "Ich will einfach mit Leuten reden können, ohne dass meine Stimme bricht.",
-      "getDates": "Ich will tatsächlich Dates bekommen. Echte. Persönlich.",
-      "findPartner": "Ich will jemand Besonderen finden. Am besten bevor ich 80 bin.",
-      "socialMagnetism": "Ich will die Person sein, mit der jeder auf der Party reden will.",
-      "ambitious": "Ehrlich? Ich will Victoria's Secret Models aufreißen.",
-      "ambitiousNote": "Greif nach den Sternen, King. Respekt."
+      "male": {
+        "socialConfidence": "Ich will einfach mit Leuten reden können, ohne dass meine Stimme bricht.",
+        "getDates": "Ich will tatsächlich Dates bekommen. Echte. Persönlich.",
+        "findPartner": "Ich will jemand Besonderen finden. Am besten bevor ich 80 bin.",
+        "socialMagnetism": "Ich will die Person sein, mit der jeder auf der Party reden will.",
+        "ambitious": "Ehrlich? Ich will Victoria's Secret Models aufreißen.",
+        "ambitiousNote": "Greif nach den Sternen, King. Respekt."
+      },
+      "female": {
+        "socialConfidence": "Ich will in einen Raum gehen können, ohne sofort eine Wand zum Anlehnen zu suchen.",
+        "getDates": "Ich will, dass ER MICH anspricht. Wiederholt.",
+        "findPartner": "Ich will jemand Besonderen finden. Zu meinen Bedingungen.",
+        "socialMagnetism": "Ich will das Mädchen sein, zu dem alle gravitieren.",
+        "ambitious": "Ich will Männer um meinen Finger wickeln. Respektvoll.",
+        "ambitiousNote": "Wir respektieren den Ehrgeiz, Queen."
+      }
     },
     "profileReveal": {
       "title": "Okay, wir haben dich durchleuchtet.",
@@ -139,6 +180,7 @@
       "basicsLevel": "Basics",
       "skillLevel": "Skill-Level",
       "goal": "Ziel",
+      "gender": "Modus",
       "labels": {
         "deep_introvert": "Tiefer Introvertiert",
         "introvert": "Introvertiert",
@@ -160,7 +202,9 @@
         "get_dates": "Dates bekommen",
         "find_partner": "Partner finden",
         "social_magnetism": "Soziale Anziehung",
-        "ambitious": "Ambitioniert"
+        "ambitious": "Ambitioniert",
+        "male": "Guy Mode",
+        "female": "Girl Mode"
       }
     },
     "recommended": "Empfohlen für dich",

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 
 export default function GraduateModal() {
   const { t } = useTranslation();
@@ -24,18 +25,20 @@ export default function GraduateModal() {
         <Text style={styles.subtitle}>{t('graduate.subtitle')}</Text>
         <Text style={styles.message}>{t('graduate.message')}</Text>
 
-        <View style={styles.buttons}>
-          <Pressable style={styles.shareButton}>
-            <Text style={styles.shareText}>{t('graduate.share')}</Text>
-          </Pressable>
+        <GlassCard style={styles.buttonsCard} intensity="light" padding={16}>
+          <View style={styles.buttons}>
+            <Pressable style={styles.shareButton}>
+              <Text style={styles.shareText}>{t('graduate.share')}</Text>
+            </Pressable>
 
-          <Pressable
-            style={styles.deleteButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.deleteText}>{t('graduate.delete')}</Text>
-          </Pressable>
-        </View>
+            <Pressable
+              style={styles.deleteButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.deleteText}>{t('graduate.delete')}</Text>
+            </Pressable>
+          </View>
+        </GlassCard>
 
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
           <Text style={styles.closeText}>Close</Text>
@@ -65,9 +68,10 @@ const styles = StyleSheet.create({
     lineHeight: 24, textAlign: 'center',
     marginTop: 24, marginBottom: 40, paddingHorizontal: 16,
   },
+  buttonsCard: { width: '100%' },
   buttons: { gap: 12, width: '100%' },
   shareButton: {
-    backgroundColor: '#fff', paddingVertical: 16,
+    backgroundColor: 'rgba(255,255,255,0.9)', paddingVertical: 16,
     borderRadius: 16, alignItems: 'center',
   },
   shareText: { fontSize: 17, fontWeight: '700', color: '#E8435A' },

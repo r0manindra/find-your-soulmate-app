@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
+import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-buttons';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
@@ -101,43 +102,45 @@ export default function RegisterScreen() {
               googleReady={googleReady}
             />
 
-            <View style={styles.form}>
-              <TextInput
-                style={styles.input}
-                placeholder={locale === 'de' ? 'Name (optional)' : 'Name (optional)'}
-                placeholderTextColor="#A3A3A3"
-                value={name}
-                onChangeText={setName}
-                autoComplete="name"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder={locale === 'de' ? 'E-Mail' : 'Email'}
-                placeholderTextColor="#A3A3A3"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoComplete="email"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder={locale === 'de' ? 'Passwort (8+ Zeichen)' : 'Password (8+ characters)'}
-                placeholderTextColor="#A3A3A3"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoComplete="new-password"
-              />
+            <GlassCard style={styles.formCard} padding={20}>
+              <View style={styles.form}>
+                <TextInput
+                  style={[styles.input, isDark && styles.inputDark]}
+                  placeholder={locale === 'de' ? 'Name (optional)' : 'Name (optional)'}
+                  placeholderTextColor="#A3A3A3"
+                  value={name}
+                  onChangeText={setName}
+                  autoComplete="name"
+                />
+                <TextInput
+                  style={[styles.input, isDark && styles.inputDark]}
+                  placeholder={locale === 'de' ? 'E-Mail' : 'Email'}
+                  placeholderTextColor="#A3A3A3"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                />
+                <TextInput
+                  style={[styles.input, isDark && styles.inputDark]}
+                  placeholder={locale === 'de' ? 'Passwort (8+ Zeichen)' : 'Password (8+ characters)'}
+                  placeholderTextColor="#A3A3A3"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  autoComplete="new-password"
+                />
 
-              <BrandButton
-                title={loading
-                  ? (locale === 'de' ? 'Konto wird erstellt...' : 'Creating account...')
-                  : (locale === 'de' ? 'Konto erstellen' : 'Create Account')}
-                onPress={handleRegister}
-                disabled={loading}
-              />
-            </View>
+                <BrandButton
+                  title={loading
+                    ? (locale === 'de' ? 'Konto wird erstellt...' : 'Creating account...')
+                    : (locale === 'de' ? 'Konto erstellen' : 'Create Account')}
+                  onPress={handleRegister}
+                  disabled={loading}
+                />
+              </View>
+            </GlassCard>
 
             <Pressable onPress={() => router.push('/auth/login')} style={styles.switchButton}>
               <Text style={styles.switchText}>
@@ -184,12 +187,18 @@ const styles = StyleSheet.create({
     fontSize: 14, color: '#E8435A', textAlign: 'center',
     marginBottom: 16, fontWeight: '500',
   },
+  formCard: { marginBottom: 4 },
   form: { gap: 12 },
   input: {
-    backgroundColor: '#fff', borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 14,
     paddingHorizontal: 16, paddingVertical: 14,
     fontSize: 16, color: '#171717',
-    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.1)',
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  inputDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: '#F5F5F5',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   switchButton: { marginTop: 24, alignItems: 'center' },
   switchText: { fontSize: 15, color: '#737373' },

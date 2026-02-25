@@ -7,6 +7,7 @@ export interface CoachCharacter {
   icon: string; // Ionicons name
   color: string;
   isPremium: boolean;
+  forGender: 'male' | 'female' | 'all';
 }
 
 export const coachCharacters: CoachCharacter[] = [
@@ -25,6 +26,7 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'sparkles',
     color: '#8B5CF6',
     isPremium: false,
+    forGender: 'male',
   },
   {
     id: 'maverick',
@@ -41,6 +43,7 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'flame',
     color: '#EF4444',
     isPremium: true,
+    forGender: 'male',
   },
   {
     id: 'gentleman',
@@ -57,6 +60,7 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'wine',
     color: '#0EA5E9',
     isPremium: true,
+    forGender: 'male',
   },
   {
     id: 'playboy',
@@ -73,6 +77,7 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'sunny',
     color: '#F59E0B',
     isPremium: true,
+    forGender: 'male',
   },
   {
     id: 'hypeman',
@@ -89,6 +94,7 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'trophy',
     color: '#EC4899',
     isPremium: true,
+    forGender: 'male',
   },
   {
     id: 'smooth',
@@ -105,6 +111,59 @@ export const coachCharacters: CoachCharacter[] = [
     icon: 'diamond',
     color: '#171717',
     isPremium: true,
+    forGender: 'male',
+  },
+  // Female coaches
+  {
+    id: 'bestfriend',
+    name: 'The Best Friend',
+    subtitle: {
+      en: 'Your Ride-or-Die Wing Woman',
+      de: 'Deine Ride-or-Die Flügel-Frau',
+    },
+    description: {
+      en: 'Warm, supportive, tells it like it is but always has your back. Like your smartest friend who happens to be amazing at dating.',
+      de: 'Warmherzig, unterstützend, sagt es wie es ist, aber steht immer hinter dir. Wie deine klügste Freundin, die zufällig auch beim Dating brilliert.',
+    },
+    inspiration: 'The supportive best friend',
+    icon: 'heart-circle',
+    color: '#EC4899',
+    isPremium: false,
+    forGender: 'female',
+  },
+  {
+    id: 'queen',
+    name: 'The Queen',
+    subtitle: {
+      en: 'Confident & Commanding',
+      de: 'Selbstbewusst & Souverän',
+    },
+    description: {
+      en: "Teaches you to own every room. High standards, zero tolerance for nonsense. She doesn't chase — she attracts.",
+      de: 'Lehrt dich, jeden Raum zu dominieren. Hohe Standards, null Toleranz für Unsinn. Sie jagt nicht — sie zieht an.',
+    },
+    inspiration: 'Confident feminine power',
+    icon: 'sparkles',
+    color: '#8B5CF6',
+    isPremium: true,
+    forGender: 'female',
+  },
+  {
+    id: 'enchantress',
+    name: 'The Enchantress',
+    subtitle: {
+      en: 'Mysteriously Magnetic',
+      de: 'Geheimnisvoll Magnetisch',
+    },
+    description: {
+      en: 'Master of subtlety, the art of the glance, the perfectly timed pause. She makes him think approaching was his idea.',
+      de: 'Meisterin der Subtilität, die Kunst des Blicks, die perfekt getimte Pause. Sie lässt ihn glauben, dass das Ansprechen seine Idee war.',
+    },
+    inspiration: 'The art of feminine mystery',
+    icon: 'moon',
+    color: '#0EA5E9',
+    isPremium: true,
+    forGender: 'female',
   },
 ];
 

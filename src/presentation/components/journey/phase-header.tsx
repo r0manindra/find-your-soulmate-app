@@ -8,9 +8,10 @@ interface PhaseHeaderProps {
   locale: 'en' | 'de';
   completedCount: number;
   totalCount: number;
+  isDark?: boolean;
 }
 
-export function PhaseHeader({ phase, locale, completedCount, totalCount }: PhaseHeaderProps) {
+export function PhaseHeader({ phase, locale, completedCount, totalCount, isDark = false }: PhaseHeaderProps) {
   const progress = totalCount > 0 ? completedCount / totalCount : 0;
   const isComplete = completedCount === totalCount;
 
@@ -21,7 +22,7 @@ export function PhaseHeader({ phase, locale, completedCount, totalCount }: Phase
           <Text style={styles.phaseLabel}>
             {locale === 'de' ? 'Phase' : 'Phase'} {phase.id}
           </Text>
-          <Text style={styles.phaseTitle}>{phase.title[locale]}</Text>
+          <Text style={[styles.phaseTitle, isDark && styles.phaseTitleDark]}>{phase.title[locale]}</Text>
         </View>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>
@@ -29,7 +30,7 @@ export function PhaseHeader({ phase, locale, completedCount, totalCount }: Phase
           </Text>
         </View>
       </View>
-      <View style={styles.progressTrack}>
+      <View style={[styles.progressTrack, isDark && styles.progressTrackDark]}>
         <View
           style={[
             styles.progressFill,
@@ -70,6 +71,9 @@ const styles = StyleSheet.create({
     color: '#171717',
     letterSpacing: -0.4,
   },
+  phaseTitleDark: {
+    color: '#F5F5F5',
+  },
   badge: {
     backgroundColor: 'rgba(232,67,90,0.1)',
     borderRadius: 10,
@@ -86,6 +90,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
     borderRadius: 2,
     overflow: 'hidden',
+  },
+  progressTrackDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   progressFill: {
     height: '100%',

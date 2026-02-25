@@ -29,7 +29,7 @@
   },
   "guide": {
     "title": "The Guide",
-    "subtitle": "24 steps to finding your soulmate",
+    "subtitle": "25 steps to finding your soulmate",
     "markComplete": "Mark Complete",
     "completed": "Completed",
     "chapter": "Chapter"
@@ -71,6 +71,15 @@
       "cta": "I'm ready to be roasted",
       "skip": "Skip — I'm already irresistible"
     },
+    "gender": {
+      "title": "One important thing first.",
+      "subtitle": "This changes everything. (Literally, the whole app.)",
+      "male": "Guy Mode",
+      "maleNote": "Teach me to approach, charm, and not be awkward",
+      "female": "Girl Mode",
+      "femaleNote": "Teach me to attract, signal, and make him come to me",
+      "footnote": "Different game, different playbook. Same confidence."
+    },
     "socialEnergy": {
       "title": "Quick question about your natural habitat.",
       "subtitle": "Where do you recharge?",
@@ -89,35 +98,67 @@
       "age_45_plus": "45+ — I've got stories. Teach me the new rules."
     },
     "basics": {
-      "title": "Let's talk basics.",
-      "subtitle": "Be honest. Nobody's watching.",
-      "none": "What's moisturizer?",
-      "some": "I try my best",
-      "solid": "I could be on GQ",
-      "mastered": "I AM the routine"
+      "male": {
+        "title": "Real talk: how's your grooming game?",
+        "subtitle": "Hygiene, skincare, style — the stuff she notices first.",
+        "none": "What's moisturizer? I use 3-in-1 shampoo for everything.",
+        "some": "I shower daily and own deodorant. That counts, right?",
+        "solid": "Skincare routine, nice clothes, I smell good.",
+        "mastered": "I AM the routine. She asks ME for product recs."
+      },
+      "female": {
+        "title": "Real talk: how's your confidence routine?",
+        "subtitle": "Self-care, style, the energy you bring into a room.",
+        "none": "I roll out of bed and hope for the best.",
+        "some": "I try, but my confidence is... inconsistent.",
+        "solid": "I feel good most days. My vibe is pretty put-together.",
+        "mastered": "I walk in and the room adjusts."
+      }
     },
     "skillLevel": {
-      "title": "Be honest. No one's watching.",
-      "subtitle": "(We totally are.)",
+      "title": "How would you rate your game?",
+      "subtitle": "(We totally are watching.)",
       "question": "How would you rate your flirting game right now?",
-      "beginner": "What is flirting? I once waved at a girl and she called security.",
-      "beginnerNote": "We love a blank canvas",
-      "intermediate": "I can hold a conversation but closing? I'd rather do my taxes.",
-      "intermediateNote": "You have potential. Scary potential.",
-      "advanced": "I do alright. I've had dates. Some even had second dates.",
-      "advancedNote": "Look at you, overachiever",
-      "expert": "I'm basically a menace. I just want to level up.",
-      "expertNote": "Save some for the rest of us"
+      "male": {
+        "beginner": "What is flirting? I once waved at a girl and she called security.",
+        "beginnerNote": "We love a blank canvas",
+        "intermediate": "I can hold a conversation but closing? I'd rather do my taxes.",
+        "intermediateNote": "You have potential. Scary potential.",
+        "advanced": "I do alright. I've had dates. Some even had second dates.",
+        "advancedNote": "Look at you, overachiever",
+        "expert": "I'm basically a menace. I just want to level up.",
+        "expertNote": "Save some for the rest of us"
+      },
+      "female": {
+        "beginner": "I smile at my phone when he walks by. Does that count?",
+        "beginnerNote": "We all start somewhere, babe",
+        "intermediate": "I can hold eye contact for 2 seconds before panicking.",
+        "intermediateNote": "You have potential. Dangerous potential.",
+        "advanced": "I've made guys approach me. Some even remembered my name.",
+        "advancedNote": "Look at you, heartbreaker",
+        "expert": "I'm a menace. I just want to level up my game.",
+        "expertNote": "Save some for the rest of us, queen"
+      }
     },
     "goal": {
       "title": "Last one. What are you actually here for?",
       "subtitle": "(Pick the one that makes you feel the least attacked.)",
-      "socialConfidence": "I just want to talk to people without my voice cracking.",
-      "getDates": "I want to actually get dates. Like, real ones. In person.",
-      "findPartner": "I want to find someone special. Preferably before I'm 80.",
-      "socialMagnetism": "I want to be the person everyone wants to talk to at the party.",
-      "ambitious": "Honestly? I want to pick up Victoria's Secret models.",
-      "ambitiousNote": "Aim for the stars, king. We respect it."
+      "male": {
+        "socialConfidence": "I just want to talk to people without my voice cracking.",
+        "getDates": "I want to actually get dates. Like, real ones. In person.",
+        "findPartner": "I want to find someone special. Preferably before I'm 80.",
+        "socialMagnetism": "I want to be the person everyone wants to talk to at the party.",
+        "ambitious": "Honestly? I want to pick up Victoria's Secret models.",
+        "ambitiousNote": "Aim for the stars, king. We respect it."
+      },
+      "female": {
+        "socialConfidence": "I want to walk into a room and not immediately find a wall to lean on.",
+        "getDates": "I want HIM to approach ME. Repeatedly.",
+        "findPartner": "I want to find someone special. On my terms.",
+        "socialMagnetism": "I want to be the girl everyone gravitates toward.",
+        "ambitious": "I want to have men wrapped around my finger. Respectfully.",
+        "ambitiousNote": "We respect the ambition, queen."
+      }
     },
     "profileReveal": {
       "title": "Alright, we've profiled you.",
@@ -139,6 +180,7 @@
       "basicsLevel": "Basics",
       "skillLevel": "Skill Level",
       "goal": "Goal",
+      "gender": "Mode",
       "labels": {
         "deep_introvert": "Deep Introvert",
         "introvert": "Introvert",
@@ -160,7 +202,9 @@
         "get_dates": "Get Dates",
         "find_partner": "Find Partner",
         "social_magnetism": "Social Magnetism",
-        "ambitious": "Ambitious"
+        "ambitious": "Ambitious",
+        "male": "Guy Mode",
+        "female": "Girl Mode"
       }
     },
     "recommended": "Recommended for you",

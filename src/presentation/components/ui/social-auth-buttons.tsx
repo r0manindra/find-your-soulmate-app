@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { GlassCard } from './glass-card';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -49,10 +50,14 @@ function SocialButton({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={loading || disabled}
-      style={[animatedStyle, styles.socialButton, (loading || disabled) && styles.socialButtonDisabled]}
+      style={[animatedStyle, (loading || disabled) && styles.socialButtonDisabled]}
     >
-      <Ionicons name={icon} size={20} color="#171717" style={styles.icon} />
-      <Text style={styles.socialButtonText}>{loading ? 'Signing in...' : label}</Text>
+      <GlassCard borderRadius={14} padding={14}>
+        <View style={styles.socialButtonInner}>
+          <Ionicons name={icon} size={20} color="#171717" style={styles.icon} />
+          <Text style={styles.socialButtonText}>{loading ? 'Signing in...' : label}</Text>
+        </View>
+      </GlassCard>
     </AnimatedPressable>
   );
 }
@@ -106,16 +111,10 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 4,
   },
-  socialButton: {
+  socialButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.1)',
   },
   socialButtonDisabled: {
     opacity: 0.5,

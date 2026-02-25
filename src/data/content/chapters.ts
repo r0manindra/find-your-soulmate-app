@@ -1,7 +1,7 @@
 import type { Chapter, Phase } from '@/src/core/entities/types';
 
 export const phases: Phase[] = [
-  { id: 0, title: { en: 'The Basics', de: 'Die Grundlagen' }, chapters: [21, 22, 23, 24] },
+  { id: 0, title: { en: 'The Basics', de: 'Die Grundlagen' }, chapters: [21, 22, 23, 24, 25] },
   { id: 1, title: { en: 'Know Yourself', de: 'Erkenne dich selbst' }, chapters: [1, 2, 3, 4] },
   { id: 2, title: { en: 'Make Your Move', de: 'Mach deinen Zug' }, chapters: [5, 6, 7, 8] },
   { id: 3, title: { en: 'The Connection', de: 'Die Verbindung' }, chapters: [9, 10, 11, 12] },
@@ -320,6 +320,19 @@ export const chapters: Chapter[] = [
     summary: {
       en: "Social etiquette, table manners, how you carry yourself. The difference between confident and cocky. The IDGAF mindset that's actually attractive, not the one that's just rude.",
       de: 'Soziale Etikette, Tischmanieren, wie du dich trägst. Der Unterschied zwischen selbstbewusst und arrogant. Die IDGAF-Mentalität, die wirklich attraktiv ist, nicht die unhöfliche.',
+    },
+  },
+  {
+    id: 25,
+    slug: 'social-practice',
+    icon: '💬',
+    ionicon: 'chatbubbles-outline',
+    phase: 0,
+    title: { en: 'Social Practice', de: 'Soziale Praxis' },
+    subtitle: { en: 'Start small, talk to everyone', de: 'Fang klein an, rede mit allen' },
+    summary: {
+      en: "All the theory in the world means nothing if you don't practice. This chapter is your social gym — starting with low-stakes conversations and building up to making strangers laugh. The goal: make talking to anyone feel as natural as breathing.",
+      de: 'Die ganze Theorie der Welt bedeutet nichts, wenn du nicht übst. Dieses Kapitel ist dein soziales Fitnessstudio — angefangen mit lockeren Gesprächen bis hin dazu, Fremde zum Lachen zu bringen. Das Ziel: Mit jedem zu reden soll sich so natürlich anfühlen wie Atmen.',
     },
   },
 ];

@@ -7,8 +7,10 @@ export type AgeGroup = 'age_18_24' | 'age_25_34' | 'age_35_44' | 'age_45_plus';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type Goal = 'social_confidence' | 'get_dates' | 'find_partner' | 'social_magnetism' | 'ambitious';
 export type BasicsLevel = 'basics_none' | 'basics_some' | 'basics_solid' | 'basics_mastered';
+export type UserGender = 'male' | 'female';
 
 interface UserProfileState {
+  userGender: UserGender | null;
   socialEnergy: SocialEnergy | null;
   ageGroup: AgeGroup | null;
   basicsLevel: BasicsLevel | null;
@@ -19,6 +21,7 @@ interface UserProfileState {
 }
 
 interface UserProfileActions {
+  setUserGender: (value: UserGender) => void;
   setSocialEnergy: (value: SocialEnergy) => void;
   setAgeGroup: (value: AgeGroup) => void;
   setBasicsLevel: (value: BasicsLevel) => void;
@@ -32,6 +35,7 @@ interface UserProfileActions {
 type UserProfileStore = UserProfileState & UserProfileActions;
 
 const initialState: UserProfileState = {
+  userGender: null,
   socialEnergy: null,
   ageGroup: null,
   basicsLevel: null,
@@ -46,6 +50,7 @@ export const useUserProfileStore = create<UserProfileStore>()(
     (set) => ({
       ...initialState,
 
+      setUserGender: (value) => set({ userGender: value }),
       setSocialEnergy: (value) => set({ socialEnergy: value }),
       setAgeGroup: (value) => set({ ageGroup: value }),
       setBasicsLevel: (value) => set({ basicsLevel: value }),

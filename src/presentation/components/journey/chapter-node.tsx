@@ -10,6 +10,7 @@ import Animated, {
   FadeIn,
 } from 'react-native-reanimated';
 import type { Chapter } from '@/src/core/entities/types';
+import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -21,6 +22,7 @@ interface ChapterNodeProps {
   locale: 'en' | 'de';
   position: 'left' | 'center' | 'right';
   isExpanded: boolean;
+  isDark?: boolean;
   onPress: () => void;
   onAction: () => void;
 }
@@ -31,6 +33,7 @@ export function ChapterNode({
   locale,
   position,
   isExpanded,
+  isDark = false,
   onPress,
   onAction,
 }: ChapterNodeProps) {
@@ -82,10 +85,12 @@ export function ChapterNode({
           <View
             style={[
               styles.node,
+              isDark && styles.nodeDark,
               { width: nodeSize, height: nodeSize, borderRadius: nodeSize / 2 },
               status === 'completed' && styles.nodeCompleted,
               status === 'active' && styles.nodeActive,
               status === 'locked' && styles.nodeLocked,
+              status === 'locked' && isDark && styles.nodeLockedDark,
             ]}
           >
             {status === 'completed' ? (
@@ -101,6 +106,7 @@ export function ChapterNode({
         <Text
           style={[
             styles.nodeLabel,
+            isDark && styles.nodeLabelDark,
             status === 'locked' && styles.nodeLabelLocked,
             status === 'active' && styles.nodeLabelActive,
           ]}
@@ -113,15 +119,15 @@ export function ChapterNode({
       {isExpanded && status !== 'locked' && (
         <Animated.View
           entering={FadeIn.duration(200)}
-          style={styles.expandedCard}
+          style={styles.expandedCardWrapper}
         >
-          <View style={styles.expandedContent}>
-            <Text style={styles.expandedChapter}>
+          <GlassCard style={styles.expandedCard} borderRadius={16} padding={16}>
+            <Text style={[styles.expandedChapter, isDark && styles.expandedChapterDark]}>
               {locale === 'de' ? 'Kapitel' : 'Chapter'} {chapter.id}
             </Text>
-            <Text style={styles.expandedTitle}>{chapter.title[locale]}</Text>
-            <Text style={styles.expandedSubtitle}>{chapter.subtitle[locale]}</Text>
-            <Text style={styles.expandedSummary} numberOfLines={3}>
+            <Text style={[styles.expandedTitle, isDark && styles.expandedTitleDark]}>{chapter.title[locale]}</Text>
+            <Text style={[styles.expandedSubtitle, isDark && styles.expandedSubtitleDark]}>{chapter.subtitle[locale]}</Text>
+            <Text style={[styles.expandedSummary, isDark && styles.expandedSummaryDark]} numberOfLines={3}>
               {chapter.summary[locale]}
             </Text>
             <Pressable
@@ -140,7 +146,7 @@ export function ChapterNode({
                   : locale === 'de' ? 'Kapitel öffnen' : 'Open Chapter'}
               </Text>
             </Pressable>
-          </View>
+          </GlassCard>
         </Animated.View>
       )}
     </View>
@@ -178,6 +184,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  nodeDark: {
+    backgroundColor: '#262626',
+    borderColor: '#404040',
+  },
   nodeCompleted: {
     backgroundColor: '#E8435A',
     borderColor: '#E8435A',
@@ -191,6 +201,10 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
     opacity: 0.6,
   },
+  nodeLockedDark: {
+    backgroundColor: '#1C1C1C',
+    borderColor: '#404040',
+  },
   nodeLabel: {
     fontSize: 12,
     fontWeight: '600',
@@ -199,6 +213,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 16,
   },
+  nodeLabelDark: {
+    color: '#A3A3A3',
+  },
   nodeLabelLocked: {
     color: '#A3A3A3',
   },
@@ -206,21 +223,11 @@ const styles = StyleSheet.create({
     color: '#E8435A',
     fontWeight: '700',
   },
-  expandedCard: {
+  expandedCardWrapper: {
     marginTop: 12,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
     width: 280,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.06)',
   },
-  expandedContent: {},
+  expandedCard: {},
   expandedChapter: {
     fontSize: 11,
     fontWeight: '700',
@@ -229,6 +236,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 4,
   },
+  expandedChapterDark: {
+    color: '#737373',
+  },
   expandedTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -236,16 +246,25 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
     marginBottom: 2,
   },
+  expandedTitleDark: {
+    color: '#F5F5F5',
+  },
   expandedSubtitle: {
     fontSize: 14,
     color: '#737373',
     marginBottom: 8,
+  },
+  expandedSubtitleDark: {
+    color: '#A3A3A3',
   },
   expandedSummary: {
     fontSize: 14,
     color: '#525252',
     lineHeight: 20,
     marginBottom: 12,
+  },
+  expandedSummaryDark: {
+    color: '#D4D4D4',
   },
   actionButton: {
     paddingVertical: 10,

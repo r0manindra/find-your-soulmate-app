@@ -13,6 +13,11 @@ export interface ChapterLesson {
   lessons: Lesson[];
   exercises: Exercise[];
   keyTakeaway: string;
+  femaleVariant?: {
+    lessons: Lesson[];
+    exercises: Exercise[];
+    keyTakeaway: string;
+  };
 }
 
 export const chapterLessons: ChapterLesson[] = [
@@ -142,6 +147,39 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'Eye contact is the most powerful non-verbal tool you have. Master it and you\'ll connect with people before you say a single word.',
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'The Glance-Smile-Look Away',
+          content:
+            "This is the most powerful move in your arsenal, and it takes exactly 2 seconds. Here's the sequence: catch his eye, hold for a beat, give a slight smile, then look away — slightly down or to the side. That's it. That's the move that has launched a thousand approaches. Research by Dr. Monica Moore found that women who use this signal get approached 4x more than women who are objectively more attractive but don't signal. The glance-smile-look away works because it does two things simultaneously: it says 'I noticed you' (interest) and 'your move' (mystery). You're giving him permission to approach while maintaining your power. He thinks it was his idea. It wasn't.",
+        },
+        {
+          title: 'The Second Glance',
+          content:
+            "If the first glance is the invitation, the second glance is the confirmation. After your initial glance-smile-look away, wait 30-60 seconds and do it again. If he catches your eye the second time and you hold it just a beat longer — that's a green light he can't miss. Most men are terrified of misreading signals. One glance could be accidental. Two is intentional. The second glance eliminates his doubt and gives him the courage to come over. Think of it as a gift you're giving him: the confidence to approach. You're not being desperate — you're being strategically generous with your attention.",
+        },
+        {
+          title: 'Reading HIS Eye Contact',
+          content:
+            "Men's eye contact signals are different from women's, and learning to read them is a superpower. The eyebrow flash: when a man sees someone he's attracted to, his eyebrows unconsciously raise for about a fifth of a second. If you catch this — he's interested. The scan: if his eyes move from your eyes to your lips and back — that's attraction, not rudeness. The double-take: he looks, looks away, then immediately looks back — he's surprised by how attracted he is. The lingering look across the room: he's working up the courage to approach. If you see any of these, you have the power to encourage or discourage with your own eye contact response.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Glance-Smile Practice',
+          description:
+            'Practice the glance-smile-look away in low-stakes situations this week: at a coffee shop, in a store, at the gym. Do it 5 times. You don\'t need to talk to anyone — just practice the signal and notice if people respond.',
+        },
+        {
+          title: 'The Signal Spotter',
+          description:
+            'Go somewhere social and observe other women. Notice who gets approached and who doesn\'t. Track what signals the approached women are sending vs. those who aren\'t. You\'ll see the pattern immediately.',
+        },
+      ],
+      keyTakeaway:
+        'You are the signal. Behavior controls who approaches you, not looks. Master the glance-smile-look away and you control the room without saying a word.',
+    },
   },
 
   {
@@ -220,6 +258,39 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'The approach is 90% courage and 10% technique. Stop waiting for the perfect moment — it doesn\'t exist.',
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'The Handkerchief Philosophy',
+          content:
+            "In the old days, a woman who wanted a man's attention would 'accidentally' drop her handkerchief near him. He'd pick it up, return it, and suddenly they were talking. She initiated everything — but he felt like the pursuer. This is the core principle of female game: create openings, don't make overt approaches. Modern handkerchiefs: positioning yourself near someone at a bar, asking for a recommendation at a bookstore, 'accidentally' making eye contact while reaching for the same item. You're not approaching — you're making yourself approachable in a way that gives him a clear opening. The best part? You get to evaluate his confidence and social skills based on whether he takes the opening.",
+        },
+        {
+          title: 'The Proximity Play',
+          content:
+            "Before any words are spoken, proximity does the heavy lifting. Position yourself within his field of vision. Stand near him at the bar. Sit at the table next to his. Browse the same section at the bookstore. This isn't stalking — it's strategic positioning. Once you're in proximity, use the signals from Chapter 3: the glance, the smile, the open body language facing his direction. Men respond to proximity + signals more than anything. A woman standing across a crowded room might as well be invisible. A woman two feet away who just caught his eye and smiled? Irresistible. You're creating the conditions for connection without doing the direct approach — and that's not passive, it's powerful.",
+        },
+        {
+          title: 'The Opinion Trap',
+          content:
+            "Here's a conversation opener that feels natural and puts you in control: ask for his opinion on something. 'Hey, settle something for me — is this the best coffee shop in this neighborhood or am I wrong?' or 'Quick question — my friend is having a debate: is it weird to go to a concert alone?' Opinion questions work beautifully because they're low-pressure, they invite playful debate, and they immediately create a dynamic where you're both engaged. The key: ask something that has a fun answer, not a boring one. Not 'Do you know what time it is?' but 'Is it just me or does this song sound like it belongs in a spy movie?' You want to create a spark, not just an answer.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Handkerchief Drop',
+          description:
+            'This week, practice creating 3 openings for men to approach you. Position yourself near someone interesting, use your signals, and see what happens. The goal isn\'t a date — it\'s getting comfortable with creating opportunities.',
+        },
+        {
+          title: 'The Opinion Opener',
+          description:
+            'Start 3 conversations this week using opinion questions. Practice on anyone — baristas, people in line, coworkers. Notice how quickly a fun question turns into a real conversation.',
+        },
+      ],
+      keyTakeaway:
+        'You don\'t need to chase — you need to create openings. Drop the handkerchief, send the signal, and let him come to you. That\'s not passive — that\'s powerful.',
+    },
   },
 
   {
@@ -363,6 +434,39 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'A genuine, specific compliment is worth more than a hundred generic ones. The goal is to make people feel seen, not just noticed.',
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'Receiving Compliments Gracefully',
+          content:
+            "Most women are terrible at receiving compliments. 'Oh, this old thing?' 'No, I look awful today.' 'You\'re just being nice.' Stop. When you deflect a compliment, you're telling the other person their perception is wrong — and you're killing any romantic momentum. The upgrade: receive it with warmth. He says 'You look amazing.' You say 'Thank you, I feel amazing' with genuine eye contact and a smile. That\'s it. No deflection, no self-deprecation, no returning the compliment immediately (that feels transactional). Just a warm, confident thank you. Receiving a compliment well is actually more attractive than the compliment itself — it signals security, self-worth, and emotional maturity.",
+        },
+        {
+          title: 'The Subtle Compliment',
+          content:
+            "Women have a secret weapon that men don't: the subtle compliment that barely sounds like a compliment. 'I feel really safe with you' — that hits differently than 'You\'re hot.' 'Something about you makes me want to be honest' — that creates instant intimacy. 'You\'re one of those people who actually listens, aren\'t you?' — that makes him feel seen. The power of the subtle compliment is that it focuses on how he makes you FEEL, not how he looks. Men are rarely complimented on their character or their effect on people. When you do it, you stand out from every woman who ever told him he has nice eyes. You become memorable.",
+        },
+        {
+          title: 'Playful Teasing as a Compliment',
+          content:
+            "The 'Schade' technique (from German: 'what a shame') is a playful way to compliment someone while keeping them on their toes. The format: acknowledge something great about them, then playfully suggest why it won't work. 'You\'re really funny — shame I don\'t date funny guys.' 'You have amazing taste in books — too bad you probably have terrible taste in movies.' 'I love how confident you are — it\'s almost annoying.' This is push-pull at its finest. The compliment lands (they glow), the tease creates tension (they want to prove you wrong), and the playfulness keeps things flirty rather than serious. Warning: tone is everything. This should always be delivered with a smile and a sparkle in your eye.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Graceful Receive',
+          description:
+            'This week, every time someone compliments you — anyone, about anything — respond with a simple, warm "Thank you" and genuine eye contact. No deflecting, no minimizing. Notice how different it feels.',
+        },
+        {
+          title: 'The Subtle Compliment Practice',
+          description:
+            'Give 3 feeling-based compliments this week: tell someone how they make you feel rather than what they look like. "I always feel energized after talking to you" or "You have this calm energy that\'s really refreshing." Track the reactions.',
+        },
+      ],
+      keyTakeaway:
+        'The most powerful compliment isn\'t what you say — it\'s how you receive one. And when you do give compliments, make them about feelings, not features.',
+    },
   },
 
   {
@@ -506,6 +610,39 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'Physical connection is a conversation, not a monologue. Escalate gradually, read the signals, and always prioritize the other person\'s comfort.',
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'The Traffic Light System',
+          content:
+            "Signal-based escalation is your superpower. Think of your body language as a traffic light. Green: you\'re leaning in, touching his arm, playing with your hair, maintaining close proximity, laughing at his jokes with full eye contact. Yellow: neutral body language — you\'re present but not encouraging or discouraging. Red: turned away, creating distance, short responses, closed arms. You control the pace of physical escalation by adjusting your traffic light. The beauty of this system: you never have to say 'touch me more' or 'back off.' Your signals communicate everything. Most men are watching for these signals more than you realize — the good ones will calibrate their behavior to match your light.",
+        },
+        {
+          title: 'Subtle Invitations',
+          content:
+            "There are ways to invite physical closeness without being overt. The accidental touch: your knee touches his under the table and you don't pull away. The arm grab: when he says something funny, you briefly grab his forearm while laughing. The lean-in: you lean close to tell him something 'just between us' even when it's not really a secret. The hair play: tucking hair behind your ear while making eye contact (one of the strongest attraction signals research has identified). Each of these signals tells him: I\'m comfortable with closeness. They're invitations for him to reciprocate. If he does, the dance of escalation begins naturally. If he doesn't, you haven't put yourself out there in a way that feels vulnerable.",
+        },
+        {
+          title: 'Boundaries Are Attractive',
+          content:
+            "The most powerful thing about the signal system is that you can also use it to set boundaries without awkwardness. If he's moving too fast, you don't need to have a confrontation — you shift to yellow. Step back slightly. Angle your body. Use shorter responses. A good man will notice immediately and recalibrate. If he doesn't notice or doesn't care — that's critical information about his character. Here's the deeper truth: having clear boundaries doesn't make you less attractive. It makes you MORE attractive. A woman who knows her own comfort zone and enforces it signals high self-worth. The right man isn't looking for a woman with no boundaries — he's looking for a woman who chooses to let HIM in.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Traffic Light Practice',
+          description:
+            'In your next social interaction with someone you\'re interested in, consciously practice switching between green and yellow signals. Notice how they respond to each. You\'re learning to control the pace without a single word.',
+        },
+        {
+          title: 'The Boundary Check',
+          description:
+            'Reflect on past situations where you felt physically uncomfortable but didn\'t signal it. What could you have done differently? Practice your "yellow light" body language in the mirror: the slight lean back, the arm cross, the phone check. Have these moves ready.',
+        },
+      ],
+      keyTakeaway:
+        'You are the traffic light. Green means go, yellow means slow, red means stop. The right person will read your signals and respect them — and that\'s how you know they\'re worth your time.',
+    },
   },
 
   {
@@ -649,6 +786,39 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'Stop trying to decode cryptic behavior. Interested people show up consistently. Mixed signals are a signal. And you deserve clarity, not a puzzle.',
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'Decoding Male Interest Signals',
+          content:
+            "Men's interest signals are different from women's — and often more physical and less verbal. The eyebrow flash: a quick raise of the eyebrows when he first sees you (happens unconsciously in 1/5th of a second). The toe point: his feet and body orient toward you even in a group conversation. Preening: he adjusts his hair, straightens his shirt, or checks his reflection when he notices you. The lean: he leans toward you, closing the distance. The deep voice: his voice drops slightly lower when talking to you (testosterone response). Protective positioning: he stands between you and the crowd, holds doors, walks on the street side. These aren't conscious choices — they're biological responses he can barely control. Learn to spot them and you'll always know where you stand.",
+        },
+        {
+          title: 'The Actions Test',
+          content:
+            "Words are cheap. Actions are the real signal. Here's the test: Does he initiate plans, or do you always have to? Does he follow through, or does he flake? Does he remember things you told him, or does he ask the same questions twice? Does he introduce you to his friends, or keep you separate? Does he prioritize time with you, or fit you in when it's convenient? A man who is genuinely interested will make effort. Not perfect effort — real effort. He'll text good morning. He'll ask about that thing you were stressed about. He'll show up. If you're constantly making excuses for his behavior ('he's just busy,' 'he's not good with his phone,' 'he shows love differently'), you're doing his emotional labor for him.",
+        },
+        {
+          title: 'Red Flags vs. Green Flags',
+          content:
+            "Green flags: he respects your time, he's consistent, he asks about your life and remembers the answers, he doesn't pressure you physically, he's kind to strangers and service workers, he celebrates your wins, he takes accountability when he messes up. Red flags: love bombing (too much too soon), inconsistency, jealousy disguised as protectiveness, testing your boundaries to see what you'll tolerate, isolating you from friends, breadcrumbing (just enough attention to keep you hooked but never enough to satisfy). The most dangerous red flag: making you feel like YOU'RE the problem for having standards. Your standards aren't too high. His effort is too low. Trust your gut — if something feels off, it probably is.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Signal Decoder',
+          description:
+            'Next time you\'re around a guy you\'re interested in, track his unconscious signals: Where are his feet pointed? Does his voice change when talking to you vs. others? Does he do the eyebrow flash? Write down what you notice afterward.',
+        },
+        {
+          title: 'The Actions Audit',
+          description:
+            'If you\'re currently interested in someone, make two lists: his actions that show interest and his actions that show disinterest. Don\'t include words — only actions. Which list is longer? Be radically honest with yourself.',
+        },
+      ],
+      keyTakeaway:
+        'His words will tell you what he wants you to think. His actions will tell you what he actually feels. Trust the actions, always.',
+    },
   },
 
   {
@@ -754,5 +924,280 @@ export const chapterLessons: ChapterLesson[] = [
     ],
     keyTakeaway:
       'The real graduation isn\'t finishing this guide — it\'s becoming someone who no longer needs it because the lessons have become part of who you are.',
+  },
+
+  // ═══════════════════════════════════════════
+  // PHASE 0: THE BASICS
+  // ═══════════════════════════════════════════
+  {
+    chapterId: 21,
+    lessons: [
+      {
+        title: 'The Shower Game',
+        content:
+          "Let's start with the most basic thing in the world: your shower routine. And no, a 90-second rinse with a 5-in-1 body wash doesn't count. A proper shower routine means washing your face with an actual face wash (not bar soap — that strips your skin), using shampoo AND conditioner (yes, both), and scrubbing your body with a washcloth or loofah. Hot water opens your pores for cleaning, cool water at the end closes them and boosts circulation. That cold finish also wakes you up better than any coffee. Shower daily, obviously, but also shower AFTER working out, not just before your day. Your skin is your largest organ. Treat it like one.",
+      },
+      {
+        title: 'Skincare Isn\'t Just for Girls',
+        content:
+          "Here's the minimum viable skincare routine that takes 3 minutes and will change your face in 30 days: Morning — cleanser, moisturizer with SPF. Night — cleanser, moisturizer. That's it. Four products. Once you've done that consistently for a month, you can add a vitamin C serum in the morning and a retinol at night. Don't buy the cheapest stuff, but you don't need the $200 bottles either. CeraVe, The Ordinary, Neutrogena — these work. The SPF is non-negotiable. Sun damage is the #1 cause of premature aging, and nobody wants to look 45 at 30. Your future self will thank you for every day you wore sunscreen.",
+      },
+      {
+        title: 'The Details That Matter',
+        content:
+          "The difference between a 6 and an 8 is often just grooming details. Nails: trim them weekly, clean under them daily. Nothing kills attraction faster than dirty, jagged fingernails. Teeth: brush twice a day, floss daily (seriously, just do it), and use mouthwash. If your teeth are yellow, whitening strips are cheap and effective. Nose hair: trim it. Ear hair: trim it. Unibrow: handle it. Hair: find a barber you trust, get a cut every 3-4 weeks, and learn ONE simple styling product. Fragrance: get a signature scent. Not body spray — actual cologne. Two sprays max: one on neck, one on wrist. People should discover your scent, not be assaulted by it. These details compound. Each one alone is small. Together, they're the difference between 'he's okay' and 'there's something about him.'",
+      },
+    ],
+    exercises: [
+      {
+        title: 'The Grooming Audit',
+        description:
+          "Stand in front of a mirror under bright light. Check: nails clean and trimmed? Nose/ear hair? Eyebrows groomed? Teeth clean? Skin clear? Hair styled? Rate yourself honestly 1-10. Write down the three lowest-scoring areas. These are your priority fixes for this week.",
+      },
+      {
+        title: 'Build Your Routine',
+        description:
+          "Write out your morning routine step by step, from alarm to walking out the door. If it doesn't include face wash, moisturizer, SPF, deodorant, and styled hair, add those steps. Time it tomorrow. A solid grooming routine should take 15-20 minutes. Set it as non-negotiable.",
+      },
+      {
+        title: 'The Fragrance Mission',
+        description:
+          "Go to a department store or Sephora. Test 5 colognes on paper strips. Pick your top 2, spray one on each wrist. Walk around for an hour (scents change over time). Ask a friend or the salesperson which suits you better. Buy a bottle. This is your signature.",
+      },
+    ],
+    keyTakeaway:
+      "You can't build a skyscraper on a shaky foundation. Grooming isn't vanity — it's self-respect made visible. Handle the basics, and everything else becomes easier.",
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'Your Self-Care Foundation',
+          content:
+            "You probably already know more about skincare than most guys will in their lifetime. But let's make sure your routine is actually working for you, not just keeping you busy. The core: a gentle cleanser suited to your skin type, a good moisturizer, and SPF every single day — even when it's cloudy. If you're dealing with breakouts, add salicylic acid. Dull skin? Vitamin C serum in the morning. The goal isn't a 12-step routine — it's consistency with the right products. Your skin should look healthy, not caked. And here's what most people won't tell you: the best skincare is sleep, water, and managing stress. No product replaces those three.",
+        },
+        {
+          title: 'The Details That Create Magnetism',
+          content:
+            "The women who turn heads aren't always the most conventionally beautiful — they're the most put-together. Clean, well-shaped nails (natural or done, either works). Hair that looks intentional, not accidental. A signature scent that's subtle enough that people lean in to catch it. Teeth that are clean and white. Eyebrows that frame your face well. Skin that glows. These aren't about being high-maintenance — they're about showing the world you care about yourself. And that energy is magnetic. Find your 3-4 non-negotiable grooming steps and make them automatic.",
+        },
+        {
+          title: 'Fragrance & First Impressions',
+          content:
+            "Your scent is a hidden superpower. It's the one sense most directly connected to memory and emotion. Find a signature fragrance that feels like YOU — not what's trending on TikTok, not what your best friend wears. Go to a store, test on your skin (not paper — it smells different on you), and wear it for a day before deciding. Layer it: matching body wash, lotion, then perfume. Light application — wrists, behind ears, in your hair. The goal is a scent trail that makes people wonder what you're wearing, not one that announces your arrival from three rooms away.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Glow-Up Audit',
+          description:
+            "Take a selfie in natural light, no filter. Look at it objectively: skin clear? Brows groomed? Hair intentional? Now take a full-body mirror check: outfit clean and fitted? Nails done? Rate yourself 1-10. Identify your top 3 improvement areas and tackle one this week.",
+        },
+        {
+          title: 'Build Your Power Routine',
+          description:
+            "Map out your ideal morning routine — the one that makes you walk out the door feeling like a 10. Skincare, hair, a put-together outfit, your scent. Time it. Keep it under 30 minutes. Practice it for 7 days straight until it's automatic.",
+        },
+        {
+          title: 'Find Your Signature Scent',
+          description:
+            "Visit a fragrance counter. Test at least 5 perfumes — spray on skin, not paper. Wear your top pick for a full day. Ask someone you trust: 'Does this suit me?' The right scent should feel like an extension of your personality.",
+        },
+      ],
+      keyTakeaway:
+        "Self-care isn't about being perfect — it's about being intentional. When you take care of yourself, it radiates outward. That energy is what people notice first.",
+    },
+  },
+  {
+    chapterId: 22,
+    lessons: [
+      {
+        title: 'Why Your Voice Matters More Than Your Words',
+        content:
+          "Studies show that HOW you say something accounts for 38% of communication impact, while WHAT you say only accounts for 7%. The rest is body language. That means your tone, pace, pitch, and vocal energy are nearly 5x more important than your actual words. Think about the most charismatic people you know — they could read a grocery list and make it sound interesting. It's not magic. It's vocal control. A deep, steady voice communicates confidence. A varied, expressive voice communicates passion. A slow, deliberate pace communicates authority. And the good news? Unlike your height or your face, your voice is something you can actively train and improve. Starting today.",
+      },
+      {
+        title: 'The Filler Word Detox',
+        content:
+          "Um. Uh. Like. You know. Basically. Right? These verbal crutches make you sound unsure, unprepared, and unconfident — even if you're none of those things. The first step is awareness. Record yourself talking for 2 minutes about anything — your day, a movie you saw, whatever. Play it back. Count the filler words. Most people are horrified. That's good — awareness is the cure. The trick to eliminating fillers isn't speaking faster to fill the gaps. It's the opposite: embrace the pause. When you feel a filler word coming, just... stop. Be silent for a beat. Then continue. Pauses make you sound thoughtful and confident. Fillers make you sound nervous. Replace 'um' with silence and you'll sound 10x more commanding overnight.",
+      },
+      {
+        title: 'Voice Exercises That Actually Work',
+        content:
+          "Want a deeper, more resonant voice? It's not about forcing a bass tone — it's about breathing from your diaphragm instead of your chest. Put your hand on your stomach. Breathe in — your stomach should push out. Speak from there, not from your throat. Practice humming at your lowest comfortable pitch for 2 minutes a day. Read out loud for 5 minutes daily, focusing on clear enunciation and varied pitch. Record a podcast episode about anything — just to hear yourself and improve. Practice speaking slightly slower than feels natural. Most people speak too fast when nervous, which raises their pitch and makes them sound anxious. Slow down, breathe deep, speak from your belly. Within 2 weeks, people will start commenting that something about you seems different. They won't know it's your voice — they'll just think you seem more confident.",
+      },
+    ],
+    exercises: [
+      {
+        title: 'The Recording Test',
+        description:
+          "Record yourself talking for 2 minutes about your day. Play it back and count: How many filler words? How's your pace — too fast? How's your tone — too high, too monotone? Write down 3 specific things to improve. Do this weekly to track progress.",
+      },
+      {
+        title: 'The Daily Voice Warm-Up',
+        description:
+          "Every morning: 1) Hum at your lowest comfortable pitch for 1 minute. 2) Say 'bing, bong, bang' slowly, feeling the vibration in your chest. 3) Read a paragraph out loud with exaggerated expression, like you're narrating a movie trailer. Total time: 5 minutes. Do this for 14 days.",
+      },
+      {
+        title: 'The Podcast Challenge',
+        description:
+          "Record yourself speaking about a topic you're passionate about for 5 minutes. No script, no editing. Listen back. Focus on: pace (slow enough?), fillers (less than 5?), energy (engaging?). Delete and re-record until you're satisfied. This is your voice gym.",
+      },
+    ],
+    keyTakeaway:
+      "Your voice is the instrument you play every day but never practice. Five minutes of daily vocal exercise will make you more commanding, more attractive, and more memorable than any pickup line ever could.",
+  },
+  {
+    chapterId: 23,
+    lessons: [
+      {
+        title: 'The Morning Routine That Changes Everything',
+        content:
+          "The first hour of your day sets the tone for the other 23. And if your first hour is scrolling TikTok in bed, eating cereal over the sink, and rushing out the door looking like you just survived a natural disaster — that energy carries. Here's a morning routine that actually works: Wake up at the same time every day (yes, weekends too). No phone for the first 30 minutes. Hydrate — a full glass of water before anything else. Move your body — even 10 minutes of stretching or pushups. Get ready with intention (your grooming routine from Chapter 21). Eat something real. This isn't about being a productivity robot. It's about starting your day from a position of control rather than chaos. People who are in control of their mornings are in control of their lives. And that control is attractive.",
+      },
+      {
+        title: 'Fitness: The Non-Negotiable',
+        content:
+          "You don't need to look like a fitness model. But you need to move your body regularly, and here's why: exercise boosts testosterone, improves posture, increases energy, reduces anxiety, improves sleep, and — oh yeah — makes you look better. Pick something you'll actually do consistently. That's the key — consistency over intensity. Three 30-minute workouts per week beats one brutal 2-hour session followed by a week on the couch. Walking counts. Swimming counts. Dancing counts. If you want maximum ROI, lift weights. Nothing transforms your body and confidence faster than progressive resistance training. You don't need a gym — bodyweight exercises at home work fine. Start with push-ups, squats, planks. Track your progress. The discipline of showing up even when you don't feel like it translates directly to every other area of your life, especially dating.",
+      },
+      {
+        title: 'Sleep & Reading: The Boring Superpowers',
+        content:
+          "Two things that will make you more attractive than any outfit or haircut: sleeping enough and reading books. Sleep: 7-8 hours minimum. Non-negotiable. Sleep deprivation kills your looks (literally — eye bags, dull skin, weight gain), your mood, your cognitive function, and your social energy. Set a bedtime. Put your phone in another room. Make your bedroom dark and cool. This alone will transform how you show up in the world. Reading: 20 minutes a day. That's it. Fiction or non-fiction, doesn't matter. Reading makes you a better conversationalist because you have more to talk about. It makes you more empathetic because you experience different perspectives. It makes you more interesting because you have actual depth. The most attractive people in the world are curious people. Curious people read. Be one of them.",
+      },
+    ],
+    exercises: [
+      {
+        title: 'Design Your Morning',
+        description:
+          "Write your ideal morning routine: wake time, first 3 actions (no phone!), grooming, breakfast. Set your alarm 30 minutes earlier than usual. Follow the routine for 7 consecutive days. Rate your energy and mood each day on a 1-10 scale. Notice the difference.",
+      },
+      {
+        title: 'The Fitness Minimum',
+        description:
+          "Commit to 3 workouts this week, 30 minutes each. No excuses. It can be anything: walking, gym, home workout, sports. Put them in your calendar like appointments. After the week, pick the one you enjoyed most and make it your regular thing.",
+      },
+      {
+        title: 'The Sleep & Read Reset',
+        description:
+          "For the next 7 days: phone goes in another room at 10pm. Lights out by 11pm. Read for 20 minutes before bed (physical book, not a screen). Track your sleep hours and next-day energy level. By day 7, you won't want to go back.",
+      },
+    ],
+    keyTakeaway:
+      "Discipline is the least sexy word in dating advice, but it's the most powerful one. The boring stuff — sleep, fitness, routine — is what separates magnetic people from forgettable ones.",
+  },
+  {
+    chapterId: 24,
+    lessons: [
+      {
+        title: 'Gentleman Etiquette: The Lost Art',
+        content:
+          "Manners aren't outdated — they're rare. And rare things are valuable. Here are the moves that separate a man from a boy: Hold the door. Not in a dramatic, look-at-me way. Just naturally hold it open for the person behind you — any person. On stairs with a woman: walk behind her going up (so you're not staring at her butt), walk in front going down (so you can catch her if she trips). At the table: pull her chair out. Wait until she sits before you sit. Place your napkin on your lap. Don't start eating until everyone has their food. When the bill comes: grab it naturally. Don't make it a big production. If she offers to split, say 'I've got this one' with a smile. Walking on the sidewalk: position yourself on the traffic side. If a car splashes water, it hits you, not her. When she arrives at the restaurant: stand up. Every time. These aren't about performing — they're about showing awareness and consideration. A gentleman isn't putting on an act. He's showing that he notices, he cares, and he was raised right — or raised himself right.",
+      },
+      {
+        title: 'Presence: The IDGAF That\'s Actually Attractive',
+        content:
+          "There's a massive difference between 'I don't care about anything' (unattractive, childish) and 'I'm secure in who I am and don't need your approval' (incredibly magnetic). The first is avoidance. The second is presence. Presence means being fully where you are. When you're in a conversation, you're IN it — not checking your phone, not scanning the room, not thinking about what to say next. When you walk into a room, you walk in like you belong there — not aggressively, just naturally. You don't slouch, you don't hide in corners, you don't apologize for existing. Presence also means being comfortable with silence. Most people can't handle silence — they fill it with nervous chatter. A person with presence can sit in silence and it doesn't feel awkward, it feels powerful. Practice this: next time there's a pause in conversation, don't rush to fill it. Just hold eye contact, smile slightly, and let the moment breathe. That's presence. And it's intoxicating.",
+      },
+      {
+        title: 'Table Manners & Social Grace',
+        content:
+          "The way you eat tells people everything about you. Chew with your mouth closed — always. Don't talk with food in your mouth. Use your utensils properly (Google 'Continental dining style' — it takes 5 minutes to learn and lasts a lifetime). Don't reach across the table — ask someone to pass it. Put your phone face-down on the table, or better yet, in your pocket. When offering your coat: if she's cold and you have a jacket, offer it without being asked. Just drape it over her shoulders with a casual 'Here.' Don't make it weird. Don't expect a medal. When ordering: know what you want. Decisiveness is attractive. Don't be the person who holds up the waiter for 10 minutes. At bars: order for the table sometimes. Know a good wine or cocktail to recommend. Tip well — how you treat service staff says everything about your character. These aren't rules to memorize — they're habits to internalize. Once they're automatic, you'll stand out in every social setting without trying.",
+      },
+    ],
+    exercises: [
+      {
+        title: 'The Gentleman Week',
+        description:
+          "For 7 days, practice every gentleman move: hold every door, walk on the traffic side, stand when someone arrives at your table, pull out a chair. By day 7, these should feel natural, not forced. Notice how people react differently to you.",
+      },
+      {
+        title: 'The Dining Test',
+        description:
+          "Have a meal at a sit-down restaurant (even alone). Practice: napkin on lap before eating, Continental utensil style, phone in pocket, correct posture. Order confidently. Tip 20%. Pay attention to how it feels to eat with intention instead of just shoveling food.",
+      },
+      {
+        title: 'The Presence Practice',
+        description:
+          "For one full day, practice presence: no phone during conversations, maintain eye contact, don't rush to fill silences, walk into rooms with your shoulders back and head up. At the end of the day, journal about how people responded to you differently.",
+      },
+    ],
+    keyTakeaway:
+      "Manners aren't about following rules — they're about showing the world you have awareness, consideration, and quiet confidence. A true gentleman doesn't perform — he just naturally makes everyone around him feel valued.",
+    femaleVariant: {
+      lessons: [
+        {
+          title: 'Grace, Poise & Commanding Respect',
+          content:
+            "Grace isn't about being delicate or submissive — it's about carrying yourself with such quiet confidence that people naturally pay attention. A woman with poise walks into a room and doesn't need to announce herself. She doesn't need to be the loudest or the most dramatic. Her posture says 'I know who I am.' Her eye contact says 'I'm worth your time.' Her energy says 'I choose to be here.' Practice walking like you're late for nothing. Sit with your back straight and legs uncrossed or elegantly crossed. Speak at a pace that says you're not rushing to justify yourself. Accept compliments with 'Thank you' — not deflection. When someone holds the door, walk through with a smile and acknowledgment. Grace is simply the absence of unnecessary apology for existing.",
+        },
+        {
+          title: 'Social Etiquette: The Modern Woman\'s Playbook',
+          content:
+            "Know wine, or at least know enough to order confidently. Know how to hold a conversation at a dinner party — ask questions, remember names, find the quiet person and include them. Table manners matter: napkin on lap, elbows off, chew with your mouth closed. Phone in your bag, not on the table. When the bill comes: if he reaches for it, let him — a genuine 'Thank you, that's really kind' is perfect. If you want to contribute, offer to get the next one or get drinks after. Don't make it a power struggle. When you arrive somewhere: walk in like you belong, make eye contact with the host, greet people warmly. When you leave: say goodbye properly — don't just vanish. How you arrive and leave are the two things people remember most.",
+        },
+        {
+          title: 'The Art of Feminine Presence',
+          content:
+            "Feminine presence is different from masculine presence, but equally powerful. It's warmth combined with boundaries. It's being approachable without being available to everyone. It's softness backed by steel. Practice this: when someone speaks to you, give them your full attention. Don't check your phone, don't look around. Make them feel like they're the only person in the room. That's a superpower most people never develop. But also: know when to walk away. A woman with presence doesn't chase, doesn't over-explain, doesn't stay where she isn't valued. She can enjoy someone's company without needing it. She can be alone at a bar and radiate 'I chose to be here' rather than 'I'm waiting for someone.' That energy — self-contained, warm, magnetic — is what makes people gravitate toward you.",
+        },
+      ],
+      exercises: [
+        {
+          title: 'The Poise Week',
+          description:
+            "For 7 days: walk with your shoulders back and head up. Accept every compliment with just 'Thank you.' Don't apologize unless you actually did something wrong. Sit with good posture in every meeting and meal. Notice how people treat you differently by day 7.",
+        },
+        {
+          title: 'The Social Grace Dinner',
+          description:
+            "Go to a nice restaurant — alone or with a friend. Practice: phone in bag, napkin on lap, order confidently, engage with the waiter warmly, eat slowly. Notice how different the experience feels when you're fully present instead of documenting it for Instagram.",
+        },
+        {
+          title: 'The Presence Experiment',
+          description:
+            "For one day, give every person you interact with your complete attention. Eye contact, genuine listening, no phone. At the end of the day, notice how many deeper conversations happened, how many people seemed drawn to you. This is feminine presence in action.",
+        },
+      ],
+      keyTakeaway:
+        "Grace isn't about being perfect — it's about being intentional. A woman who carries herself with poise and treats everyone with warmth becomes unforgettable without even trying.",
+    },
+  },
+  {
+    chapterId: 25,
+    lessons: [
+      {
+        title: 'The Barista Test',
+        content:
+          "Here's the truth nobody tells you: social skills are a muscle, and most people's social muscles have atrophied from years of hiding behind screens. The fix? Start with the easiest reps. Your barista. Your cashier. Your Uber driver. The person next to you in line. These are zero-stakes conversations. They can't reject you — they're literally paid to be nice to you. Your mission: make one service worker smile per day. Not with a joke — just with genuine human warmth. 'How's your day going?' with actual eye contact. Compliment their efficiency. Ask what drink they'd recommend. Thank them by name (it's on the cup or their nametag). The goal here isn't to become best friends with your barista. It's to break the pattern of going through life on autopilot, treating people like vending machines. When you start seeing every interaction as practice, the world becomes your social gym. Within a week of doing this daily, you'll notice something wild: talking to strangers starts feeling... natural. Like it's supposed to.",
+      },
+      {
+        title: 'The Stranger Workout',
+        content:
+          "Level 2. Now we're talking to people who DON'T have to be nice to us. Compliment a stranger — not on their body (creepy), on their choices. Their shoes, their bag, their dog, their book. 'Hey, those are great shoes' as you walk by. No expectation of conversation, just a drive-by compliment and keep walking. Once that feels easy, graduate to opinion requests: 'Hey quick question — I'm trying to pick a gift for my friend, does this look good?' People love giving their opinions. It makes them feel valued. Start conversations in elevators, in lines, at the gym water fountain. Comment on something in the shared environment: 'This line is insane' or 'This song is actually good.' The key: approach with energy, not neediness. You're not trying to GET anything from them. You're just a friendly human being friendly. The paradox is that when you stop trying to get something from conversations, people start wanting to give you their time, attention, and number.",
+      },
+      {
+        title: 'Wit & Banter: The Art of Being Quick',
+        content:
+          "Witty people aren't born — they're practiced. The guys who always have the perfect comeback? They've had thousands of conversations. They've failed thousands of times. They've tried things, bombed, adjusted, and tried again. Here's how to build your wit muscle: 1) Consume funny content intentionally — stand-up comedy, witty podcasts, sharp dialogue in shows. Notice the STRUCTURE of humor, not just the jokes. 2) Practice callback humor — reference something from earlier in the conversation. 'Remember when you said...' This makes people feel heard AND makes you funny. 3) Playful teasing — light exaggeration of something they said or did. NOT insults. 'Oh so you're one of THOSE people who puts ketchup on everything' said with a smile. 4) Self-deprecation in small doses — shows you don't take yourself too seriously. 5) Thinking out loud — don't filter every thought. Sometimes the funniest things come from unfiltered observations. The daily practice: try to make at least one person laugh per day who isn't a close friend. Track your hits and misses. Within a month, being funny will feel like second nature.",
+      },
+    ],
+    exercises: [
+      {
+        title: 'The 7-Day Social Challenge',
+        description:
+          "Day 1: Say hi and smile at 3 strangers. Day 2: Ask a barista how their day is going — actually listen. Day 3: Compliment a stranger on something they chose (outfit, bag, book). Day 4: Ask a stranger for their opinion on something small. Day 5: Have a 2-minute conversation with someone new. Day 6: Make a stranger laugh (or try). Day 7: Combine everything — approach someone, compliment, converse, and make them laugh. Track each day in your notes.",
+      },
+      {
+        title: 'The Comedy Study',
+        description:
+          "Watch 3 stand-up specials this week. After each one, write down: What made you laugh hardest? What technique did they use (timing, callback, misdirection, relatability)? Try using ONE technique in a real conversation the next day. Humor is learnable — you just need to study it like any other skill.",
+      },
+      {
+        title: 'The Banter Log',
+        description:
+          "For 7 days, keep a note on your phone: every time you make someone laugh, write down what you said and why it worked. Every time a joke falls flat, write that down too. At the end of the week, you'll see patterns — what kind of humor suits you naturally. Double down on that.",
+      },
+    ],
+    keyTakeaway:
+      "Social skills aren't a talent — they're a practice. The person who talks to 10 strangers a week will always be more socially confident than the person who reads 10 books about social skills. Get out there and rep it out.",
   },
 ];

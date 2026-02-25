@@ -21,9 +21,9 @@ import { useProgressStore } from '@/src/store/progress-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { getCharacter } from '@/src/data/content/coach-characters';
 import { chapters } from '@/src/data/content/chapters';
-import type { SocialEnergy, AgeGroup, BasicsLevel, SkillLevel, Goal } from '@/src/store/user-profile-store';
+import type { SocialEnergy, AgeGroup, BasicsLevel, SkillLevel, Goal, UserGender } from '@/src/store/user-profile-store';
 
-const TOTAL_PAGES = 7;
+const TOTAL_PAGES = 8;
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
@@ -36,10 +36,12 @@ export default function OnboardingScreen() {
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const {
-    socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
-    setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
+    userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
+    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
     completeOnboarding, skipOnboarding,
   } = useUserProfileStore();
+
+  const g = userGender ?? 'male';
 
   const goToPage = useCallback((page: number) => {
     flatListRef.current?.scrollToIndex({ index: page, animated: true });
@@ -60,18 +62,18 @@ export default function OnboardingScreen() {
 
   const handleComplete = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const personalization = getPersonalization({ socialEnergy, ageGroup, basicsLevel, skillLevel, goal });
+    const personalization = getPersonalization({ userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal });
     const currentCharacterId = useSettingsStore.getState().selectedCharacterId;
-    if (currentCharacterId === 'charismo') {
+    if (currentCharacterId === 'charismo' || currentCharacterId === 'bestfriend') {
       setCharacterId(personalization.recommendedCharacterId);
     }
     completeOnboarding();
     router.replace('/(tabs)');
-  }, [socialEnergy, ageGroup, skillLevel, goal, completeOnboarding, setCharacterId, router]);
+  }, [userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal, completeOnboarding, setCharacterId, router]);
 
   const personalization = useMemo(
-    () => getPersonalization({ socialEnergy, ageGroup, basicsLevel, skillLevel, goal }),
-    [socialEnergy, ageGroup, basicsLevel, skillLevel, goal],
+    () => getPersonalization({ userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal }),
+    [userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal],
   );
 
   const recommendedCharacter = useMemo(
@@ -88,6 +90,24 @@ export default function OnboardingScreen() {
     switch (item) {
       case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} />;
       case 1: return (
+        <QuestionPage
+          locale={locale}
+          title={t('onboarding.gender.title')}
+          subtitle={t('onboarding.gender.subtitle')}
+          footnote={t('onboarding.gender.footnote')}
+          options={[
+            { emoji: '🚀', label: t('onboarding.gender.male'), note: t('onboarding.gender.maleNote'), value: 'male' as const },
+            { emoji: '✨', label: t('onboarding.gender.female'), note: t('onboarding.gender.femaleNote'), value: 'female' as const },
+          ]}
+          selected={userGender}
+          onSelect={(value) => {
+            setUserGender(value as UserGender);
+            setTimeout(advance, 400);
+          }}
+          width={width}
+        />
+      );
+      case 2: return (
         <QuestionPage
           locale={locale}
           title={t('onboarding.socialEnergy.title')}
@@ -107,7 +127,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 2: return (
+      case 3: return (
         <QuestionPage
           locale={locale}
           title={t('onboarding.ageGroup.title')}
@@ -126,16 +146,16 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 3: return (
+      case 4: return (
         <QuestionPage
           locale={locale}
-          title={t('onboarding.basics.title')}
-          subtitle={t('onboarding.basics.subtitle')}
+          title={t(`onboarding.basics.${g}.title`)}
+          subtitle={t(`onboarding.basics.${g}.subtitle`)}
           options={[
-            { emoji: '🧼', label: t('onboarding.basics.none'), value: 'basics_none' as const },
-            { emoji: '🚿', label: t('onboarding.basics.some'), value: 'basics_some' as const },
-            { emoji: '💅', label: t('onboarding.basics.solid'), value: 'basics_solid' as const },
-            { emoji: '👑', label: t('onboarding.basics.mastered'), value: 'basics_mastered' as const },
+            { emoji: '🧼', label: t(`onboarding.basics.${g}.none`), value: 'basics_none' as const },
+            { emoji: '🚿', label: t(`onboarding.basics.${g}.some`), value: 'basics_some' as const },
+            { emoji: '💅', label: t(`onboarding.basics.${g}.solid`), value: 'basics_solid' as const },
+            { emoji: '👑', label: t(`onboarding.basics.${g}.mastered`), value: 'basics_mastered' as const },
           ]}
           selected={basicsLevel}
           onSelect={(value) => {
@@ -145,17 +165,17 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 4: return (
+      case 5: return (
         <QuestionPage
           locale={locale}
           title={t('onboarding.skillLevel.title')}
           subtitle={t('onboarding.skillLevel.subtitle')}
           question={t('onboarding.skillLevel.question')}
           options={[
-            { emoji: '🐣', label: t('onboarding.skillLevel.beginner'), note: t('onboarding.skillLevel.beginnerNote'), value: 'beginner' as const },
-            { emoji: '📈', label: t('onboarding.skillLevel.intermediate'), note: t('onboarding.skillLevel.intermediateNote'), value: 'intermediate' as const },
-            { emoji: '🎯', label: t('onboarding.skillLevel.advanced'), note: t('onboarding.skillLevel.advancedNote'), value: 'advanced' as const },
-            { emoji: '🔥', label: t('onboarding.skillLevel.expert'), note: t('onboarding.skillLevel.expertNote'), value: 'expert' as const },
+            { emoji: '🐣', label: t(`onboarding.skillLevel.${g}.beginner`), note: t(`onboarding.skillLevel.${g}.beginnerNote`), value: 'beginner' as const },
+            { emoji: '📈', label: t(`onboarding.skillLevel.${g}.intermediate`), note: t(`onboarding.skillLevel.${g}.intermediateNote`), value: 'intermediate' as const },
+            { emoji: '🎯', label: t(`onboarding.skillLevel.${g}.advanced`), note: t(`onboarding.skillLevel.${g}.advancedNote`), value: 'advanced' as const },
+            { emoji: '🔥', label: t(`onboarding.skillLevel.${g}.expert`), note: t(`onboarding.skillLevel.${g}.expertNote`), value: 'expert' as const },
           ]}
           selected={skillLevel}
           onSelect={(value) => {
@@ -165,17 +185,17 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 5: return (
+      case 6: return (
         <QuestionPage
           locale={locale}
           title={t('onboarding.goal.title')}
           subtitle={t('onboarding.goal.subtitle')}
           options={[
-            { emoji: '🗣️', label: t('onboarding.goal.socialConfidence'), value: 'social_confidence' as const },
-            { emoji: '📅', label: t('onboarding.goal.getDates'), value: 'get_dates' as const },
-            { emoji: '💕', label: t('onboarding.goal.findPartner'), value: 'find_partner' as const },
-            { emoji: '✨', label: t('onboarding.goal.socialMagnetism'), value: 'social_magnetism' as const },
-            { emoji: '👑', label: t('onboarding.goal.ambitious'), note: t('onboarding.goal.ambitiousNote'), value: 'ambitious' as const },
+            { emoji: '🗣️', label: t(`onboarding.goal.${g}.socialConfidence`), value: 'social_confidence' as const },
+            { emoji: '📅', label: t(`onboarding.goal.${g}.getDates`), value: 'get_dates' as const },
+            { emoji: '💕', label: t(`onboarding.goal.${g}.findPartner`), value: 'find_partner' as const },
+            { emoji: '✨', label: t(`onboarding.goal.${g}.socialMagnetism`), value: 'social_magnetism' as const },
+            { emoji: '👑', label: t(`onboarding.goal.${g}.ambitious`), note: t(`onboarding.goal.${g}.ambitiousNote`), value: 'ambitious' as const },
           ]}
           selected={goal}
           onSelect={(value) => {
@@ -185,7 +205,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 6: return (
+      case 7: return (
         <ProfileRevealPage
           locale={locale}
           t={t}
@@ -202,13 +222,13 @@ export default function OnboardingScreen() {
       default: return null;
     }
   }, [
-    locale, t, width, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
+    locale, t, width, g, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
     personalization, recommendedCharacter, suggestedChapter,
     advance, handleSkip, handleComplete,
-    setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
+    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
   ]);
 
-  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6], []);
+  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7], []);
 
   return (
     <View style={styles.screen}>

@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 import { useHabitStore } from '@/src/store/habit-store';
 import { presetHabits } from '@/src/data/content/preset-habits';
 import { phases } from '@/src/data/content/chapters';
+import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 
 const EMOJI_GRID = [
   '🔥', '💪', '🧠', '📝', '🏃', '🧘', '💧', '🥗', '😊', '🎯',
@@ -62,7 +63,7 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
           <Text style={styles.sectionTitle}>
             {locale === 'de' ? 'Eigene erstellen' : 'Create Custom'}
           </Text>
-          <View style={styles.customCard}>
+          <GlassCard style={styles.customCard} padding={18}>
             <Text style={styles.emojiPickerLabel}>
               {locale === 'de' ? 'Emoji wählen' : 'Pick an emoji'}
             </Text>
@@ -97,7 +98,7 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
                 {locale === 'de' ? 'Hinzufügen' : 'Add'}
               </Text>
             </Pressable>
-          </View>
+          </GlassCard>
 
           {/* Suggested presets by phase */}
           <Text style={styles.sectionTitle}>
@@ -163,10 +164,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3, marginBottom: 12, marginTop: 8,
   },
   customCard: {
-    backgroundColor: '#fff', borderRadius: 20, padding: 18,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
     marginBottom: 24,
   },
   emojiPickerLabel: {

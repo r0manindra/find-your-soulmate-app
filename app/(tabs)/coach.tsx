@@ -290,7 +290,10 @@ export default function CoachScreen() {
                 : 'Each coach has their own style. Find the one that fits you.'}
             </Text>
             <ScrollView contentContainerStyle={styles.characterList} showsVerticalScrollIndicator={false}>
-              {coachCharacters.map((char) => {
+              {coachCharacters.filter((c) => {
+                const gender = userProfile.userGender ?? 'male';
+                return c.forGender === gender || c.forGender === 'all';
+              }).map((char) => {
                 const isSelected = char.id === selectedCharacterId;
                 const isLocked = char.isPremium && !isPremium;
 
