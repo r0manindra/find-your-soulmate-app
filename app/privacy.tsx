@@ -46,8 +46,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Verantwortlich für die Datenverarbeitung ist:\n\nFlirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@charismo.app\n\nFür Fragen zum Datenschutz kontaktieren Sie uns bitte unter der oben genannten E-Mail-Adresse.'
-            : 'The data controller responsible for processing your data is:\n\nFlirt IQ\nOwner: Roman Indra\nEmail: privacy@charismo.app\n\nFor any data protection inquiries, please contact us at the email address above.'}
+            ? 'Verantwortlich für die Datenverarbeitung ist:\n\nFlirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@flirt-iq.com\n\nFür Fragen zum Datenschutz kontaktieren Sie uns bitte unter der oben genannten E-Mail-Adresse.'
+            : 'The data controller responsible for processing your data is:\n\nFlirt IQ\nOwner: Roman Indra\nEmail: privacy@flirt-iq.com\n\nFor any data protection inquiries, please contact us at the email address above.'}
         </Text>
 
         {/* Section 2: Data We Collect */}
@@ -66,8 +66,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Wir verarbeiten Ihre Daten auf folgenden Rechtsgrundlagen (Art. 6 DSGVO):\n\n• Vertragserfüllung (Art. 6 Abs. 1 lit. b): Kontodaten, App-Fortschritt, KI-Coach-Nachrichten und Kaufdaten — notwendig zur Erbringung unserer Dienste.\n• Berechtigtes Interesse (Art. 6 Abs. 1 lit. f): Analytics und Absturzberichte — zur Verbesserung der App-Stabilität und -Leistung.\n• Einwilligung (Art. 6 Abs. 1 lit. a): Marketing-Kommunikation (nur mit ausdrücklichem Opt-in).'
-            : 'We process your data on the following legal bases (GDPR Art. 6):\n\n• Contract performance (Art. 6(1)(b)): Account data, app progress, AI coach messages, and purchase data — necessary to provide our services.\n• Legitimate interest (Art. 6(1)(f)): Analytics and crash reports — to improve app stability and performance.\n• Consent (Art. 6(1)(a)): Marketing communications (only with explicit opt-in).'}
+            ? 'Wir verarbeiten Ihre Daten auf folgenden Rechtsgrundlagen (Art. 6 DSGVO):\n\n• Vertragserfüllung (Art. 6 Abs. 1 lit. b): Kontodaten, App-Fortschritt, KI-Coach-Nachrichten und Kaufdaten -notwendig zur Erbringung unserer Dienste.\n• Berechtigtes Interesse (Art. 6 Abs. 1 lit. f): Analytics und Absturzberichte -zur Verbesserung der App-Stabilität und -Leistung.\n• Einwilligung (Art. 6 Abs. 1 lit. a): Marketing-Kommunikation (nur mit ausdrücklichem Opt-in).'
+            : 'We process your data on the following legal bases (GDPR Art. 6):\n\n• Contract performance (Art. 6(1)(b)): Account data, app progress, AI coach messages, and purchase data -necessary to provide our services.\n• Legitimate interest (Art. 6(1)(f)): Analytics and crash reports -to improve app stability and performance.\n• Consent (Art. 6(1)(a)): Marketing communications (only with explicit opt-in).'}
         </Text>
 
         {/* Section 4: Purpose */}
@@ -86,8 +86,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Unsere Coach-Funktion wird durch künstliche Intelligenz betrieben. Sie interagieren mit einem KI-System, nicht mit einem Menschen. Gemäß EU AI Act (Artikel 50):\n\n• Ihre Chat-Nachrichten werden zur Antwortgenerierung an unseren KI-Dienstleister übermittelt.\n• Ihre Chat-Daten werden NICHT zum Training von KI-Modellen verwendet.\n• Der KI-Coach bietet Bildungsinhalte — keine professionelle psychologische oder Beziehungsberatung.\n• Sie können Ihren Chat-Verlauf jederzeit löschen.\n• Chat-Nachrichten werden maximal 90 Tage auf unseren Servern gespeichert.'
-            : 'Our coach feature is powered by artificial intelligence. You are interacting with an AI system, not a human. In compliance with the EU AI Act (Article 50):\n\n• Your chat messages are sent to our AI service provider to generate responses.\n• Your chat data is NOT used to train AI models.\n• The AI coach provides educational content — not professional psychological or relationship counseling.\n• You can delete your chat history at any time.\n• Chat messages are retained on our servers for a maximum of 90 days.'}
+            ? 'Unsere Coach-Funktion wird durch künstliche Intelligenz betrieben. Sie interagieren mit einem KI-System, nicht mit einem Menschen. Gemäß EU AI Act (Artikel 50):\n\n• Ihre Chat-Nachrichten werden zur Antwortgenerierung an unseren KI-Dienstleister übermittelt.\n• Ihre Chat-Daten werden NICHT zum Training von KI-Modellen verwendet.\n• Der KI-Coach bietet Bildungsinhalte -keine professionelle psychologische oder Beziehungsberatung.\n• Sie können Ihren Chat-Verlauf jederzeit löschen.\n• Chat-Nachrichten werden maximal 90 Tage auf unseren Servern gespeichert.'
+            : 'Our coach feature is powered by artificial intelligence. You are interacting with an AI system, not a human. In compliance with the EU AI Act (Article 50):\n\n• Your chat messages are sent to our AI service provider to generate responses.\n• Your chat data is NOT used to train AI models.\n• The AI coach provides educational content -not professional psychological or relationship counseling.\n• You can delete your chat history at any time.\n• Chat messages are retained on our servers for a maximum of 90 days.'}
         </Text>
 
         {/* Section 6: Third Parties */}
@@ -96,8 +96,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Wir arbeiten mit folgenden Drittanbietern zusammen:\n\n• RevenueCat — Abo-Verwaltung (Kaufverlauf, anonyme Nutzer-ID)\n• Firebase (Google) — Backend, Analytics, Absturzberichte\n• Supabase — Datenbank und Backend (Kontodaten, Fortschritt, Chat)\n• KI-Dienstleister — Generierung von Coach-Antworten (Chat-Nachrichten)\n• Apple — App-Verteilung und Zahlungsabwicklung\n\nMit jedem Dienstleister besteht eine Auftragsverarbeitungsvereinbarung (AVV) gemäß DSGVO.'
-            : 'We work with the following third-party services:\n\n• RevenueCat — Subscription management (purchase history, anonymous user ID)\n• Firebase (Google) — Backend, analytics, crash reports\n• Supabase — Database and backend (account data, progress, chat messages)\n• AI service provider — Coach response generation (chat messages)\n• Apple — App distribution and payment processing\n\nA Data Processing Agreement (DPA) is in place with each service provider in compliance with GDPR.'}
+            ? 'Wir arbeiten mit folgenden Drittanbietern zusammen:\n\n• RevenueCat -Abo-Verwaltung (Kaufverlauf, anonyme Nutzer-ID)\n• Firebase (Google) -Backend, Analytics, Absturzberichte\n• Supabase -Datenbank und Backend (Kontodaten, Fortschritt, Chat)\n• KI-Dienstleister -Generierung von Coach-Antworten (Chat-Nachrichten)\n• Apple -App-Verteilung und Zahlungsabwicklung\n\nMit jedem Dienstleister besteht eine Auftragsverarbeitungsvereinbarung (AVV) gemäß DSGVO.'
+            : 'We work with the following third-party services:\n\n• RevenueCat -Subscription management (purchase history, anonymous user ID)\n• Firebase (Google) -Backend, analytics, crash reports\n• Supabase -Database and backend (account data, progress, chat messages)\n• AI service provider -Coach response generation (chat messages)\n• Apple -App distribution and payment processing\n\nA Data Processing Agreement (DPA) is in place with each service provider in compliance with GDPR.'}
         </Text>
 
         {/* Section 7: International Transfers */}
@@ -126,8 +126,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Gemäß DSGVO haben Sie folgende Rechte:\n\n• Auskunftsrecht (Art. 15) — Kopie Ihrer personenbezogenen Daten anfordern\n• Recht auf Berichtigung (Art. 16) — Korrektur unrichtiger Daten\n• Recht auf Löschung (Art. 17) — Löschung Ihrer Daten verlangen\n• Recht auf Einschränkung der Verarbeitung (Art. 18)\n• Recht auf Datenübertragbarkeit (Art. 20) — Ihre Daten in maschinenlesbarem Format erhalten\n• Widerspruchsrecht (Art. 21) — der Verarbeitung widersprechen\n• Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3) — jederzeit, ohne Auswirkung auf die Rechtmäßigkeit vorheriger Verarbeitung\n\nZur Ausübung Ihrer Rechte kontaktieren Sie uns unter: privacy@charismo.app\n\nSie haben außerdem das Recht, eine Beschwerde bei der österreichischen Datenschutzbehörde (dsb.gv.at) einzureichen.'
-            : 'Under the GDPR, you have the following rights:\n\n• Right of access (Art. 15) — request a copy of your personal data\n• Right to rectification (Art. 16) — correct inaccurate data\n• Right to erasure (Art. 17) — request deletion of your data\n• Right to restriction of processing (Art. 18)\n• Right to data portability (Art. 20) — receive your data in a machine-readable format\n• Right to object (Art. 21) — object to processing based on legitimate interest\n• Right to withdraw consent (Art. 7(3)) — at any time, without affecting the lawfulness of prior processing\n\nTo exercise your rights, contact us at: privacy@charismo.app\n\nYou also have the right to lodge a complaint with the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
+            ? 'Gemäß DSGVO haben Sie folgende Rechte:\n\n• Auskunftsrecht (Art. 15) -Kopie Ihrer personenbezogenen Daten anfordern\n• Recht auf Berichtigung (Art. 16) -Korrektur unrichtiger Daten\n• Recht auf Löschung (Art. 17) -Löschung Ihrer Daten verlangen\n• Recht auf Einschränkung der Verarbeitung (Art. 18)\n• Recht auf Datenübertragbarkeit (Art. 20) -Ihre Daten in maschinenlesbarem Format erhalten\n• Widerspruchsrecht (Art. 21) -der Verarbeitung widersprechen\n• Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3) -jederzeit, ohne Auswirkung auf die Rechtmäßigkeit vorheriger Verarbeitung\n\nZur Ausübung Ihrer Rechte kontaktieren Sie uns unter: privacy@flirt-iq.com\n\nSie haben außerdem das Recht, eine Beschwerde bei der österreichischen Datenschutzbehörde (dsb.gv.at) einzureichen.'
+            : 'Under the GDPR, you have the following rights:\n\n• Right of access (Art. 15) -request a copy of your personal data\n• Right to rectification (Art. 16) -correct inaccurate data\n• Right to erasure (Art. 17) -request deletion of your data\n• Right to restriction of processing (Art. 18)\n• Right to data portability (Art. 20) -receive your data in a machine-readable format\n• Right to object (Art. 21) -object to processing based on legitimate interest\n• Right to withdraw consent (Art. 7(3)) -at any time, without affecting the lawfulness of prior processing\n\nTo exercise your rights, contact us at: privacy@flirt-iq.com\n\nYou also have the right to lodge a complaint with the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
         </Text>
 
         {/* Section 10: Account Deletion */}
@@ -136,8 +136,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Sie können Ihr Konto und alle zugehörigen Daten jederzeit löschen, indem Sie uns unter privacy@charismo.app kontaktieren. Bei Löschung:\n\n• Ihr Konto und Profildaten werden dauerhaft gelöscht\n• KI-Chat-Verlauf wird gelöscht\n• Kaufbelege können gemäß gesetzlicher Anforderungen aufbewahrt werden\n• Lokale Daten auf Ihrem Gerät werden bei Deinstallation entfernt'
-            : 'You can delete your account and all associated data at any time by contacting us at privacy@charismo.app. Upon deletion:\n\n• Your account and profile data will be permanently removed\n• AI chat history will be deleted\n• Purchase receipts may be retained as required by law\n• Local data on your device is removed when you uninstall the app'}
+            ? 'Sie können Ihr Konto und alle zugehörigen Daten jederzeit löschen, indem Sie uns unter privacy@flirt-iq.com kontaktieren. Bei Löschung:\n\n• Ihr Konto und Profildaten werden dauerhaft gelöscht\n• KI-Chat-Verlauf wird gelöscht\n• Kaufbelege können gemäß gesetzlicher Anforderungen aufbewahrt werden\n• Lokale Daten auf Ihrem Gerät werden bei Deinstallation entfernt'
+            : 'You can delete your account and all associated data at any time by contacting us at privacy@flirt-iq.com. Upon deletion:\n\n• Your account and profile data will be permanently removed\n• AI chat history will be deleted\n• Purchase receipts may be retained as required by law\n• Local data on your device is removed when you uninstall the app'}
         </Text>
 
         {/* Section 11: Tracking Technologies */}
@@ -186,8 +186,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Flirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@charismo.app\n\nBei Fragen zum Datenschutz kontaktieren Sie uns gerne. Sie haben außerdem das Recht, sich an die österreichische Datenschutzbehörde (dsb.gv.at) zu wenden.'
-            : 'Flirt IQ\nOwner: Roman Indra\nEmail: privacy@charismo.app\n\nFor any questions about data protection, please contact us. You also have the right to contact the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
+            ? 'Flirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@flirt-iq.com\n\nBei Fragen zum Datenschutz kontaktieren Sie uns gerne. Sie haben außerdem das Recht, sich an die österreichische Datenschutzbehörde (dsb.gv.at) zu wenden.'
+            : 'Flirt IQ\nOwner: Roman Indra\nEmail: privacy@flirt-iq.com\n\nFor any questions about data protection, please contact us. You also have the right to contact the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
         </Text>
 
         <View style={styles.bottomSpacer} />

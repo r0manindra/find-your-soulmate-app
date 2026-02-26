@@ -24,7 +24,7 @@ interface HabitStore {
   isPresetAlreadyAdded: (presetId: string) => boolean;
   getTodayCompletedCount: () => number;
   getTodayTotalCount: () => number;
-  setHabitSchedule: (habitId: string, time: HabitTimeSlot, days: number[]) => void;
+  setHabitSchedule: (habitId: string, time: HabitTimeSlot, days: number[], specificTime?: string) => void;
   getHabitsForDate: (date: Date) => Habit[];
 }
 
@@ -199,10 +199,10 @@ export const useHabitStore = create<HabitStore>()(
         }).length;
       },
 
-      setHabitSchedule: (habitId, time, days) =>
+      setHabitSchedule: (habitId, time, days, specificTime) =>
         set((state) => ({
           habits: state.habits.map((h) =>
-            h.id === habitId ? { ...h, scheduledTime: time, scheduledDays: days } : h
+            h.id === habitId ? { ...h, scheduledTime: time, scheduledDays: days, specificTime: specificTime || undefined } : h
           ),
         })),
 

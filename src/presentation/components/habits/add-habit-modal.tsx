@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, ScrollView, Pressable, Modal, StyleSheet,
+  View, Text, TextInput, ScrollView, Pressable, Modal, Platform, Linking, Alert, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,8 +12,8 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import type { HabitTimeSlot } from '@/src/core/entities/habit-types';
 
 const EMOJI_GRID = [
-  '🔥', '💪', '🧠', '📝', '🏃', '🧘', '💧', '🥗', '😊', '🎯',
-  '⭐', '🌟', '💎', '🎵', '📚', '🌅', '🧹', '💤', '🙏', '❤️',
+  '\u{1F525}', '\u{1F4AA}', '\u{1F9E0}', '\u{1F4DD}', '\u{1F3C3}', '\u{1F9D8}', '\u{1F4A7}', '\u{1F957}', '\u{1F60A}', '\u{1F3AF}',
+  '\u{2B50}', '\u{1F31F}', '\u{1F48E}', '\u{1F3B5}', '\u{1F4DA}', '\u{1F305}', '\u{1F9F9}', '\u{1F4A4}', '\u{1F64F}', '\u{2764}\u{FE0F}',
 ];
 
 const TIME_OPTIONS: { key: HabitTimeSlot; icon: string; en: string; de: string }[] = [
@@ -36,11 +36,13 @@ interface AddHabitModalProps {
 export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddHabitModalProps) {
   const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded, setHabitSchedule } = useHabitStore();
   const [step, setStep] = useState<1 | 2>(1);
-  const [customEmoji, setCustomEmoji] = useState('🔥');
+  const [customEmoji, setCustomEmoji] = useState('\u{1F525}');
   const [customName, setCustomName] = useState('');
   const [selectedTime, setSelectedTime] = useState<HabitTimeSlot>(null);
   const [selectedDays, setSelectedDays] = useState<number[]>(ALL_DAYS);
   const [selectedPreset, setSelectedPreset] = useState<typeof presetHabits[0] | null>(null);
+  const [specificHour, setSpecificHour] = useState<number | null>(null);
+  const [specificMinute, setSpecificMinute] = useState(0);
 
   const dayLabels = locale === 'de' ? DAY_LABELS_DE : DAY_LABELS_EN;
 
@@ -48,7 +50,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     Haptics.selectionAsync();
     setSelectedDays((prev) => {
       if (prev.includes(day)) {
-        if (prev.length <= 1) return prev; // keep at least 1 day
+        if (prev.length <= 1) return prev;
         return prev.filter((d) => d !== day);
       }
       return [...prev, day].sort();
@@ -61,6 +63,8 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     setSelectedPreset(preset);
     setSelectedTime(null);
     setSelectedDays(ALL_DAYS);
+    setSpecificHour(null);
+    setSpecificMinute(0);
     setStep(2);
   };
 
@@ -70,7 +74,39 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     setSelectedPreset(null);
     setSelectedTime(null);
     setSelectedDays(ALL_DAYS);
+    setSpecificHour(null);
+    setSpecificMinute(0);
     setStep(2);
+  };
+
+  const formatTimeDisplay = (h: number, m: number): string => {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+  };
+
+  const formatTime24 = (h: number, m: number): string => {
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  };
+
+  const adjustHour = (delta: number) => {
+    Haptics.selectionAsync();
+    if (specificHour === null) {
+      setSpecificHour(9);
+      return;
+    }
+    setSpecificHour((h) => {
+      const next = ((h ?? 9) + delta + 24) % 24;
+      return next;
+    });
+  };
+
+  const adjustMinute = (delta: number) => {
+    Haptics.selectionAsync();
+    setSpecificMinute((m) => {
+      const next = (m + delta + 60) % 60;
+      return next;
+    });
   };
 
   const handleConfirm = () => {
@@ -82,23 +118,65 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
       addCustomHabit(customEmoji, customName.trim());
     }
 
-    // Apply schedule to the newly created habit
     const habits = useHabitStore.getState().habits;
     const newHabit = habits[habits.length - 1];
     if (newHabit) {
       const days = selectedDays.length === 7 ? [] : selectedDays;
-      setHabitSchedule(newHabit.id, selectedTime, days);
+      const timeStr = specificHour !== null ? formatTime24(specificHour, specificMinute) : undefined;
+      setHabitSchedule(newHabit.id, selectedTime, days, timeStr);
     }
 
     resetState();
     onClose();
   };
 
+  const handleAddToCalendar = () => {
+    const title = selectedPreset ? selectedPreset.title[locale] : customName;
+    const emoji = selectedPreset ? selectedPreset.emoji : customEmoji;
+    const eventTitle = `${emoji} ${title}`;
+
+    let startHour = 9;
+    let startMinute = 0;
+    if (specificHour !== null) {
+      startHour = specificHour;
+      startMinute = specificMinute;
+    } else if (selectedTime === 'morning') {
+      startHour = 8;
+    } else if (selectedTime === 'afternoon') {
+      startHour = 14;
+    } else if (selectedTime === 'evening') {
+      startHour = 19;
+    }
+
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, startMinute);
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+    if (Platform.OS === 'ios') {
+      const timestamp = start.getTime() / 1000;
+      Linking.openURL(`calshow:${timestamp}`).catch(() => {
+        Alert.alert(
+          locale === 'de' ? 'Kalender' : 'Calendar',
+          locale === 'de' ? 'Kalender-App konnte nicht geoffnet werden' : 'Could not open Calendar app'
+        );
+      });
+    } else {
+      const intentUrl = `content://com.android.calendar/events?title=${encodeURIComponent(eventTitle)}&beginTime=${start.getTime()}&endTime=${end.getTime()}`;
+      Linking.openURL(intentUrl).catch(() => {
+        Alert.alert(
+          locale === 'de' ? 'Kalender' : 'Calendar',
+          locale === 'de' ? 'Kalender-App konnte nicht geoffnet werden' : 'Could not open Calendar app'
+        );
+      });
+    }
+  };
+
   const handleBack = () => {
-    // Go back to step 1, preserve custom name/emoji
     setSelectedPreset(null);
     setSelectedTime(null);
     setSelectedDays(ALL_DAYS);
+    setSpecificHour(null);
+    setSpecificMinute(0);
     setStep(1);
   };
 
@@ -106,9 +184,11 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     setStep(1);
     setSelectedPreset(null);
     setCustomName('');
-    setCustomEmoji('🔥');
+    setCustomEmoji('\u{1F525}');
     setSelectedTime(null);
     setSelectedDays(ALL_DAYS);
+    setSpecificHour(null);
+    setSpecificMinute(0);
   };
 
   const handleClose = () => {
@@ -116,7 +196,6 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     onClose();
   };
 
-  // Colors based on dark mode
   const bg = isDark ? '#171717' : '#FAFAFA';
   const textPrimary = isDark ? '#F5F5F5' : '#171717';
   const textSecondary = isDark ? '#A3A3A3' : '#737373';
@@ -124,7 +203,6 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
   const borderCol = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const cardBg = isDark ? '#252525' : '#fff';
 
-  // Preview info for step 2
   const previewEmoji = selectedPreset ? selectedPreset.emoji : customEmoji;
   const previewTitle = selectedPreset ? selectedPreset.title[locale] : customName;
 
@@ -148,9 +226,8 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
         </View>
 
         {step === 2 ? (
-          /* Step 2: Schedule (for both preset and custom) */
           <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* Preview of selected habit */}
+            {/* Preview */}
             <GlassCard style={styles.previewCard} padding={18}>
               <View style={styles.previewRow}>
                 <Text style={styles.previewEmoji}>{previewEmoji}</Text>
@@ -160,7 +237,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
               </View>
             </GlassCard>
 
-            {/* Time of day picker */}
+            {/* Time of day */}
             <Text style={[styles.scheduleLabel, { color: textSecondary }]}>
               {locale === 'de' ? 'Tageszeit' : 'Time of day'}
             </Text>
@@ -193,8 +270,73 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
               ))}
             </View>
 
-            {/* Day of week selector */}
+            {/* Specific time */}
             <Text style={[styles.scheduleLabel, { color: textSecondary }]}>
+              {locale === 'de' ? 'Genaue Uhrzeit (optional)' : 'Specific time (optional)'}
+            </Text>
+            {specificHour === null ? (
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setSpecificHour(9);
+                  setSpecificMinute(0);
+                }}
+                style={[styles.specificTimeButton, { backgroundColor: surfaceBg }]}
+              >
+                <Ionicons name="time-outline" size={18} color="#A3A3A3" />
+                <Text style={styles.specificTimeText}>
+                  {locale === 'de' ? 'Uhrzeit festlegen' : 'Set a time'}
+                </Text>
+              </Pressable>
+            ) : (
+              <View style={[styles.timePickerContainer, { backgroundColor: surfaceBg }]}>
+                <View style={styles.timePickerRow}>
+                  {/* Hour */}
+                  <View style={styles.timePickerColumn}>
+                    <Pressable onPress={() => adjustHour(1)} style={styles.timePickerArrow}>
+                      <Ionicons name="chevron-up" size={22} color="#A3A3A3" />
+                    </Pressable>
+                    <Text style={[styles.timePickerValue, { color: textPrimary }]}>
+                      {specificHour.toString().padStart(2, '0')}
+                    </Text>
+                    <Pressable onPress={() => adjustHour(-1)} style={styles.timePickerArrow}>
+                      <Ionicons name="chevron-down" size={22} color="#A3A3A3" />
+                    </Pressable>
+                  </View>
+                  <Text style={[styles.timePickerSeparator, { color: textPrimary }]}>:</Text>
+                  {/* Minute */}
+                  <View style={styles.timePickerColumn}>
+                    <Pressable onPress={() => adjustMinute(5)} style={styles.timePickerArrow}>
+                      <Ionicons name="chevron-up" size={22} color="#A3A3A3" />
+                    </Pressable>
+                    <Text style={[styles.timePickerValue, { color: textPrimary }]}>
+                      {specificMinute.toString().padStart(2, '0')}
+                    </Text>
+                    <Pressable onPress={() => adjustMinute(-5)} style={styles.timePickerArrow}>
+                      <Ionicons name="chevron-down" size={22} color="#A3A3A3" />
+                    </Pressable>
+                  </View>
+                  {/* Display */}
+                  <Text style={styles.timePickerDisplay}>
+                    {formatTimeDisplay(specificHour, specificMinute)}
+                  </Text>
+                  {/* Clear */}
+                  <Pressable
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setSpecificHour(null);
+                      setSpecificMinute(0);
+                    }}
+                    style={styles.timePickerClear}
+                  >
+                    <Ionicons name="close-circle" size={20} color="#A3A3A3" />
+                  </Pressable>
+                </View>
+              </View>
+            )}
+
+            {/* Days */}
+            <Text style={[styles.scheduleLabel, { color: textSecondary, marginTop: 14 }]}>
               {locale === 'de' ? 'Wochentage' : 'Days'}
             </Text>
             <View style={styles.daysRow}>
@@ -218,25 +360,40 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
               ))}
             </View>
 
-            {/* Action buttons */}
-            <View style={styles.presetActions}>
+            {/* Add to Calendar */}
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleAddToCalendar();
+              }}
+              style={[styles.calendarButton, { backgroundColor: surfaceBg }]}
+            >
+              <Ionicons name="calendar-outline" size={18} color="#E8435A" />
+              <Text style={styles.calendarButtonText}>
+                {locale === 'de' ? 'Zum Kalender hinzufügen' : 'Add to Calendar'}
+              </Text>
+            </Pressable>
+
+            {/* Action buttons - equal size */}
+            <View style={styles.actionRow}>
               <Pressable
                 onPress={handleBack}
-                style={[styles.backButton, { backgroundColor: surfaceBg }]}
+                style={[styles.actionButton, { backgroundColor: surfaceBg }]}
               >
-                <Text style={[styles.backButtonText, { color: textPrimary }]}>
+                <Ionicons name="chevron-back" size={18} color={textPrimary} />
+                <Text style={[styles.actionButtonText, { color: textPrimary }]}>
                   {locale === 'de' ? 'Zurück' : 'Back'}
                 </Text>
               </Pressable>
-              <Pressable onPress={handleConfirm} style={styles.addCustomButton}>
-                <Text style={styles.addCustomButtonText}>
+              <Pressable onPress={handleConfirm} style={[styles.actionButton, styles.actionButtonPrimary]}>
+                <Ionicons name="add-circle-outline" size={18} color="#fff" />
+                <Text style={styles.actionButtonPrimaryText}>
                   {locale === 'de' ? 'Hinzufügen' : 'Add Habit'}
                 </Text>
               </Pressable>
             </View>
           </ScrollView>
         ) : (
-          /* Step 1: Browse presets + custom (no day/time pickers) */
           <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             {/* Custom habit creation */}
             <Text style={[styles.sectionTitle, { color: textPrimary }]}>
@@ -274,16 +431,16 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
               />
               <Pressable
                 onPress={handleCustomNext}
-                style={[styles.addCustomButton, !customName.trim() && styles.addCustomButtonDisabled]}
+                style={[styles.nextButton, !customName.trim() && styles.nextButtonDisabled]}
                 disabled={!customName.trim()}
               >
-                <Text style={styles.addCustomButtonText}>
+                <Text style={styles.nextButtonText}>
                   {locale === 'de' ? 'Weiter' : 'Next'}
                 </Text>
               </Pressable>
             </GlassCard>
 
-            {/* Suggested presets by phase */}
+            {/* Suggested presets */}
             <Text style={[styles.sectionTitle, { color: textPrimary }]}>
               {locale === 'de' ? 'Vorgeschlagen' : 'Suggested'}
             </Text>
@@ -348,7 +505,7 @@ const styles = StyleSheet.create({
   closeButtonDark: {
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   sectionTitle: {
     fontSize: 20, fontWeight: '700',
     letterSpacing: -0.3, marginBottom: 12, marginTop: 8,
@@ -398,6 +555,42 @@ const styles = StyleSheet.create({
   timeButtonTextActive: {
     color: '#E8435A',
   },
+
+  // Specific time
+  specificTimeButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12,
+    marginBottom: 0,
+  },
+  specificTimeText: {
+    flex: 1, fontSize: 15, fontWeight: '500', color: '#A3A3A3',
+  },
+  timePickerContainer: {
+    borderRadius: 14, padding: 14, marginBottom: 0,
+  },
+  timePickerRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+  },
+  timePickerColumn: {
+    alignItems: 'center',
+  },
+  timePickerArrow: {
+    padding: 4,
+  },
+  timePickerValue: {
+    fontSize: 28, fontWeight: '700', width: 50, textAlign: 'center',
+  },
+  timePickerSeparator: {
+    fontSize: 28, fontWeight: '700', marginBottom: 2,
+  },
+  timePickerDisplay: {
+    fontSize: 14, fontWeight: '600', color: '#E8435A', marginLeft: 12,
+  },
+  timePickerClear: {
+    marginLeft: 8, padding: 4,
+  },
+
+  // Days
   daysRow: {
     flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16,
   },
@@ -415,24 +608,42 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 
-  addCustomButton: {
+  // Calendar button
+  calendarButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 12, borderRadius: 14, marginBottom: 16,
+  },
+  calendarButtonText: {
+    fontSize: 15, fontWeight: '600', color: '#E8435A',
+  },
+
+  // Action buttons (equal size)
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
+  actionButton: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, borderRadius: 14, paddingVertical: 14,
+  },
+  actionButtonText: { fontSize: 16, fontWeight: '600' },
+  actionButtonPrimary: {
+    backgroundColor: '#E8435A',
+  },
+  actionButtonPrimaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+
+  // Step 1 next button
+  nextButton: {
     backgroundColor: '#E8435A', borderRadius: 14,
     paddingVertical: 12, alignItems: 'center',
   },
-  addCustomButtonDisabled: { opacity: 0.4 },
-  addCustomButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  nextButtonDisabled: { opacity: 0.4 },
+  nextButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 
-  // Step 2: preview + actions
+  // Preview
   previewCard: { marginBottom: 20 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   previewEmoji: { fontSize: 28 },
   previewTitle: { fontSize: 18, fontWeight: '700', flex: 1 },
-  presetActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  backButton: {
-    flex: 1, borderRadius: 14, paddingVertical: 12, alignItems: 'center',
-  },
-  backButtonText: { fontSize: 16, fontWeight: '600' },
 
+  // Presets
   phaseGroup: { marginBottom: 20 },
   phaseTitle: {
     fontSize: 13, fontWeight: '700', color: '#A3A3A3',

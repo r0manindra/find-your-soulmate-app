@@ -17,6 +17,7 @@ export interface Habit {
   createdAt: string;
   isArchived: boolean;
   scheduledTime?: HabitTimeSlot;
+  specificTime?: string; // HH:MM format, e.g. "08:30"
   scheduledDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat. Default: all days
 }
 

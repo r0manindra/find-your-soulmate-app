@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, Linking, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, Linking, Modal, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -339,60 +339,98 @@ export default function ProfileScreen() {
             <Text style={[styles.settingLabel, isDark && styles.textDark]}>
               {locale === 'de' ? 'Erscheinungsbild' : 'Appearance'}
             </Text>
-            <View>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setThemeDropdownOpen(true);
+              }}
+              style={[styles.themeDropdownTrigger, isDark && styles.themeDropdownTriggerDark]}
+            >
+              <Ionicons
+                name={
+                  themeMode === 'system' ? 'phone-portrait-outline' as any :
+                  themeMode === 'light' ? 'sunny-outline' as any : 'moon-outline' as any
+                }
+                size={14}
+                color={isDark ? '#F5F5F5' : '#171717'}
+              />
+              <Text style={[styles.themeDropdownLabel, isDark && styles.textDark]}>
+                {themeMode === 'system' ? 'Auto' : themeMode === 'light' ? (locale === 'de' ? 'Hell' : 'Light') : (locale === 'de' ? 'Dunkel' : 'Dark')}
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color="#A3A3A3" />
+            </Pressable>
+          </View>
+
+        {/* Theme Modal */}
+        <Modal
+          visible={themeDropdownOpen}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setThemeDropdownOpen(false)}
+        >
+          <View style={[styles.themeModalContainer, isDark && styles.themeModalContainerDark]}>
+            <View style={styles.themeModalHeader}>
+              <Text style={[styles.themeModalTitle, isDark && styles.textDark]}>
+                {locale === 'de' ? 'Erscheinungsbild' : 'Appearance'}
+              </Text>
               <Pressable
-                onPress={() => setThemeDropdownOpen((v) => !v)}
-                style={[styles.themeDropdownTrigger, isDark && styles.themeDropdownTriggerDark]}
+                onPress={() => setThemeDropdownOpen(false)}
+                style={[styles.themeModalClose, isDark && { backgroundColor: 'rgba(255,255,255,0.08)' }]}
               >
-                <Ionicons
-                  name={
-                    themeMode === 'system' ? 'phone-portrait-outline' as any :
-                    themeMode === 'light' ? 'sunny-outline' as any : 'moon-outline' as any
-                  }
-                  size={14}
-                  color={isDark ? '#F5F5F5' : '#171717'}
-                />
-                <Text style={[styles.themeDropdownLabel, isDark && styles.textDark]}>
-                  {themeMode === 'system' ? 'Auto' : themeMode === 'light' ? (locale === 'de' ? 'Hell' : 'Light') : (locale === 'de' ? 'Dunkel' : 'Dark')}
-                </Text>
-                <Ionicons name="chevron-down" size={14} color="#A3A3A3" />
+                <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
               </Pressable>
-              {themeDropdownOpen && (
-                <View style={[styles.themeDropdownMenu, isDark && styles.themeDropdownMenuDark]}>
-                  {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => {
-                    const isActive = themeMode === mode;
-                    const icons: Record<ThemeMode, string> = {
-                      system: 'phone-portrait-outline',
-                      light: 'sunny-outline',
-                      dark: 'moon-outline',
-                    };
-                    const labels: Record<ThemeMode, { en: string; de: string }> = {
-                      system: { en: 'Auto', de: 'Auto' },
-                      light: { en: 'Light', de: 'Hell' },
-                      dark: { en: 'Dark', de: 'Dunkel' },
-                    };
-                    return (
-                      <Pressable
-                        key={mode}
-                        onPress={() => {
-                          setThemeMode(mode);
-                          setThemeDropdownOpen(false);
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }}
-                        style={[styles.themeDropdownItem, isActive && styles.themeDropdownItemActive]}
-                      >
-                        <Ionicons name={icons[mode] as any} size={16} color={isActive ? '#E8435A' : (isDark ? '#A3A3A3' : '#737373')} />
-                        <Text style={[styles.themeDropdownItemText, isDark && styles.themeDropdownItemTextDark, isActive && styles.themeDropdownItemTextActive]}>
-                          {labels[mode][locale]}
-                        </Text>
-                        {isActive && <Ionicons name="checkmark" size={16} color="#E8435A" />}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
+            </View>
+
+            <View style={styles.themeModalOptions}>
+              {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => {
+                const isActive = themeMode === mode;
+                const icons: Record<ThemeMode, string> = {
+                  system: 'phone-portrait-outline',
+                  light: 'sunny-outline',
+                  dark: 'moon-outline',
+                };
+                const labels: Record<ThemeMode, { en: string; de: string }> = {
+                  system: { en: 'Auto (System)', de: 'Auto (System)' },
+                  light: { en: 'Light', de: 'Hell' },
+                  dark: { en: 'Dark', de: 'Dunkel' },
+                };
+                const descriptions: Record<ThemeMode, { en: string; de: string }> = {
+                  system: { en: 'Follows your device settings', de: 'Folgt den Geräteeinstellungen' },
+                  light: { en: 'Always use light mode', de: 'Immer hellen Modus verwenden' },
+                  dark: { en: 'Always use dark mode', de: 'Immer dunklen Modus verwenden' },
+                };
+                return (
+                  <Pressable
+                    key={mode}
+                    onPress={() => {
+                      setThemeMode(mode);
+                      setThemeDropdownOpen(false);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    style={[
+                      styles.themeModalItem,
+                      isDark && styles.themeModalItemDark,
+                      isActive && styles.themeModalItemActive,
+                    ]}
+                  >
+                    <View style={[styles.themeModalIconContainer, isActive && styles.themeModalIconContainerActive]}>
+                      <Ionicons name={icons[mode] as any} size={22} color={isActive ? '#E8435A' : (isDark ? '#A3A3A3' : '#737373')} />
+                    </View>
+                    <View style={styles.themeModalItemInfo}>
+                      <Text style={[styles.themeModalItemLabel, isDark && styles.textDark, isActive && styles.themeModalItemLabelActive]}>
+                        {labels[mode][locale]}
+                      </Text>
+                      <Text style={[styles.themeModalItemDesc, isDark && { color: '#737373' }]}>
+                        {descriptions[mode][locale]}
+                      </Text>
+                    </View>
+                    {isActive && <Ionicons name="checkmark-circle" size={24} color="#E8435A" />}
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
+        </Modal>
         </GlassCard>
 
         {/* Legal */}
@@ -570,7 +608,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
     marginVertical: 14,
   },
-  // Theme dropdown
+  // Theme trigger
   themeDropdownTrigger: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 10,
@@ -580,28 +618,53 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   themeDropdownLabel: { fontSize: 14, fontWeight: '600', color: '#171717' },
-  themeDropdownMenu: {
-    position: 'absolute', top: 44, right: 0, zIndex: 10,
-    backgroundColor: '#fff', borderRadius: 14,
-    paddingVertical: 4, minWidth: 150,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12, shadowRadius: 12, elevation: 8,
+  // Theme modal
+  themeModalContainer: {
+    flex: 1, backgroundColor: '#FAFAFA', padding: 20,
+  },
+  themeModalContainerDark: {
+    backgroundColor: '#171717',
+  },
+  themeModalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingTop: 20, paddingBottom: 24,
+  },
+  themeModalTitle: {
+    fontSize: 28, fontWeight: '700', color: '#171717', letterSpacing: -0.5,
+  },
+  themeModalClose: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  themeModalOptions: { gap: 10 },
+  themeModalItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: '#fff', borderRadius: 16, padding: 16,
     borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
   },
-  themeDropdownMenuDark: {
-    backgroundColor: '#252525',
-    borderColor: 'rgba(255,255,255,0.1)',
+  themeModalItemDark: {
+    backgroundColor: '#252525', borderColor: 'rgba(255,255,255,0.08)',
   },
-  themeDropdownItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingHorizontal: 14, paddingVertical: 10,
+  themeModalItemActive: {
+    borderColor: '#E8435A', borderWidth: 2,
   },
-  themeDropdownItemActive: {
-    backgroundColor: 'rgba(232,67,90,0.06)',
+  themeModalIconContainer: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    alignItems: 'center', justifyContent: 'center',
   },
-  themeDropdownItemText: { flex: 1, fontSize: 15, fontWeight: '500', color: '#171717' },
-  themeDropdownItemTextDark: { color: '#F5F5F5' },
-  themeDropdownItemTextActive: { color: '#E8435A', fontWeight: '600' },
+  themeModalIconContainerActive: {
+    backgroundColor: 'rgba(232,67,90,0.08)',
+  },
+  themeModalItemInfo: { flex: 1 },
+  themeModalItemLabel: {
+    fontSize: 17, fontWeight: '600', color: '#171717',
+  },
+  themeModalItemLabelActive: { color: '#E8435A' },
+  themeModalItemDesc: {
+    fontSize: 13, color: '#737373', marginTop: 2,
+  },
 
   // Legal
   legalRow: {

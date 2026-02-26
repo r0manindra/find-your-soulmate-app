@@ -153,7 +153,7 @@ function BubbleTabButton({
       )}
       <Animated.View style={animatedStyle}>
         {config.useCharismoIcon ? (
-          <CharismoIcon size={25} color={focused ? '#E8435A' : inactiveColor} />
+          <CharismoIcon size={22} color={focused ? '#E8435A' : inactiveColor} />
         ) : (
           <Ionicons
             name={focused ? config.ioniconFocused : config.ionicon}

@@ -139,7 +139,7 @@ export default function CoachScreen() {
   }, [setChatInputFocused]);
 
   // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
-  const inputBottomPadding = (isInputFocused && keyboardVisible) ? Math.max(insets.bottom, 8) : tabBarHeight + 8;
+  const inputBottomPadding = (isInputFocused && keyboardVisible) ? 4 : tabBarHeight + 8;
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    paddingHorizontal: 20, paddingTop: 12,
+    paddingHorizontal: 20, paddingTop: 8,
   },
   input: {
     flex: 1, minHeight: 40, maxHeight: 100,

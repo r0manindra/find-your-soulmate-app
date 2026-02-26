@@ -76,8 +76,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@charismo.app kontaktieren.'
-            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@charismo.app.'}
+            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@flirt-iq.com kontaktieren.'
+            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@flirt-iq.com.'}
         </Text>
 
         {/* Section 5: Subscriptions */}
@@ -176,8 +176,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nFlirt IQ\nE-Mail: support@charismo.app'
-            : 'For questions about these Terms of Service, contact us at:\n\nFlirt IQ\nEmail: support@charismo.app'}
+            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nFlirt IQ\nE-Mail: support@flirt-iq.com'
+            : 'For questions about these Terms of Service, contact us at:\n\nFlirt IQ\nEmail: support@flirt-iq.com'}
         </Text>
 
         <View style={styles.bottomSpacer} />

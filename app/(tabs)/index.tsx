@@ -240,7 +240,7 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="checkmark-circle-outline"
             label="Habits"
-            subtitle={habitsTotalToday > 0 ? `${habitsCompletedToday}/${habitsTotalToday}` : undefined}
+            subtitle={habitsTotalToday > 0 ? `${habitsCompletedToday}/${habitsTotalToday}` : (locale === 'de' ? 'Gewohnheiten' : 'Daily')}
             onPress={() => router.push('/habits' as any)}
             isDark={isDark}
             delay={250}
@@ -248,6 +248,7 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="chatbubbles-outline"
             label="Coach"
+            subtitle={locale === 'de' ? 'KI-Coach' : 'AI Coach'}
             customIcon={<CharismoIcon size={26} color="#E8435A" />}
             onPress={() => router.push('/coach' as any)}
             isDark={isDark}

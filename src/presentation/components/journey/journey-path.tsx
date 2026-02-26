@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, useWindowDimensions, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import Svg, { Line } from 'react-native-svg';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
@@ -33,6 +34,64 @@ function getChapterStatus(
   return 'active';
 }
 
+const NODE_PADDING = 32;
+const NODE_COLUMN_WIDTH = 100;
+const CONNECTOR_HEIGHT = 24;
+
+function DiagonalConnector({
+  fromPosition,
+  toPosition,
+  isCompleted,
+  isDark,
+  screenWidth,
+}: {
+  fromPosition: 'left' | 'center' | 'right';
+  toPosition: 'left' | 'center' | 'right';
+  isCompleted: boolean;
+  isDark: boolean;
+  screenWidth: number;
+}) {
+  const getX = (pos: 'left' | 'center' | 'right') => {
+    switch (pos) {
+      case 'left': return NODE_PADDING + NODE_COLUMN_WIDTH / 2;
+      case 'right': return screenWidth - NODE_PADDING - NODE_COLUMN_WIDTH / 2;
+      default: return screenWidth / 2;
+    }
+  };
+
+  const x1 = getX(fromPosition);
+  const x2 = getX(toPosition);
+
+  return (
+    <View style={styles.connectorWrapper}>
+      <Svg width={screenWidth} height={CONNECTOR_HEIGHT} style={StyleSheet.absoluteFill}>
+        {/* Background line */}
+        <Line
+          x1={x1}
+          y1={0}
+          x2={x2}
+          y2={CONNECTOR_HEIGHT}
+          stroke={isDark ? '#404040' : '#E5E5E5'}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        />
+        {/* Completed overlay */}
+        {isCompleted && (
+          <Line
+            x1={x1}
+            y1={0}
+            x2={x2}
+            y2={CONNECTOR_HEIGHT}
+            stroke="#E8435A"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+          />
+        )}
+      </Svg>
+    </View>
+  );
+}
+
 export function JourneyPath() {
   const { t } = useTranslation();
   const { completedChapters } = useProgressStore();
@@ -42,6 +101,7 @@ export function JourneyPath() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { width: screenWidth } = useWindowDimensions();
 
   const suggestedStart = useMemo(() => {
     if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return 1;
@@ -80,11 +140,6 @@ export function JourneyPath() {
             completedChapters.includes(c.id)
           ).length;
 
-          // Determine how far the completed line should extend
-          const lastCompletedIdx = phaseChapters.reduce((acc, c, idx) =>
-            completedChapters.includes(c.id) ? idx : acc, -1
-          );
-
           return (
             <View key={phase.id} style={styles.phaseSection}>
               <PhaseHeader
@@ -96,59 +151,53 @@ export function JourneyPath() {
               />
 
               <View style={styles.nodesContainer}>
-                {/* Continuous vertical line through all nodes */}
-                {phaseChapters.length > 1 && (
-                  <View style={styles.lineContainer}>
-                    {/* Background line */}
-                    <View
-                      style={[
-                        styles.verticalLine,
-                        isDark && styles.verticalLineDark,
-                      ]}
-                    />
-                    {/* Completed portion */}
-                    {lastCompletedIdx >= 0 && (
-                      <View
-                        style={[
-                          styles.verticalLineCompleted,
-                          {
-                            height: lastCompletedIdx === phaseChapters.length - 1
-                              ? '100%'
-                              : `${((lastCompletedIdx + 0.5) / (phaseChapters.length - 1)) * 100}%`,
-                          },
-                        ]}
-                      />
-                    )}
-                  </View>
-                )}
                 {phaseChapters.map((chapter, idx) => {
                   const status = getChapterStatus(chapter.id, completedChapters);
                   const position = getNodePosition(idx);
                   const isStartHere = chapter.id === suggestedStart && completedChapters.length === 0;
                   const isSkippable = chapter.id < suggestedStart && completedChapters.length === 0 && suggestedStart > 1;
 
+                  // Diagonal connector before this node (from previous node)
+                  const showConnector = idx > 0;
+                  const prevPosition = showConnector ? getNodePosition(idx - 1) : position;
+                  const prevChapter = showConnector ? phaseChapters[idx - 1] : null;
+                  const connectorCompleted = showConnector && prevChapter
+                    ? completedChapters.includes(prevChapter.id)
+                    : false;
+
                   return (
-                    <View key={chapter.id} style={styles.nodeWrapper}>
-                      {isStartHere && (
-                        <View style={styles.startHereBadge}>
-                          <Text style={styles.startHereText}>
-                            {locale === 'de' ? 'Starte hier' : 'Start here'} →
-                          </Text>
-                        </View>
-                      )}
-                      <View style={isSkippable ? styles.skippableContainer : undefined}>
-                        <ChapterNode
-                          chapter={chapter}
-                          status={status}
-                          locale={locale}
-                          position={position}
-                          isExpanded={expandedId === chapter.id}
+                    <React.Fragment key={chapter.id}>
+                      {showConnector && (
+                        <DiagonalConnector
+                          fromPosition={prevPosition}
+                          toPosition={position}
+                          isCompleted={connectorCompleted}
                           isDark={isDark}
-                          onPress={() => toggleExpand(chapter.id)}
-                          onAction={() => handleAction(chapter.id)}
+                          screenWidth={screenWidth}
                         />
+                      )}
+                      <View style={styles.nodeWrapper}>
+                        {isStartHere && (
+                          <View style={styles.startHereBadge}>
+                            <Text style={styles.startHereText}>
+                              {locale === 'de' ? 'Starte hier' : 'Start here'} →
+                            </Text>
+                          </View>
+                        )}
+                        <View style={isSkippable ? styles.skippableContainer : undefined}>
+                          <ChapterNode
+                            chapter={chapter}
+                            status={status}
+                            locale={locale}
+                            position={position}
+                            isExpanded={expandedId === chapter.id}
+                            isDark={isDark}
+                            onPress={() => toggleExpand(chapter.id)}
+                            onAction={() => handleAction(chapter.id)}
+                          />
+                        </View>
                       </View>
-                    </View>
+                    </React.Fragment>
                   );
                 })}
               </View>
@@ -202,38 +251,13 @@ const styles = StyleSheet.create({
   },
   nodesContainer: {
     paddingVertical: 8,
-    position: 'relative',
   },
   nodeWrapper: {
     zIndex: 1,
   },
-  // Continuous vertical line
-  lineContainer: {
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -1.25,
-    top: 40,
-    bottom: 40,
-    width: 2.5,
+  connectorWrapper: {
+    height: CONNECTOR_HEIGHT,
     zIndex: 0,
-  },
-  verticalLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 2.5,
-    backgroundColor: '#E5E5E5',
-    borderRadius: 1,
-  },
-  verticalLineDark: {
-    backgroundColor: '#404040',
-  },
-  verticalLineCompleted: {
-    position: 'absolute',
-    top: 0,
-    width: 2.5,
-    backgroundColor: '#E8435A',
-    borderRadius: 1,
   },
   startHereBadge: {
     alignSelf: 'center',
