@@ -138,14 +138,42 @@ export async function syncProgress(progress: {
 }
 
 // Coach
-export async function sendCoachMessage(message: string, characterId: string = 'charismo') {
+export interface JourneyContext {
+  profile: {
+    gender: 'male' | 'female' | null;
+    ageGroup: string | null;
+    skillLevel: string | null;
+    socialEnergy: string | null;
+    basicsLevel: string | null;
+    goal: string | null;
+  };
+  progress: {
+    completedChapters: number[];
+    currentChapterId: number | null;
+    streak: number;
+    graduated: boolean;
+  };
+  habits: {
+    active: { name: string; currentStreak: number }[];
+    todayCompleted: number;
+    todayTotal: number;
+    weeklyCompletionRate: number;
+  };
+  locale: 'en' | 'de';
+}
+
+export async function sendCoachMessage(
+  message: string,
+  characterId: string = 'charismo',
+  context?: JourneyContext
+) {
   return request<{
     response: string;
     messagesUsed: number;
     messagesLimit: number | null;
   }>('/coach/message', {
     method: 'POST',
-    body: JSON.stringify({ message, characterId }),
+    body: JSON.stringify({ message, characterId, ...(context ? { context } : {}) }),
   });
 }
 

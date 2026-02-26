@@ -11,7 +11,7 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
-import { useSettingsStore } from '@/src/store/settings-store';
+import { useSettingsStore, type ThemeMode } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { achievements } from '@/src/data/content/achievements';
 import { books } from '@/src/data/content/books';
@@ -22,7 +22,7 @@ export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const progress = useProgressStore();
-  const { locale, setLocale } = useSettingsStore();
+  const { locale, setLocale, themeMode, setThemeMode } = useSettingsStore();
   const { user, isLoggedIn, isPremium, logout } = useAuthStore();
   const userProfile = useUserProfileStore();
   const colorScheme = useColorScheme();
@@ -333,6 +333,43 @@ export default function ProfileScreen() {
               </View>
             </Pressable>
           </View>
+          <View style={styles.settingDivider} />
+          <View style={styles.settingRow}>
+            <Text style={[styles.settingLabel, isDark && styles.textDark]}>
+              {locale === 'de' ? 'Erscheinungsbild' : 'Appearance'}
+            </Text>
+            <View style={styles.languageToggle}>
+              {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => {
+                const isActive = themeMode === mode;
+                const labels: Record<ThemeMode, { en: string; de: string; icon: string }> = {
+                  system: { en: 'Auto', de: 'Auto', icon: 'phone-portrait-outline' },
+                  light: { en: 'Light', de: 'Hell', icon: 'sunny-outline' },
+                  dark: { en: 'Dark', de: 'Dunkel', icon: 'moon-outline' },
+                };
+                return (
+                  <Pressable
+                    key={mode}
+                    onPress={() => {
+                      setThemeMode(mode);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    style={[styles.langOption, isActive && styles.langActive]}
+                  >
+                    <View style={styles.themeOptionContent}>
+                      <Ionicons
+                        name={labels[mode].icon as any}
+                        size={14}
+                        color={isActive ? '#171717' : '#A3A3A3'}
+                      />
+                      <Text style={[styles.langText, isActive && styles.langTextActive]}>
+                        {labels[mode][locale]}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </GlassCard>
 
         {/* Legal */}
@@ -505,6 +542,12 @@ const styles = StyleSheet.create({
   langActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
   langText: { fontSize: 14, fontWeight: '600', color: '#A3A3A3' },
   langTextActive: { color: '#171717' },
+  settingDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    marginVertical: 14,
+  },
+  themeOptionContent: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 
   // Legal
   legalRow: {

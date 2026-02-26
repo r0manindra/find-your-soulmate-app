@@ -20,9 +20,15 @@ export const chaptersMeta: { id: number; title: string; subtitle: string }[] = [
   { id: 18, title: 'The Relationship Talk', subtitle: 'When to commit' },
   { id: 19, title: 'Keeping the Spark', subtitle: 'Long-term flirting' },
   { id: 20, title: 'The Graduation', subtitle: 'You found your soulmate' },
+  { id: 21, title: 'The Foundation', subtitle: 'Hygiene, skincare & grooming' },
+  { id: 22, title: 'Your Voice', subtitle: 'How you speak > what you say' },
+  { id: 23, title: 'Discipline & Habits', subtitle: 'The boring stuff that makes you magnetic' },
+  { id: 24, title: 'Presence & Manners', subtitle: 'How you carry yourself' },
+  { id: 25, title: 'Social Practice', subtitle: 'Start small, talk to everyone' },
 ];
 
 export const phasesMeta = [
+  { id: 0, title: 'The Basics', chapters: [21, 22, 23, 24, 25] },
   { id: 1, title: 'Know Yourself', chapters: [1, 2, 3, 4] },
   { id: 2, title: 'Make Your Move', chapters: [5, 6, 7, 8] },
   { id: 3, title: 'The Connection', chapters: [9, 10, 11, 12] },

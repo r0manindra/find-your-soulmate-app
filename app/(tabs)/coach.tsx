@@ -14,10 +14,13 @@ import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUIStore } from '@/src/store/ui-store';
+import { useHabitStore } from '@/src/store/habit-store';
 import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
+import { chapters } from '@/src/data/content/chapters';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
 import * as api from '@/src/services/api';
+import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 
 const FALLBACK_RESPONSES = [
@@ -40,9 +43,51 @@ export default function CoachScreen() {
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const userProfile = useUserProfileStore();
+  const progressStore = useProgressStore();
+  const habitStore = useHabitStore();
   const recommendedCharacterId = userProfile.hasCompletedOnboarding
     ? getPersonalization(userProfile).recommendedCharacterId
     : null;
+
+  // Chapter order from phases — used to determine current chapter
+  const chapterOrder = React.useMemo(
+    () => [21, 22, 23, 24, 25, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    []
+  );
+
+  const buildJourneyContext = useCallback((): JourneyContext => {
+    const completed = progressStore.completedChapters;
+    const currentChapterId = chapterOrder.find((id) => !completed.includes(id)) ?? null;
+    const activeHabits = habitStore.getActiveHabits();
+    const activeWithStreaks = activeHabits.map((h) => ({
+      name: h.title[locale] || h.title.en,
+      currentStreak: habitStore.getStreak(h.id).current,
+    }));
+
+    return {
+      profile: {
+        gender: userProfile.userGender,
+        ageGroup: userProfile.ageGroup,
+        skillLevel: userProfile.skillLevel,
+        socialEnergy: userProfile.socialEnergy,
+        basicsLevel: userProfile.basicsLevel,
+        goal: userProfile.goal,
+      },
+      progress: {
+        completedChapters: completed,
+        currentChapterId,
+        streak: progressStore.streak,
+        graduated: progressStore.graduated,
+      },
+      habits: {
+        active: activeWithStreaks,
+        todayCompleted: habitStore.getTodayCompletedCount(),
+        todayTotal: habitStore.getTodayTotalCount(),
+        weeklyCompletionRate: habitStore.getWeeklyCompletionRate(),
+      },
+      locale,
+    };
+  }, [progressStore, habitStore, userProfile, locale, chapterOrder]);
 
   const [showCharacterPicker, setShowCharacterPicker] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -146,7 +191,8 @@ export default function CoachScreen() {
 
     try {
       if (isLoggedIn) {
-        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId);
+        const context = buildJourneyContext();
+        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId, context);
         setMessagesUsed(data.messagesUsed);
         setMessagesLimit(data.messagesLimit);
 
@@ -184,7 +230,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext]);
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';

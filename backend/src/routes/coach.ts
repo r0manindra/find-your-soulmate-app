@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { prisma } from '../config/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { getCoachResponse } from '../services/coach';
+import { getCharacterPrompt } from '../services/characters';
+import { buildContextAwarePrompt, type UserJourneyContext } from '../services/coach-context';
 import { env } from '../config/env';
 
 const router = Router();
@@ -10,15 +12,40 @@ router.use(authMiddleware);
 
 import { VALID_CHARACTER_IDS } from '../services/characters';
 
+const contextSchema = z.object({
+  profile: z.object({
+    gender: z.enum(['male', 'female']).nullable(),
+    ageGroup: z.string().nullable(),
+    skillLevel: z.string().nullable(),
+    socialEnergy: z.string().nullable(),
+    basicsLevel: z.string().nullable(),
+    goal: z.string().nullable(),
+  }),
+  progress: z.object({
+    completedChapters: z.array(z.number()),
+    currentChapterId: z.number().nullable(),
+    streak: z.number(),
+    graduated: z.boolean(),
+  }),
+  habits: z.object({
+    active: z.array(z.object({ name: z.string(), currentStreak: z.number() })),
+    todayCompleted: z.number(),
+    todayTotal: z.number(),
+    weeklyCompletionRate: z.number(),
+  }),
+  locale: z.enum(['en', 'de']),
+}).optional();
+
 const messageSchema = z.object({
   message: z.string().min(1).max(2000),
   characterId: z.string().optional().default('charismo'),
+  context: contextSchema,
 });
 
 // POST /api/coach/message
 router.post('/message', async (req: AuthRequest, res: Response) => {
   try {
-    const { message, characterId } = messageSchema.parse(req.body);
+    const { message, characterId, context } = messageSchema.parse(req.body);
 
     // Premium characters require premium subscription
     if (characterId !== 'charismo') {
@@ -77,11 +104,16 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     });
     history.reverse();
 
-    // Get AI response with selected character
+    // Build system prompt — enriched with context if available, otherwise plain character prompt
+    const systemPrompt = context
+      ? buildContextAwarePrompt(characterId, context as UserJourneyContext)
+      : getCharacterPrompt(characterId);
+
+    // Get AI response
     const aiResponse = await getCoachResponse(
       history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       message,
-      characterId
+      systemPrompt
     );
 
     // Save both messages

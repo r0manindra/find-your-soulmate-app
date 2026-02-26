@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { env } from '../config/env';
-import { getCharacterPrompt } from './characters';
 
 const anthropic = new Anthropic({
   apiKey: env.anthropicApiKey,
@@ -14,7 +13,7 @@ export interface CoachMessage {
 export async function getCoachResponse(
   messages: CoachMessage[],
   userMessage: string,
-  characterId: string = 'charismo'
+  systemPrompt: string
 ): Promise<string> {
   const conversationHistory = messages.map((m) => ({
     role: m.role as 'user' | 'assistant',
@@ -22,8 +21,6 @@ export async function getCoachResponse(
   }));
 
   conversationHistory.push({ role: 'user', content: userMessage });
-
-  const systemPrompt = getCharacterPrompt(characterId);
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
