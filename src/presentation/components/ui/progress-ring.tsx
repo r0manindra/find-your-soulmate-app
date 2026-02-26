@@ -11,9 +11,10 @@ interface ProgressRingProps {
   size?: number;
   strokeWidth?: number;
   label?: string;
+  isDark?: boolean;
 }
 
-export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: ProgressRingProps) {
+export function ProgressRing({ progress, size = 120, strokeWidth = 8, label, isDark = false }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const innerDiameter = size - strokeWidth * 2 - 8;
@@ -38,7 +39,7 @@ export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: P
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E5E5E5"
+          stroke={isDark ? '#404040' : '#E5E5E5'}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -58,8 +59,8 @@ export function ProgressRing({ progress, size = 120, strokeWidth = 8, label }: P
         />
       </Svg>
       <View style={[styles.labelContainer, { width: innerDiameter }]}>
-        <Text style={[styles.percentage, isSmall && styles.percentageSmall]}>{percentage}%</Text>
-        {label && <Text style={[styles.label, isSmall && styles.labelSmall]} numberOfLines={1}>{label}</Text>}
+        <Text style={[styles.percentage, isSmall && styles.percentageSmall, isDark && styles.percentageDark]}>{percentage}%</Text>
+        {label && <Text style={[styles.label, isSmall && styles.labelSmall, isDark && styles.labelDark]} numberOfLines={1}>{label}</Text>}
       </View>
     </View>
   );
@@ -81,6 +82,9 @@ const styles = StyleSheet.create({
     color: '#171717',
     letterSpacing: -1,
   },
+  percentageDark: {
+    color: '#F5F5F5',
+  },
   percentageSmall: {
     fontSize: 22,
   },
@@ -89,6 +93,9 @@ const styles = StyleSheet.create({
     color: '#737373',
     marginTop: 2,
     textAlign: 'center',
+  },
+  labelDark: {
+    color: '#A3A3A3',
   },
   labelSmall: {
     fontSize: 10,

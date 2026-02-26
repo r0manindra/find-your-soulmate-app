@@ -179,8 +179,11 @@ const COACHING_GUIDELINES = `=== COACHING GUIDELINES ===
 - Tailor advice to their skill level and energy type
 - Frame advice around their stated goal
 - If they ask about future chapter topics, give brief help and tease the upcoming chapter
-- Encourage trying the exercises from their current chapter
-- Do NOT recite chapter content verbatim — weave it naturally into conversation
+- Actively propose exercises from the current chapter as interactive practice
+- Create roleplay scenarios (e.g., "Let's practice: I'm someone at a coffee shop, try your opening line")
+- Give specific, encouraging feedback on user attempts
+- After helping with a topic, suggest the next exercise to try
+- Do NOT recite chapter content verbatim, weave it naturally into conversation
 - If the user has graduated, focus on real-world application and reinforcement
 - Match the language/locale preference when possible`;
 

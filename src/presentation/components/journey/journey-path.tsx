@@ -80,6 +80,11 @@ export function JourneyPath() {
             completedChapters.includes(c.id)
           ).length;
 
+          // Determine how far the completed line should extend
+          const lastCompletedIdx = phaseChapters.reduce((acc, c, idx) =>
+            completedChapters.includes(c.id) ? idx : acc, -1
+          );
+
           return (
             <View key={phase.id} style={styles.phaseSection}>
               <PhaseHeader
@@ -91,6 +96,31 @@ export function JourneyPath() {
               />
 
               <View style={styles.nodesContainer}>
+                {/* Continuous vertical line through all nodes */}
+                {phaseChapters.length > 1 && (
+                  <View style={styles.lineContainer}>
+                    {/* Background line */}
+                    <View
+                      style={[
+                        styles.verticalLine,
+                        isDark && styles.verticalLineDark,
+                      ]}
+                    />
+                    {/* Completed portion */}
+                    {lastCompletedIdx >= 0 && (
+                      <View
+                        style={[
+                          styles.verticalLineCompleted,
+                          {
+                            height: lastCompletedIdx === phaseChapters.length - 1
+                              ? '100%'
+                              : `${((lastCompletedIdx + 0.5) / (phaseChapters.length - 1)) * 100}%`,
+                          },
+                        ]}
+                      />
+                    )}
+                  </View>
+                )}
                 {phaseChapters.map((chapter, idx) => {
                   const status = getChapterStatus(chapter.id, completedChapters);
                   const position = getNodePosition(idx);
@@ -98,16 +128,7 @@ export function JourneyPath() {
                   const isSkippable = chapter.id < suggestedStart && completedChapters.length === 0 && suggestedStart > 1;
 
                   return (
-                    <View key={chapter.id}>
-                      {idx > 0 && (
-                        <View
-                          style={[
-                            styles.connector,
-                            isDark && styles.connectorDark,
-                            completedChapters.includes(chapter.id) && styles.connectorCompleted,
-                          ]}
-                        />
-                      )}
+                    <View key={chapter.id} style={styles.nodeWrapper}>
                       {isStartHere && (
                         <View style={styles.startHereBadge}>
                           <Text style={styles.startHereText}>
@@ -181,19 +202,38 @@ const styles = StyleSheet.create({
   },
   nodesContainer: {
     paddingVertical: 8,
+    position: 'relative',
   },
-  connector: {
+  nodeWrapper: {
+    zIndex: 1,
+  },
+  // Continuous vertical line
+  lineContainer: {
+    position: 'absolute',
+    left: '50%',
+    marginLeft: -1.25,
+    top: 40,
+    bottom: 40,
     width: 2.5,
-    height: 20,
+    zIndex: 0,
+  },
+  verticalLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 2.5,
     backgroundColor: '#E5E5E5',
-    alignSelf: 'center',
     borderRadius: 1,
   },
-  connectorDark: {
+  verticalLineDark: {
     backgroundColor: '#404040',
   },
-  connectorCompleted: {
+  verticalLineCompleted: {
+    position: 'absolute',
+    top: 0,
+    width: 2.5,
     backgroundColor: '#E8435A',
+    borderRadius: 1,
   },
   startHereBadge: {
     alignSelf: 'center',
@@ -202,6 +242,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
     marginBottom: 6,
+    zIndex: 2,
   },
   startHereText: {
     fontSize: 12,

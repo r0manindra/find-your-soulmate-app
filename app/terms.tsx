@@ -46,8 +46,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Durch die Nutzung der FlirtIQ-App ("App"), bereitgestellt von FlirtIQ ("wir", "uns"), stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie die App bitte nicht.'
-            : 'By using the FlirtIQ app ("App"), provided by FlirtIQ ("we", "us", "our"), you agree to these Terms of Service. If you do not agree to these terms, please do not use the App.'}
+            ? 'Durch die Nutzung der Charismo-App ("App"), bereitgestellt von Flirt IQ ("wir", "uns"), stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie die App bitte nicht.'
+            : 'By using the Charismo app ("App"), provided by Flirt IQ ("we", "us", "our"), you agree to these Terms of Service. If you do not agree to these terms, please do not use the App.'}
         </Text>
 
         {/* Section 2: Description */}
@@ -56,8 +56,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'FlirtIQ ist eine Dating-Bildungs-App, die soziale und Flirt-Fähigkeiten durch geführte Lektionen, KI-Coaching und Buchempfehlungen vermittelt. Die App ist kein Dating-Dienst und stellt keine Vermittlung zwischen Personen her.'
-            : 'FlirtIQ is a dating education app that teaches social and flirting skills through guided lessons, AI coaching, and book recommendations. The App is not a dating service and does not facilitate matchmaking between individuals.'}
+            ? 'Charismo ist eine Dating-Bildungs-App, die soziale und Flirt-Fähigkeiten durch geführte Lektionen, KI-Coaching und Buchempfehlungen vermittelt. Die App ist kein Dating-Dienst und stellt keine Vermittlung zwischen Personen her.'
+            : 'Charismo is a dating education app that teaches social and flirting skills through guided lessons, AI coaching, and book recommendations. The App is not a dating service and does not facilitate matchmaking between individuals.'}
         </Text>
 
         {/* Section 3: Eligibility */}
@@ -76,8 +76,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@flirt-iq.com kontaktieren.'
-            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@flirt-iq.com.'}
+            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@charismo.app kontaktieren.'
+            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@charismo.app.'}
         </Text>
 
         {/* Section 5: Subscriptions */}
@@ -116,8 +116,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Alle Inhalte der App, einschließlich Text, Grafiken, Logos, Kursstruktur und Software, sind Eigentum von FlirtIQ und durch Urheberrecht und andere Gesetze zum Schutz geistigen Eigentums geschützt. Sie erhalten eine begrenzte, nicht-exklusive, nicht übertragbare Lizenz zur persönlichen, nicht-kommerziellen Nutzung.'
-            : 'All content in the App, including text, graphics, logos, course structure, and software, is the property of FlirtIQ and is protected by copyright and other intellectual property laws. You are granted a limited, non-exclusive, non-transferable license for personal, non-commercial use.'}
+            ? 'Alle Inhalte der App, einschließlich Text, Grafiken, Logos, Kursstruktur und Software, sind Eigentum von Flirt IQ und durch Urheberrecht und andere Gesetze zum Schutz geistigen Eigentums geschützt. Sie erhalten eine begrenzte, nicht-exklusive, nicht übertragbare Lizenz zur persönlichen, nicht-kommerziellen Nutzung.'
+            : 'All content in the App, including text, graphics, logos, course structure, and software, is the property of Flirt IQ and is protected by copyright and other intellectual property laws. You are granted a limited, non-exclusive, non-transferable license for personal, non-commercial use.'}
         </Text>
 
         {/* Section 9: Disclaimers */}
@@ -136,8 +136,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Soweit gesetzlich zulässig, haftet FlirtIQ nicht für indirekte, zufällige, besondere oder Folgeschäden, die sich aus der Nutzung oder der Unfähigkeit zur Nutzung der App ergeben. Unsere Gesamthaftung ist auf den Betrag beschränkt, den Sie in den 12 Monaten vor dem Anspruch für die App bezahlt haben.\n\nDiese Beschränkung gilt nicht für Schäden, die durch Vorsatz oder grobe Fahrlässigkeit verursacht werden, oder für die Haftung für Personenschäden gemäß österreichischem Recht.'
-            : 'To the maximum extent permitted by law, FlirtIQ shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of or inability to use the App. Our total liability is limited to the amount you paid for the App in the 12 months preceding the claim.\n\nThis limitation does not apply to damages caused by willful intent or gross negligence, or to liability for personal injury under Austrian law.'}
+            ? 'Soweit gesetzlich zulässig, haftet Flirt IQ nicht für indirekte, zufällige, besondere oder Folgeschäden, die sich aus der Nutzung oder der Unfähigkeit zur Nutzung der App ergeben. Unsere Gesamthaftung ist auf den Betrag beschränkt, den Sie in den 12 Monaten vor dem Anspruch für die App bezahlt haben.\n\nDiese Beschränkung gilt nicht für Schäden, die durch Vorsatz oder grobe Fahrlässigkeit verursacht werden, oder für die Haftung für Personenschäden gemäß österreichischem Recht.'
+            : 'To the maximum extent permitted by law, Flirt IQ shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of or inability to use the App. Our total liability is limited to the amount you paid for the App in the 12 months preceding the claim.\n\nThis limitation does not apply to damages caused by willful intent or gross negligence, or to liability for personal injury under Austrian law.'}
         </Text>
 
         {/* Section 11: Termination */}
@@ -176,8 +176,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nFlirtIQ\nE-Mail: support@flirt-iq.com'
-            : 'For questions about these Terms of Service, contact us at:\n\nFlirtIQ\nEmail: support@flirt-iq.com'}
+            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nFlirt IQ\nE-Mail: support@charismo.app'
+            : 'For questions about these Terms of Service, contact us at:\n\nFlirt IQ\nEmail: support@charismo.app'}
         </Text>
 
         <View style={styles.bottomSpacer} />

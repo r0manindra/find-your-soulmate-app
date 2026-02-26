@@ -9,9 +9,10 @@ const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 interface WeeklyReviewProps {
   locale: 'en' | 'de';
+  isDark?: boolean;
 }
 
-export function WeeklyReview({ locale }: WeeklyReviewProps) {
+export function WeeklyReview({ locale, isDark = false }: WeeklyReviewProps) {
   const { completions, getActiveHabits, getWeeklyCompletionRate } = useHabitStore();
   const activeHabits = getActiveHabits();
   const rate = getWeeklyCompletionRate();
@@ -53,7 +54,7 @@ export function WeeklyReview({ locale }: WeeklyReviewProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>
+      <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
         {locale === 'de' ? 'Diese Woche' : 'This Week'}
       </Text>
 
@@ -64,17 +65,19 @@ export function WeeklyReview({ locale }: WeeklyReviewProps) {
             size={80}
             strokeWidth={6}
             label={locale === 'de' ? 'Erledigt' : 'Done'}
+            isDark={isDark}
           />
           <View style={styles.dotGrid}>
             {weekDays.map((day, i) => (
               <View key={i} style={styles.dayColumn}>
-                <Text style={[styles.dayLabel, day.isToday && styles.dayLabelToday]}>
+                <Text style={[styles.dayLabel, isDark && styles.dayLabelDark, day.isToday && styles.dayLabelToday]}>
                   {weekdayLabels[i]}
                 </Text>
                 <View
                   style={[
                     styles.dot,
-                    day.isFuture && styles.dotFuture,
+                    isDark && styles.dotDark,
+                    day.isFuture && (isDark ? styles.dotFutureDark : styles.dotFuture),
                     !day.isFuture && day.completed === day.total && day.total > 0 && styles.dotFull,
                     !day.isFuture && day.completed > 0 && day.completed < day.total && styles.dotPartial,
                     day.isToday && styles.dotToday,
@@ -91,10 +94,10 @@ export function WeeklyReview({ locale }: WeeklyReviewProps) {
             {habitBreakdown.map(({ habit, count, totalDays }) => (
               <View key={habit.id} style={styles.breakdownRow}>
                 <Text style={styles.breakdownEmoji}>{habit.emoji}</Text>
-                <Text style={styles.breakdownName} numberOfLines={1}>
+                <Text style={[styles.breakdownName, isDark && styles.breakdownNameDark]} numberOfLines={1}>
                   {habit.title[locale]}
                 </Text>
-                <Text style={styles.breakdownCount}>{count}/{totalDays}</Text>
+                <Text style={[styles.breakdownCount, isDark && styles.breakdownCountDark]}>{count}/{totalDays}</Text>
               </View>
             ))}
           </View>
@@ -110,6 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 20, fontWeight: '700', color: '#171717',
     letterSpacing: -0.3, marginBottom: 12,
   },
+  sectionTitleDark: { color: '#F5F5F5' },
   card: { marginBottom: 16 },
   topRow: {
     flexDirection: 'row', alignItems: 'center', gap: 20,
@@ -117,12 +121,15 @@ const styles = StyleSheet.create({
   dotGrid: { flex: 1, flexDirection: 'row', justifyContent: 'space-around' },
   dayColumn: { alignItems: 'center', gap: 6 },
   dayLabel: { fontSize: 11, fontWeight: '600', color: '#A3A3A3' },
+  dayLabelDark: { color: '#737373' },
   dayLabelToday: { color: '#E8435A' },
   dot: {
     width: 12, height: 12, borderRadius: 6,
     backgroundColor: '#E5E5E5',
   },
+  dotDark: { backgroundColor: '#404040' },
   dotFuture: { backgroundColor: '#F5F5F5' },
+  dotFutureDark: { backgroundColor: '#2A2A2A' },
   dotFull: { backgroundColor: '#E8435A' },
   dotPartial: { backgroundColor: '#FFB4B4' },
   dotToday: { borderWidth: 2, borderColor: '#E8435A' },
@@ -130,5 +137,7 @@ const styles = StyleSheet.create({
   breakdownRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   breakdownEmoji: { fontSize: 16 },
   breakdownName: { flex: 1, fontSize: 14, color: '#525252' },
+  breakdownNameDark: { color: '#A3A3A3' },
   breakdownCount: { fontSize: 14, fontWeight: '600', color: '#171717' },
+  breakdownCountDark: { color: '#F5F5F5' },
 });

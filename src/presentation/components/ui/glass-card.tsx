@@ -61,6 +61,7 @@ export function GlassCard({
           {
             // @ts-ignore – web CSS property
             backdropFilter: `blur(${blurIntensity}px)`,
+            // @ts-ignore – web CSS property
             WebkitBackdropFilter: `blur(${blurIntensity}px)`,
             backgroundColor: isDark ? 'rgba(30,30,35,0.85)' : 'rgba(255,255,255,0.85)',
             borderWidth: GLASS.border.width,

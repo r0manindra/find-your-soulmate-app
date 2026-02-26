@@ -46,8 +46,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Verantwortlich für die Datenverarbeitung ist:\n\nFlirtIQ\nInhaber: Roman Indra\nE-Mail: privacy@flirt-iq.com\n\nFür Fragen zum Datenschutz kontaktieren Sie uns bitte unter der oben genannten E-Mail-Adresse.'
-            : 'The data controller responsible for processing your data is:\n\nFlirtIQ\nOwner: Roman Indra\nEmail: privacy@flirt-iq.com\n\nFor any data protection inquiries, please contact us at the email address above.'}
+            ? 'Verantwortlich für die Datenverarbeitung ist:\n\nFlirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@charismo.app\n\nFür Fragen zum Datenschutz kontaktieren Sie uns bitte unter der oben genannten E-Mail-Adresse.'
+            : 'The data controller responsible for processing your data is:\n\nFlirt IQ\nOwner: Roman Indra\nEmail: privacy@charismo.app\n\nFor any data protection inquiries, please contact us at the email address above.'}
         </Text>
 
         {/* Section 2: Data We Collect */}
@@ -126,8 +126,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Gemäß DSGVO haben Sie folgende Rechte:\n\n• Auskunftsrecht (Art. 15) — Kopie Ihrer personenbezogenen Daten anfordern\n• Recht auf Berichtigung (Art. 16) — Korrektur unrichtiger Daten\n• Recht auf Löschung (Art. 17) — Löschung Ihrer Daten verlangen\n• Recht auf Einschränkung der Verarbeitung (Art. 18)\n• Recht auf Datenübertragbarkeit (Art. 20) — Ihre Daten in maschinenlesbarem Format erhalten\n• Widerspruchsrecht (Art. 21) — der Verarbeitung widersprechen\n• Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3) — jederzeit, ohne Auswirkung auf die Rechtmäßigkeit vorheriger Verarbeitung\n\nZur Ausübung Ihrer Rechte kontaktieren Sie uns unter: privacy@flirt-iq.com\n\nSie haben außerdem das Recht, eine Beschwerde bei der österreichischen Datenschutzbehörde (dsb.gv.at) einzureichen.'
-            : 'Under the GDPR, you have the following rights:\n\n• Right of access (Art. 15) — request a copy of your personal data\n• Right to rectification (Art. 16) — correct inaccurate data\n• Right to erasure (Art. 17) — request deletion of your data\n• Right to restriction of processing (Art. 18)\n• Right to data portability (Art. 20) — receive your data in a machine-readable format\n• Right to object (Art. 21) — object to processing based on legitimate interest\n• Right to withdraw consent (Art. 7(3)) — at any time, without affecting the lawfulness of prior processing\n\nTo exercise your rights, contact us at: privacy@flirt-iq.com\n\nYou also have the right to lodge a complaint with the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
+            ? 'Gemäß DSGVO haben Sie folgende Rechte:\n\n• Auskunftsrecht (Art. 15) — Kopie Ihrer personenbezogenen Daten anfordern\n• Recht auf Berichtigung (Art. 16) — Korrektur unrichtiger Daten\n• Recht auf Löschung (Art. 17) — Löschung Ihrer Daten verlangen\n• Recht auf Einschränkung der Verarbeitung (Art. 18)\n• Recht auf Datenübertragbarkeit (Art. 20) — Ihre Daten in maschinenlesbarem Format erhalten\n• Widerspruchsrecht (Art. 21) — der Verarbeitung widersprechen\n• Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3) — jederzeit, ohne Auswirkung auf die Rechtmäßigkeit vorheriger Verarbeitung\n\nZur Ausübung Ihrer Rechte kontaktieren Sie uns unter: privacy@charismo.app\n\nSie haben außerdem das Recht, eine Beschwerde bei der österreichischen Datenschutzbehörde (dsb.gv.at) einzureichen.'
+            : 'Under the GDPR, you have the following rights:\n\n• Right of access (Art. 15) — request a copy of your personal data\n• Right to rectification (Art. 16) — correct inaccurate data\n• Right to erasure (Art. 17) — request deletion of your data\n• Right to restriction of processing (Art. 18)\n• Right to data portability (Art. 20) — receive your data in a machine-readable format\n• Right to object (Art. 21) — object to processing based on legitimate interest\n• Right to withdraw consent (Art. 7(3)) — at any time, without affecting the lawfulness of prior processing\n\nTo exercise your rights, contact us at: privacy@charismo.app\n\nYou also have the right to lodge a complaint with the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
         </Text>
 
         {/* Section 10: Account Deletion */}
@@ -136,8 +136,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Sie können Ihr Konto und alle zugehörigen Daten jederzeit löschen, indem Sie uns unter privacy@flirt-iq.com kontaktieren. Bei Löschung:\n\n• Ihr Konto und Profildaten werden dauerhaft gelöscht\n• KI-Chat-Verlauf wird gelöscht\n• Kaufbelege können gemäß gesetzlicher Anforderungen aufbewahrt werden\n• Lokale Daten auf Ihrem Gerät werden bei Deinstallation entfernt'
-            : 'You can delete your account and all associated data at any time by contacting us at privacy@flirt-iq.com. Upon deletion:\n\n• Your account and profile data will be permanently removed\n• AI chat history will be deleted\n• Purchase receipts may be retained as required by law\n• Local data on your device is removed when you uninstall the app'}
+            ? 'Sie können Ihr Konto und alle zugehörigen Daten jederzeit löschen, indem Sie uns unter privacy@charismo.app kontaktieren. Bei Löschung:\n\n• Ihr Konto und Profildaten werden dauerhaft gelöscht\n• KI-Chat-Verlauf wird gelöscht\n• Kaufbelege können gemäß gesetzlicher Anforderungen aufbewahrt werden\n• Lokale Daten auf Ihrem Gerät werden bei Deinstallation entfernt'
+            : 'You can delete your account and all associated data at any time by contacting us at privacy@charismo.app. Upon deletion:\n\n• Your account and profile data will be permanently removed\n• AI chat history will be deleted\n• Purchase receipts may be retained as required by law\n• Local data on your device is removed when you uninstall the app'}
         </Text>
 
         {/* Section 11: Tracking Technologies */}
@@ -166,8 +166,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'FlirtIQ ist nicht für Personen unter 16 Jahren bestimmt. Wir erheben wissentlich keine Daten von Kindern unter 16 Jahren. Sollten wir erfahren, dass wir Daten eines Kindes erhoben haben, werden diese unverzüglich gelöscht.'
-            : 'FlirtIQ is not intended for individuals under the age of 16. We do not knowingly collect data from children under 16. If we become aware that we have collected data from a child, we will promptly delete it.'}
+            ? 'Charismo ist nicht für Personen unter 16 Jahren bestimmt. Wir erheben wissentlich keine Daten von Kindern unter 16 Jahren. Sollten wir erfahren, dass wir Daten eines Kindes erhoben haben, werden diese unverzüglich gelöscht.'
+            : 'Charismo is not intended for individuals under the age of 16. We do not knowingly collect data from children under 16. If we become aware that we have collected data from a child, we will promptly delete it.'}
         </Text>
 
         {/* Section 14: Changes */}
@@ -186,8 +186,8 @@ export default function PrivacyScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'FlirtIQ\nInhaber: Roman Indra\nE-Mail: privacy@flirt-iq.com\n\nBei Fragen zum Datenschutz kontaktieren Sie uns gerne. Sie haben außerdem das Recht, sich an die österreichische Datenschutzbehörde (dsb.gv.at) zu wenden.'
-            : 'FlirtIQ\nOwner: Roman Indra\nEmail: privacy@flirt-iq.com\n\nFor any questions about data protection, please contact us. You also have the right to contact the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
+            ? 'Flirt IQ\nInhaber: Roman Indra\nE-Mail: privacy@charismo.app\n\nBei Fragen zum Datenschutz kontaktieren Sie uns gerne. Sie haben außerdem das Recht, sich an die österreichische Datenschutzbehörde (dsb.gv.at) zu wenden.'
+            : 'Flirt IQ\nOwner: Roman Indra\nEmail: privacy@charismo.app\n\nFor any questions about data protection, please contact us. You also have the right to contact the Austrian Data Protection Authority (Datenschutzbehörde, dsb.gv.at).'}
         </Text>
 
         <View style={styles.bottomSpacer} />

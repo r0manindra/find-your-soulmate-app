@@ -24,6 +24,7 @@ const HabitRow = React.memo(function HabitRow({
   streak,
   onToggle,
   onArchive,
+  isDark,
 }: {
   habit: { id: string; emoji: string; title: { en: string; de: string } };
   locale: 'en' | 'de';
@@ -31,6 +32,7 @@ const HabitRow = React.memo(function HabitRow({
   streak: number;
   onToggle: () => void;
   onArchive: () => void;
+  isDark: boolean;
 }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -55,12 +57,12 @@ const HabitRow = React.memo(function HabitRow({
     <AnimatedPressable onPress={handlePress} onLongPress={handleLongPress} style={animatedStyle}>
       <GlassCard style={styles.habitRow}>
         <View style={styles.habitContent}>
-          <View style={[styles.checkbox, isCompleted && styles.checkboxChecked]}>
+          <View style={[styles.checkbox, isDark && styles.checkboxDark, isCompleted && styles.checkboxChecked]}>
             {isCompleted && <Ionicons name="checkmark" size={16} color="#fff" />}
           </View>
           <Text style={styles.habitEmoji}>{habit.emoji}</Text>
           <Text
-            style={[styles.habitTitle, isCompleted && styles.habitTitleCompleted]}
+            style={[styles.habitTitle, isDark && styles.habitTitleDark, isCompleted && styles.habitTitleCompleted]}
             numberOfLines={1}
           >
             {habit.title[locale]}
@@ -221,7 +223,7 @@ export default function HabitsScreen() {
             style={styles.emptyButton}
           />
         </View>
-        <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} />
+        <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} isDark={isDark} />
       </SafeAreaView>
     );
   }
@@ -253,7 +255,7 @@ export default function HabitsScreen() {
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <View>
-              <Text style={styles.progressLabel}>
+              <Text style={[styles.progressLabel, isDark && styles.progressLabelDark]}>
                 {isToday
                   ? (locale === 'de' ? 'Heute' : 'Today')
                   : selectedDate.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -270,6 +272,7 @@ export default function HabitsScreen() {
                   key={h.id}
                   style={[
                     styles.progressDot,
+                    isDark && styles.progressDotDark,
                     isCompletedOnDate(h.id) && styles.progressDotDone,
                   ]}
                 />
@@ -321,6 +324,7 @@ export default function HabitsScreen() {
                       streak={current}
                       onToggle={() => handleToggle(habit.id)}
                       onArchive={() => handleArchive(habit.id)}
+                      isDark={isDark}
                     />
                   );
                 })}
@@ -337,10 +341,10 @@ export default function HabitsScreen() {
         />
 
         {/* Weekly Review */}
-        <WeeklyReview locale={locale} />
+        <WeeklyReview locale={locale} isDark={isDark} />
       </ScrollView>
 
-      <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} />
+      <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} isDark={isDark} />
     </SafeAreaView>
   );
 }
@@ -365,11 +369,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
   progressLabel: { fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: 2 },
+  progressLabelDark: { color: '#A3A3A3' },
   progressValue: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3 },
   progressDots: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', maxWidth: 150, justifyContent: 'flex-end' },
   progressDot: {
     width: 10, height: 10, borderRadius: 5, backgroundColor: '#E5E5E5',
   },
+  progressDotDark: { backgroundColor: '#404040' },
   progressDotDone: { backgroundColor: '#E8435A' },
 
   // Nudge
@@ -401,11 +407,13 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: '#D4D4D4',
     alignItems: 'center', justifyContent: 'center',
   },
+  checkboxDark: { borderColor: '#525252' },
   checkboxChecked: {
     backgroundColor: '#E8435A', borderColor: '#E8435A',
   },
   habitEmoji: { fontSize: 20 },
   habitTitle: { flex: 1, fontSize: 16, fontWeight: '600', color: '#171717' },
+  habitTitleDark: { color: '#F5F5F5' },
   habitTitleCompleted: { color: '#A3A3A3', textDecorationLine: 'line-through' },
   streakBadge: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   streakIcon: { fontSize: 14 },

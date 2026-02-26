@@ -60,6 +60,9 @@ const TAB_CONFIG: TabConfig[] = [
 // Path A: iOS 26+ — Native liquid glass tab bar
 // ---------------------------------------------------------------------------
 
+// Template PNG of the Charismo icon for native tab bar (rendered as template image)
+const charismoTabIcon = require('@/assets/images/charismo-tab-icon.png');
+
 function NativeLiquidGlassLayout() {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
@@ -83,12 +86,16 @@ function NativeLiquidGlassLayout() {
           href={tab.name === 'index' ? '/' : `/${tab.name}`}
         >
           <NativeLabel hidden />
-          <NativeIcon
-            sf={{
-              default: tab.sfSymbol as any,
-              selected: tab.sfSymbolFocused as any,
-            }}
-          />
+          {tab.useCharismoIcon ? (
+            <NativeIcon src={charismoTabIcon} />
+          ) : (
+            <NativeIcon
+              sf={{
+                default: tab.sfSymbol as any,
+                selected: tab.sfSymbolFocused as any,
+              }}
+            />
+          )}
         </NativeTabs.Trigger>
       ))}
     </NativeTabs>

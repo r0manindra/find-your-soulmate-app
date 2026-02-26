@@ -10,6 +10,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, with
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
+import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -153,7 +154,7 @@ function JourneyMiniMap({ completedChapters, isDark }: { completedChapters: numb
   );
 }
 
-function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay }: { icon: string; label: string; subtitle?: string; onPress: () => void; isDark: boolean; delay: number }) {
+function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay, customIcon }: { icon: string; label: string; subtitle?: string; onPress: () => void; isDark: boolean; delay: number; customIcon?: React.ReactNode }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -170,7 +171,7 @@ function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay }: { 
           onPress();
         }}
       >
-        <Ionicons name={icon as any} size={24} color="#E8435A" />
+        {customIcon ?? <Ionicons name={icon as any} size={24} color="#E8435A" />}
         <Text style={[styles.quickActionLabel, isDark && styles.quickActionLabelDark]}>{label}</Text>
         {subtitle ? (
           <Text style={[styles.quickActionStat, isDark && styles.quickActionStatDark]}>{subtitle}</Text>
@@ -245,8 +246,9 @@ export default function HomeScreen() {
             delay={250}
           />
           <QuickActionButton
-            icon="chatbubble-outline"
+            icon="chatbubbles-outline"
             label="Coach"
+            customIcon={<CharismoIcon size={26} color="#E8435A" />}
             onPress={() => router.push('/coach' as any)}
             isDark={isDark}
             delay={300}
@@ -260,6 +262,7 @@ export default function HomeScreen() {
               progress={overallProgress}
               size={130}
               label={t('home.progress')}
+              isDark={isDark}
             />
             <View style={styles.statsColumn}>
               <View>

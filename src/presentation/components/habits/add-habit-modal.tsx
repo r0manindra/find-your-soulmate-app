@@ -30,14 +30,17 @@ interface AddHabitModalProps {
   visible: boolean;
   onClose: () => void;
   locale: 'en' | 'de';
+  isDark?: boolean;
 }
 
-export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) {
+export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddHabitModalProps) {
   const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded, setHabitSchedule } = useHabitStore();
+  const [step, setStep] = useState<1 | 2>(1);
   const [customEmoji, setCustomEmoji] = useState('🔥');
   const [customName, setCustomName] = useState('');
   const [selectedTime, setSelectedTime] = useState<HabitTimeSlot>(null);
   const [selectedDays, setSelectedDays] = useState<number[]>(ALL_DAYS);
+  const [selectedPreset, setSelectedPreset] = useState<typeof presetHabits[0] | null>(null);
 
   const dayLabels = locale === 'de' ? DAY_LABELS_DE : DAY_LABELS_EN;
 
@@ -52,16 +55,32 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
     });
   };
 
-  const handleAddPreset = (preset: typeof presetHabits[0]) => {
+  const handleSelectPreset = (preset: typeof presetHabits[0]) => {
     if (isPresetAlreadyAdded(preset.id)) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    addHabitFromPreset(preset.id, preset.emoji, preset.title, preset.chapterId);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedPreset(preset);
+    setSelectedTime(null);
+    setSelectedDays(ALL_DAYS);
+    setStep(2);
   };
 
-  const handleAddCustom = () => {
+  const handleCustomNext = () => {
     if (!customName.trim()) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedPreset(null);
+    setSelectedTime(null);
+    setSelectedDays(ALL_DAYS);
+    setStep(2);
+  };
+
+  const handleConfirm = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    addCustomHabit(customEmoji, customName.trim());
+
+    if (selectedPreset) {
+      addHabitFromPreset(selectedPreset.id, selectedPreset.emoji, selectedPreset.title, selectedPreset.chapterId);
+    } else {
+      addCustomHabit(customEmoji, customName.trim());
+    }
 
     // Apply schedule to the newly created habit
     const habits = useHabitStore.getState().habits;
@@ -71,64 +90,78 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
       setHabitSchedule(newHabit.id, selectedTime, days);
     }
 
+    resetState();
+    onClose();
+  };
+
+  const handleBack = () => {
+    // Go back to step 1, preserve custom name/emoji
+    setSelectedPreset(null);
+    setSelectedTime(null);
+    setSelectedDays(ALL_DAYS);
+    setStep(1);
+  };
+
+  const resetState = () => {
+    setStep(1);
+    setSelectedPreset(null);
     setCustomName('');
     setCustomEmoji('🔥');
     setSelectedTime(null);
     setSelectedDays(ALL_DAYS);
+  };
+
+  const handleClose = () => {
+    resetState();
     onClose();
   };
+
+  // Colors based on dark mode
+  const bg = isDark ? '#171717' : '#FAFAFA';
+  const textPrimary = isDark ? '#F5F5F5' : '#171717';
+  const textSecondary = isDark ? '#A3A3A3' : '#737373';
+  const surfaceBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+  const borderCol = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const cardBg = isDark ? '#252525' : '#fff';
+
+  // Preview info for step 2
+  const previewEmoji = selectedPreset ? selectedPreset.emoji : customEmoji;
+  const previewTitle = selectedPreset ? selectedPreset.title[locale] : customName;
 
   return (
     <Modal
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: bg }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>
-            {locale === 'de' ? 'Habit hinzufügen' : 'Add Habit'}
+          <Text style={[styles.title, { color: textPrimary }]}>
+            {step === 2
+              ? (locale === 'de' ? 'Zeitplan wählen' : 'Set Schedule')
+              : (locale === 'de' ? 'Habit hinzufügen' : 'Add Habit')}
           </Text>
-          <Pressable onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#737373" />
+          <Pressable onPress={handleClose} style={[styles.closeButton, isDark && styles.closeButtonDark]}>
+            <Ionicons name="close" size={24} color={textSecondary} />
           </Pressable>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Custom habit creation */}
-          <Text style={styles.sectionTitle}>
-            {locale === 'de' ? 'Eigene erstellen' : 'Create Custom'}
-          </Text>
-          <GlassCard style={styles.customCard} padding={18}>
-            <Text style={styles.emojiPickerLabel}>
-              {locale === 'de' ? 'Emoji wählen' : 'Pick an emoji'}
-            </Text>
-            <View style={styles.emojiGrid}>
-              {EMOJI_GRID.map((emoji) => (
-                <Pressable
-                  key={emoji}
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setCustomEmoji(emoji);
-                  }}
-                  style={[styles.emojiItem, emoji === customEmoji && styles.emojiItemSelected]}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <TextInput
-              style={styles.input}
-              value={customName}
-              onChangeText={setCustomName}
-              placeholder={locale === 'de' ? 'Habit-Name' : 'Habit name'}
-              placeholderTextColor="#A3A3A3"
-              maxLength={50}
-            />
+        {step === 2 ? (
+          /* Step 2: Schedule (for both preset and custom) */
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Preview of selected habit */}
+            <GlassCard style={styles.previewCard} padding={18}>
+              <View style={styles.previewRow}>
+                <Text style={styles.previewEmoji}>{previewEmoji}</Text>
+                <Text style={[styles.previewTitle, { color: textPrimary }]}>
+                  {previewTitle}
+                </Text>
+              </View>
+            </GlassCard>
 
             {/* Time of day picker */}
-            <Text style={styles.scheduleLabel}>
+            <Text style={[styles.scheduleLabel, { color: textSecondary }]}>
               {locale === 'de' ? 'Tageszeit' : 'Time of day'}
             </Text>
             <View style={styles.timeRow}>
@@ -141,6 +174,7 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
                   }}
                   style={[
                     styles.timeButton,
+                    { backgroundColor: surfaceBg },
                     selectedTime === opt.key && styles.timeButtonActive,
                   ]}
                 >
@@ -160,7 +194,7 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
             </View>
 
             {/* Day of week selector */}
-            <Text style={styles.scheduleLabel}>
+            <Text style={[styles.scheduleLabel, { color: textSecondary }]}>
               {locale === 'de' ? 'Wochentage' : 'Days'}
             </Text>
             <View style={styles.daysRow}>
@@ -170,6 +204,7 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
                   onPress={() => toggleDay(day)}
                   style={[
                     styles.dayToggle,
+                    { backgroundColor: surfaceBg },
                     selectedDays.includes(day) && styles.dayToggleActive,
                   ]}
                 >
@@ -183,85 +218,146 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
               ))}
             </View>
 
-            <Pressable
-              onPress={handleAddCustom}
-              style={[styles.addCustomButton, !customName.trim() && styles.addCustomButtonDisabled]}
-              disabled={!customName.trim()}
-            >
-              <Text style={styles.addCustomButtonText}>
-                {locale === 'de' ? 'Hinzufügen' : 'Add'}
+            {/* Action buttons */}
+            <View style={styles.presetActions}>
+              <Pressable
+                onPress={handleBack}
+                style={[styles.backButton, { backgroundColor: surfaceBg }]}
+              >
+                <Text style={[styles.backButtonText, { color: textPrimary }]}>
+                  {locale === 'de' ? 'Zurück' : 'Back'}
+                </Text>
+              </Pressable>
+              <Pressable onPress={handleConfirm} style={styles.addCustomButton}>
+                <Text style={styles.addCustomButtonText}>
+                  {locale === 'de' ? 'Hinzufügen' : 'Add Habit'}
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+        ) : (
+          /* Step 1: Browse presets + custom (no day/time pickers) */
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Custom habit creation */}
+            <Text style={[styles.sectionTitle, { color: textPrimary }]}>
+              {locale === 'de' ? 'Eigene erstellen' : 'Create Custom'}
+            </Text>
+            <GlassCard style={styles.customCard} padding={18}>
+              <Text style={[styles.emojiPickerLabel, { color: textSecondary }]}>
+                {locale === 'de' ? 'Emoji wählen' : 'Pick an emoji'}
               </Text>
-            </Pressable>
-          </GlassCard>
-
-          {/* Suggested presets by phase */}
-          <Text style={styles.sectionTitle}>
-            {locale === 'de' ? 'Vorgeschlagen' : 'Suggested'}
-          </Text>
-          {phases.map((phase) => {
-            const phasePresets = presetHabits.filter((p) =>
-              phase.chapters.includes(p.chapterId)
-            );
-            if (phasePresets.length === 0) return null;
-
-            return (
-              <View key={phase.id} style={styles.phaseGroup}>
-                <Text style={styles.phaseTitle}>{phase.title[locale]}</Text>
-                {phasePresets.map((preset) => {
-                  const added = isPresetAlreadyAdded(preset.id);
-                  return (
-                    <Pressable
-                      key={preset.id}
-                      onPress={() => handleAddPreset(preset)}
-                      style={styles.presetRow}
-                      disabled={added}
-                    >
-                      <Text style={styles.presetEmoji}>{preset.emoji}</Text>
-                      <View style={styles.presetInfo}>
-                        <Text style={[styles.presetTitle, added && styles.presetTitleAdded]}>
-                          {preset.title[locale]}
-                        </Text>
-                      </View>
-                      {added ? (
-                        <Ionicons name="checkmark-circle" size={22} color="#E8435A" />
-                      ) : (
-                        <Ionicons name="add-circle-outline" size={22} color="#A3A3A3" />
-                      )}
-                    </Pressable>
-                  );
-                })}
+              <View style={styles.emojiGrid}>
+                {EMOJI_GRID.map((emoji) => (
+                  <Pressable
+                    key={emoji}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setCustomEmoji(emoji);
+                    }}
+                    style={[
+                      styles.emojiItem,
+                      { backgroundColor: surfaceBg },
+                      emoji === customEmoji && styles.emojiItemSelected,
+                    ]}
+                  >
+                    <Text style={styles.emojiText}>{emoji}</Text>
+                  </Pressable>
+                ))}
               </View>
-            );
-          })}
-          <View style={{ height: 40 }} />
-        </ScrollView>
+              <TextInput
+                style={[styles.input, { backgroundColor: surfaceBg, color: textPrimary }]}
+                value={customName}
+                onChangeText={setCustomName}
+                placeholder={locale === 'de' ? 'Habit-Name' : 'Habit name'}
+                placeholderTextColor="#A3A3A3"
+                maxLength={50}
+              />
+              <Pressable
+                onPress={handleCustomNext}
+                style={[styles.addCustomButton, !customName.trim() && styles.addCustomButtonDisabled]}
+                disabled={!customName.trim()}
+              >
+                <Text style={styles.addCustomButtonText}>
+                  {locale === 'de' ? 'Weiter' : 'Next'}
+                </Text>
+              </Pressable>
+            </GlassCard>
+
+            {/* Suggested presets by phase */}
+            <Text style={[styles.sectionTitle, { color: textPrimary }]}>
+              {locale === 'de' ? 'Vorgeschlagen' : 'Suggested'}
+            </Text>
+            {phases.map((phase) => {
+              const phasePresets = presetHabits.filter((p) =>
+                phase.chapters.includes(p.chapterId)
+              );
+              if (phasePresets.length === 0) return null;
+
+              return (
+                <View key={phase.id} style={styles.phaseGroup}>
+                  <Text style={styles.phaseTitle}>{phase.title[locale]}</Text>
+                  {phasePresets.map((preset) => {
+                    const added = isPresetAlreadyAdded(preset.id);
+                    return (
+                      <Pressable
+                        key={preset.id}
+                        onPress={() => handleSelectPreset(preset)}
+                        style={[
+                          styles.presetRow,
+                          { backgroundColor: cardBg, borderColor: borderCol },
+                        ]}
+                        disabled={added}
+                      >
+                        <Text style={styles.presetEmoji}>{preset.emoji}</Text>
+                        <View style={styles.presetInfo}>
+                          <Text style={[styles.presetTitle, { color: textPrimary }, added && styles.presetTitleAdded]}>
+                            {preset.title[locale]}
+                          </Text>
+                        </View>
+                        {added ? (
+                          <Ionicons name="checkmark-circle" size={22} color="#E8435A" />
+                        ) : (
+                          <Ionicons name="chevron-forward" size={20} color="#A3A3A3" />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              );
+            })}
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        )}
       </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  safeArea: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#171717', letterSpacing: -0.5 },
+  title: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5 },
   closeButton: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center', justifyContent: 'center',
   },
+  closeButtonDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
   scrollContent: { paddingHorizontal: 20, paddingTop: 20 },
   sectionTitle: {
-    fontSize: 20, fontWeight: '700', color: '#171717',
+    fontSize: 20, fontWeight: '700',
     letterSpacing: -0.3, marginBottom: 12, marginTop: 8,
   },
   customCard: {
     marginBottom: 24,
   },
   emojiPickerLabel: {
-    fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: 10,
+    fontSize: 13, fontWeight: '600', marginBottom: 10,
   },
   emojiGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14,
@@ -269,7 +365,6 @@ const styles = StyleSheet.create({
   emojiItem: {
     width: 40, height: 40, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.03)',
   },
   emojiItemSelected: {
     backgroundColor: 'rgba(232,67,90,0.12)',
@@ -277,14 +372,14 @@ const styles = StyleSheet.create({
   },
   emojiText: { fontSize: 20 },
   input: {
-    height: 44, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 12,
-    paddingHorizontal: 14, fontSize: 16, color: '#171717',
+    height: 44, borderRadius: 12,
+    paddingHorizontal: 14, fontSize: 16,
     marginBottom: 14,
   },
 
   // Schedule
   scheduleLabel: {
-    fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: 8,
+    fontSize: 13, fontWeight: '600', marginBottom: 8,
   },
   timeRow: {
     flexDirection: 'row', gap: 8, marginBottom: 14,
@@ -292,7 +387,6 @@ const styles = StyleSheet.create({
   timeButton: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 4, paddingVertical: 10, borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.03)',
   },
   timeButtonActive: {
     backgroundColor: 'rgba(232,67,90,0.1)',
@@ -310,7 +404,6 @@ const styles = StyleSheet.create({
   dayToggle: {
     width: 38, height: 38, borderRadius: 19,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.03)',
   },
   dayToggleActive: {
     backgroundColor: '#E8435A',
@@ -329,6 +422,17 @@ const styles = StyleSheet.create({
   addCustomButtonDisabled: { opacity: 0.4 },
   addCustomButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 
+  // Step 2: preview + actions
+  previewCard: { marginBottom: 20 },
+  previewRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  previewEmoji: { fontSize: 28 },
+  previewTitle: { fontSize: 18, fontWeight: '700', flex: 1 },
+  presetActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  backButton: {
+    flex: 1, borderRadius: 14, paddingVertical: 12, alignItems: 'center',
+  },
+  backButtonText: { fontSize: 16, fontWeight: '600' },
+
   phaseGroup: { marginBottom: 20 },
   phaseTitle: {
     fontSize: 13, fontWeight: '700', color: '#A3A3A3',
@@ -336,12 +440,12 @@ const styles = StyleSheet.create({
   },
   presetRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#fff', borderRadius: 14, padding: 14,
+    borderRadius: 14, padding: 14,
     marginBottom: 8,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: StyleSheet.hairlineWidth,
   },
   presetEmoji: { fontSize: 22 },
   presetInfo: { flex: 1 },
-  presetTitle: { fontSize: 15, fontWeight: '600', color: '#171717' },
+  presetTitle: { fontSize: 15, fontWeight: '600' },
   presetTitleAdded: { color: '#A3A3A3' },
 });

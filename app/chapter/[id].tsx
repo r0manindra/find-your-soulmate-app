@@ -1,33 +1,70 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
+import {
+  View, Text, ScrollView, Pressable, TextInput, FlatList, Modal,
+  KeyboardAvoidingView, Platform, StyleSheet,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
+import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
+import { useAuthStore } from '@/src/store/auth-store';
+import { useHabitStore } from '@/src/store/habit-store';
 import { chapters } from '@/src/data/content/chapters';
 import { chapterLessons } from '@/src/data/content/chapter-lessons';
 import { chapterLessonsDe } from '@/src/data/content/chapter-lessons-de';
+import { getCharacter } from '@/src/data/content/coach-characters';
+import * as api from '@/src/services/api';
+import type { JourneyContext } from '@/src/services/api';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface CoachMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+const FALLBACK_RESPONSES = [
+  "Good question. Here's the thing: confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
+  "Listen, I get it. Approaching someone feels like defusing a bomb. But here's the secret: they're probably just as nervous. Start with something genuine, comment on something real in the moment.",
+  "The biggest mistake I see? Trying to be someone you're not. The right person will love the real you, weird quirks, awkward pauses, and all. Authenticity is the ultimate cheat code.",
+  "Let me be real with you: rejection isn't about you. It's about timing, circumstances, chemistry. Don't take it personally. The best players in the game have the most strikeouts. Keep swinging.",
+  "Here's what separates the amateurs from the naturals: listening. Most people are just waiting for their turn to talk. Actually listen. Ask follow-up questions. Make them feel seen.",
+];
 
 export default function ChapterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const chapterId = parseInt(id || '1', 10);
   const locale = useSettingsStore((s) => s.locale);
-  const userGender = useUserProfileStore((s) => s.userGender);
+  const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
+  const userProfile = useUserProfileStore();
+  const userGender = userProfile.userGender;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const { completedChapters, completeChapter, uncompleteChapter } = useProgressStore();
+  const progressStore = useProgressStore();
+  const { completedChapters, completeChapter, uncompleteChapter } = progressStore;
+  const { isLoggedIn } = useAuthStore();
+  const habitStore = useHabitStore();
+  const insets = useSafeAreaInsets();
+
+  const [coachVisible, setCoachVisible] = useState(false);
+  const [coachMessages, setCoachMessages] = useState<CoachMessage[]>([]);
+  const [coachInput, setCoachInput] = useState('');
+  const [coachLoading, setCoachLoading] = useState(false);
+  const coachListRef = useRef<FlatList>(null);
+  const activeCharacter = getCharacter(selectedCharacterId);
 
   const chapter = useMemo(() => chapters.find((c) => c.id === chapterId), [chapterId]);
   const lesson = useMemo(() => {
@@ -46,6 +83,114 @@ export default function ChapterDetailScreen() {
   }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);
 
+  // Generate suggestion chips from chapter exercises
+  const suggestionChips = useMemo(() => {
+    if (!lesson) return [];
+    const chips: { label: string; text: string }[] = [];
+    lesson.exercises.slice(0, 2).forEach((ex) => {
+      chips.push({
+        label: locale === 'de' ? `Üben: ${ex.title}` : `Practice: ${ex.title}`,
+        text: locale === 'de'
+          ? `Lass uns die Übung "${ex.title}" aus diesem Kapitel gemeinsam üben.`
+          : `Let's practice the exercise "${ex.title}" from this chapter together.`,
+      });
+    });
+    chips.push({
+      label: locale === 'de' ? 'Quiz mich' : 'Quiz me',
+      text: locale === 'de'
+        ? 'Stell mir Quizfragen zu diesem Kapitel, um mein Verständnis zu testen.'
+        : 'Quiz me on this chapter to test my understanding.',
+    });
+    chips.push({
+      label: locale === 'de' ? 'Erkläre die Erkenntnis' : 'Explain the takeaway',
+      text: locale === 'de'
+        ? `Erkläre mir die wichtigste Erkenntnis dieses Kapitels genauer: "${lesson.keyTakeaway}"`
+        : `Explain the key takeaway of this chapter in more detail: "${lesson.keyTakeaway}"`,
+    });
+    return chips;
+  }, [lesson, locale]);
+
+  const buildChapterContext = useCallback((): JourneyContext => {
+    const completed = progressStore.completedChapters;
+    const activeHabits = habitStore.getActiveHabits();
+    const activeWithStreaks = activeHabits.map((h) => ({
+      name: h.title[locale] || h.title.en,
+      currentStreak: habitStore.getStreak(h.id).current,
+    }));
+
+    return {
+      profile: {
+        gender: userProfile.userGender,
+        ageGroup: userProfile.ageGroup,
+        skillLevel: userProfile.skillLevel,
+        socialEnergy: userProfile.socialEnergy,
+        basicsLevel: userProfile.basicsLevel,
+        goal: userProfile.goal,
+      },
+      progress: {
+        completedChapters: completed,
+        currentChapterId: chapterId,
+        streak: progressStore.streak,
+        graduated: progressStore.graduated,
+      },
+      habits: {
+        active: activeWithStreaks,
+        todayCompleted: habitStore.getTodayCompletedCount(),
+        todayTotal: habitStore.getTodayTotalCount(),
+        weeklyCompletionRate: habitStore.getWeeklyCompletionRate(),
+      },
+      locale,
+    };
+  }, [progressStore, habitStore, userProfile, locale, chapterId]);
+
+  const sendCoachMsg = useCallback(async (messageText?: string) => {
+    const text = messageText ?? coachInput;
+    if (!text.trim() || coachLoading) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const userMsg: CoachMessage = {
+      id: String(Date.now()),
+      role: 'user',
+      content: text.trim(),
+    };
+    setCoachMessages((prev) => [...prev, userMsg]);
+    setCoachInput('');
+    setCoachLoading(true);
+
+    try {
+      if (isLoggedIn) {
+        const context = buildChapterContext();
+        const data = await api.sendCoachMessage(userMsg.content, selectedCharacterId, context);
+        setCoachMessages((prev) => [...prev, {
+          id: String(Date.now() + 1),
+          role: 'assistant',
+          content: data.response,
+        }]);
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        const response = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
+        setCoachMessages((prev) => [...prev, {
+          id: String(Date.now() + 1),
+          role: 'assistant',
+          content: response,
+        }]);
+      }
+    } catch {
+      setCoachMessages((prev) => [...prev, {
+        id: String(Date.now() + 1),
+        role: 'assistant',
+        content: locale === 'de' ? 'Etwas ist schiefgelaufen. Bitte versuche es erneut.' : 'Something went wrong. Please try again.',
+      }]);
+    } finally {
+      setCoachLoading(false);
+    }
+  }, [coachInput, coachLoading, isLoggedIn, selectedCharacterId, locale, buildChapterContext]);
+
+  const handleChipPress = useCallback((chipText: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    sendCoachMsg(chipText);
+  }, [sendCoachMsg]);
+
   if (!chapter || !lesson) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -61,6 +206,29 @@ export default function ChapterDetailScreen() {
     } else {
       completeChapter(chapterId);
     }
+  };
+
+  const showChips = coachMessages.length === 0 && !coachLoading;
+
+  const renderCoachMessage = ({ item }: { item: CoachMessage }) => {
+    const isUser = item.role === 'user';
+    return (
+      <View style={[styles.coachMsgRow, isUser && styles.coachMsgRowUser]}>
+        {!isUser && (
+          <View style={[styles.coachAvatar, { backgroundColor: `${activeCharacter.color}15` }]}>
+            <CharismoIcon size={16} color={activeCharacter.color} />
+          </View>
+        )}
+        <View style={[
+          styles.coachBubble,
+          isUser ? styles.coachBubbleUser : [styles.coachBubbleAI, isDark && styles.coachBubbleAIDark],
+        ]}>
+          <Text style={[styles.coachMsgText, isDark && !isUser && styles.coachMsgTextDark, isUser && styles.coachMsgTextUser]}>
+            {item.content}
+          </Text>
+        </View>
+      </View>
+    );
   };
 
   return (
@@ -196,6 +364,138 @@ export default function ChapterDetailScreen() {
           );
         })()}
       </ScrollView>
+
+      {/* Floating "Ask Coach" button */}
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          setCoachVisible(true);
+        }}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
+      >
+        <LinearGradient
+          colors={['#E8435A', '#FF7854']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <CharismoIcon size={22} color="#fff" />
+          <Text style={styles.fabText}>
+            {locale === 'de' ? 'Coach fragen' : 'Ask Coach'}
+          </Text>
+        </LinearGradient>
+      </Pressable>
+
+      {/* Coach Panel Modal */}
+      <Modal
+        visible={coachVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setCoachVisible(false)}
+      >
+        <SafeAreaView style={[styles.coachSafeArea, isDark && styles.coachSafeAreaDark]}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            {/* Coach panel header */}
+            <View style={styles.coachHeader}>
+              <View style={styles.coachHeaderLeft}>
+                <View style={[styles.coachHeaderIcon, { backgroundColor: `${activeCharacter.color}15` }]}>
+                  <CharismoIcon size={18} color={activeCharacter.color} />
+                </View>
+                <View>
+                  <Text style={[styles.coachHeaderTitle, isDark && styles.coachHeaderTitleDark]}>
+                    {locale === 'de' ? 'Mit Coach üben' : 'Practice with Coach'}
+                  </Text>
+                  <Text style={styles.coachHeaderSubtitle} numberOfLines={1}>
+                    {chapter.title[locale]}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => setCoachVisible(false)}
+                style={[styles.coachCloseBtn, isDark && styles.coachCloseBtnDark]}
+              >
+                <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
+              </Pressable>
+            </View>
+
+            {/* Messages */}
+            <FlatList
+              ref={coachListRef}
+              data={coachMessages}
+              keyExtractor={(item) => item.id}
+              renderItem={renderCoachMessage}
+              contentContainerStyle={styles.coachMsgList}
+              showsVerticalScrollIndicator={false}
+              onContentSizeChange={() => coachListRef.current?.scrollToEnd({ animated: true })}
+              ListHeaderComponent={
+                showChips ? (
+                  <View style={styles.coachChipsArea}>
+                    <Text style={[styles.coachChipsTitle, isDark && styles.coachChipsTitleDark]}>
+                      {locale === 'de' ? 'Probiere eine Frage:' : 'Try a question:'}
+                    </Text>
+                    <View style={styles.coachChipsWrap}>
+                      {suggestionChips.map((chip, idx) => (
+                        <Pressable
+                          key={idx}
+                          onPress={() => handleChipPress(chip.text)}
+                          style={[styles.coachChip, isDark && styles.coachChipDark]}
+                        >
+                          <Text style={styles.coachChipText} numberOfLines={1}>{chip.label}</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                ) : null
+              }
+              ListFooterComponent={
+                coachLoading ? (
+                  <View style={styles.coachMsgRow}>
+                    <View style={[styles.coachAvatar, { backgroundColor: `${activeCharacter.color}15` }]}>
+                      <CharismoIcon size={16} color={activeCharacter.color} />
+                    </View>
+                    <View style={[styles.coachBubbleAI, isDark && styles.coachBubbleAIDark]}>
+                      <Text style={styles.coachLoadingText}>
+                        {locale === 'de' ? 'Denke nach...' : 'Thinking...'}
+                      </Text>
+                    </View>
+                  </View>
+                ) : null
+              }
+            />
+
+            {/* Input */}
+            <BlurView
+              intensity={isDark ? 40 : 80}
+              tint={isDark ? 'dark' : 'light'}
+              style={styles.coachInputBlur}
+            >
+              <View style={styles.coachInputRow}>
+                <TextInput
+                  style={[styles.coachInput, isDark && styles.coachInputDark]}
+                  value={coachInput}
+                  onChangeText={setCoachInput}
+                  placeholder={locale === 'de' ? 'Frage stellen...' : 'Ask a question...'}
+                  placeholderTextColor="#A3A3A3"
+                  multiline
+                  maxLength={500}
+                  onSubmitEditing={() => sendCoachMsg()}
+                  returnKeyType="send"
+                />
+                <Pressable
+                  onPress={() => sendCoachMsg()}
+                  style={[styles.coachSendBtn, { backgroundColor: activeCharacter.color }, (!coachInput.trim() || coachLoading) && styles.coachSendBtnDisabled]}
+                  disabled={!coachInput.trim() || coachLoading}
+                >
+                  <Ionicons name="arrow-up" size={20} color="#fff" />
+                </Pressable>
+              </View>
+            </BlurView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -438,4 +738,163 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  // Floating Action Button
+  fab: {
+    position: 'absolute',
+    right: 20,
+    shadowColor: '#E8435A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  fabGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 50,
+  },
+  fabText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  // Coach Panel
+  coachSafeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  coachSafeAreaDark: { backgroundColor: '#171717' },
+  coachHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
+  },
+  coachHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  coachHeaderIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+  },
+  coachHeaderTitleDark: { color: '#F5F5F5' },
+  coachHeaderSubtitle: {
+    fontSize: 13,
+    color: '#737373',
+    marginTop: 1,
+  },
+  coachCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachCloseBtnDark: { backgroundColor: 'rgba(255,255,255,0.08)' },
+
+  // Suggestion chips
+  coachChipsArea: {
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  coachChipsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#737373',
+    marginBottom: 10,
+  },
+  coachChipsTitleDark: { color: '#A3A3A3' },
+  coachChipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  coachChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(232,67,90,0.15)',
+  },
+  coachChipDark: {
+    backgroundColor: 'rgba(232,67,90,0.12)',
+    borderColor: 'rgba(232,67,90,0.2)',
+  },
+  coachChipText: { fontSize: 13, fontWeight: '600', color: '#E8435A' },
+
+  // Messages
+  coachMsgList: { paddingHorizontal: 20, paddingBottom: 8 },
+  coachMsgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12 },
+  coachMsgRowUser: { justifyContent: 'flex-end' },
+  coachAvatar: {
+    width: 28, height: 28, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+  },
+  coachBubble: { maxWidth: '75%', padding: 14, borderRadius: 20 },
+  coachBubbleUser: { backgroundColor: '#E8435A', borderBottomRightRadius: 4 },
+  coachBubbleAI: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.06)',
+    borderBottomLeftRadius: 4,
+    maxWidth: '75%',
+    padding: 14,
+    borderRadius: 20,
+  },
+  coachBubbleAIDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  coachMsgText: { fontSize: 16, lineHeight: 22, color: '#171717' },
+  coachMsgTextDark: { color: '#F5F5F5' },
+  coachMsgTextUser: { color: '#fff' },
+  coachLoadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
+
+  // Input area
+  coachInputBlur: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(0,0,0,0.06)',
+    overflow: 'hidden',
+  },
+  coachInputRow: {
+    flexDirection: 'row', alignItems: 'flex-end', gap: 8,
+    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12,
+  },
+  coachInput: {
+    flex: 1, minHeight: 40, maxHeight: 100,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10,
+    fontSize: 16, color: '#171717',
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  coachInputDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: '#F5F5F5',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  coachSendBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  coachSendBtnDisabled: { opacity: 0.4 },
 });

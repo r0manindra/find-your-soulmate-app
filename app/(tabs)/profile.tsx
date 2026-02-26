@@ -28,6 +28,7 @@ export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
 
   const unlockedAchievements = useMemo(
     () => achievements.filter((a) => a.condition(progress)),
@@ -338,36 +339,58 @@ export default function ProfileScreen() {
             <Text style={[styles.settingLabel, isDark && styles.textDark]}>
               {locale === 'de' ? 'Erscheinungsbild' : 'Appearance'}
             </Text>
-            <View style={styles.languageToggle}>
-              {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => {
-                const isActive = themeMode === mode;
-                const labels: Record<ThemeMode, { en: string; de: string; icon: string }> = {
-                  system: { en: 'Auto', de: 'Auto', icon: 'phone-portrait-outline' },
-                  light: { en: 'Light', de: 'Hell', icon: 'sunny-outline' },
-                  dark: { en: 'Dark', de: 'Dunkel', icon: 'moon-outline' },
-                };
-                return (
-                  <Pressable
-                    key={mode}
-                    onPress={() => {
-                      setThemeMode(mode);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
-                    style={[styles.langOption, isActive && styles.langActive]}
-                  >
-                    <View style={styles.themeOptionContent}>
-                      <Ionicons
-                        name={labels[mode].icon as any}
-                        size={14}
-                        color={isActive ? '#171717' : '#A3A3A3'}
-                      />
-                      <Text style={[styles.langText, isActive && styles.langTextActive]}>
-                        {labels[mode][locale]}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
+            <View>
+              <Pressable
+                onPress={() => setThemeDropdownOpen((v) => !v)}
+                style={[styles.themeDropdownTrigger, isDark && styles.themeDropdownTriggerDark]}
+              >
+                <Ionicons
+                  name={
+                    themeMode === 'system' ? 'phone-portrait-outline' as any :
+                    themeMode === 'light' ? 'sunny-outline' as any : 'moon-outline' as any
+                  }
+                  size={14}
+                  color={isDark ? '#F5F5F5' : '#171717'}
+                />
+                <Text style={[styles.themeDropdownLabel, isDark && styles.textDark]}>
+                  {themeMode === 'system' ? 'Auto' : themeMode === 'light' ? (locale === 'de' ? 'Hell' : 'Light') : (locale === 'de' ? 'Dunkel' : 'Dark')}
+                </Text>
+                <Ionicons name="chevron-down" size={14} color="#A3A3A3" />
+              </Pressable>
+              {themeDropdownOpen && (
+                <View style={[styles.themeDropdownMenu, isDark && styles.themeDropdownMenuDark]}>
+                  {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => {
+                    const isActive = themeMode === mode;
+                    const icons: Record<ThemeMode, string> = {
+                      system: 'phone-portrait-outline',
+                      light: 'sunny-outline',
+                      dark: 'moon-outline',
+                    };
+                    const labels: Record<ThemeMode, { en: string; de: string }> = {
+                      system: { en: 'Auto', de: 'Auto' },
+                      light: { en: 'Light', de: 'Hell' },
+                      dark: { en: 'Dark', de: 'Dunkel' },
+                    };
+                    return (
+                      <Pressable
+                        key={mode}
+                        onPress={() => {
+                          setThemeMode(mode);
+                          setThemeDropdownOpen(false);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        style={[styles.themeDropdownItem, isActive && styles.themeDropdownItemActive]}
+                      >
+                        <Ionicons name={icons[mode] as any} size={16} color={isActive ? '#E8435A' : (isDark ? '#A3A3A3' : '#737373')} />
+                        <Text style={[styles.themeDropdownItemText, isDark && styles.themeDropdownItemTextDark, isActive && styles.themeDropdownItemTextActive]}>
+                          {labels[mode][locale]}
+                        </Text>
+                        {isActive && <Ionicons name="checkmark" size={16} color="#E8435A" />}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
             </View>
           </View>
         </GlassCard>
@@ -380,7 +403,7 @@ export default function ProfileScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/privacy');
+              router.push('/privacy' as any);
             }}
             style={styles.legalRow}
           >
@@ -394,7 +417,7 @@ export default function ProfileScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/terms');
+              router.push('/terms' as any);
             }}
             style={styles.legalRow}
           >
@@ -538,7 +561,7 @@ const styles = StyleSheet.create({
   settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   settingLabel: { fontSize: 17, fontWeight: '500', color: '#171717' },
   languageToggle: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 12, padding: 3 },
-  langOption: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
+  langOption: { paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
   langActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
   langText: { fontSize: 14, fontWeight: '600', color: '#A3A3A3' },
   langTextActive: { color: '#171717' },
@@ -547,7 +570,38 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
     marginVertical: 14,
   },
-  themeOptionContent: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  // Theme dropdown
+  themeDropdownTrigger: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 8,
+  },
+  themeDropdownTriggerDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  themeDropdownLabel: { fontSize: 14, fontWeight: '600', color: '#171717' },
+  themeDropdownMenu: {
+    position: 'absolute', top: 44, right: 0, zIndex: 10,
+    backgroundColor: '#fff', borderRadius: 14,
+    paddingVertical: 4, minWidth: 150,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12, shadowRadius: 12, elevation: 8,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
+  },
+  themeDropdownMenuDark: {
+    backgroundColor: '#252525',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  themeDropdownItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 14, paddingVertical: 10,
+  },
+  themeDropdownItemActive: {
+    backgroundColor: 'rgba(232,67,90,0.06)',
+  },
+  themeDropdownItemText: { flex: 1, fontSize: 15, fontWeight: '500', color: '#171717' },
+  themeDropdownItemTextDark: { color: '#F5F5F5' },
+  themeDropdownItemTextActive: { color: '#E8435A', fontWeight: '600' },
 
   // Legal
   legalRow: {

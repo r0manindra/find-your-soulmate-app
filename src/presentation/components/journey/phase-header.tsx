@@ -16,7 +16,7 @@ export function PhaseHeader({ phase, locale, completedCount, totalCount, isDark 
   const isComplete = completedCount === totalCount;
 
   return (
-    <GlassCard style={styles.container} intensity={40}>
+    <GlassCard style={styles.container} intensity="light">
       <View style={styles.row}>
         <View style={styles.textContainer}>
           <Text style={styles.phaseLabel}>

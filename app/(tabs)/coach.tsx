@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View, Text, TextInput, FlatList, Pressable, ScrollView, Modal, StyleSheet, KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -24,10 +25,10 @@ import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 
 const FALLBACK_RESPONSES = [
-  "Good question. Here's the thing — confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
-  "Listen, I get it. Approaching someone feels like defusing a bomb. But here's the secret: they're probably just as nervous. Start with something genuine — comment on something real in the moment.",
-  "The biggest mistake I see? Trying to be someone you're not. The right person will love the real you — weird quirks, awkward pauses, and all. Authenticity is the ultimate cheat code.",
-  "Let me be real with you — rejection isn't about you. It's about timing, circumstances, chemistry. Don't take it personally. The best players in the game have the most strikeouts. Keep swinging.",
+  "Good question. Here's the thing: confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
+  "Listen, I get it. Approaching someone feels like defusing a bomb. But here's the secret: they're probably just as nervous. Start with something genuine, comment on something real in the moment.",
+  "The biggest mistake I see? Trying to be someone you're not. The right person will love the real you, weird quirks, awkward pauses, and all. Authenticity is the ultimate cheat code.",
+  "Let me be real with you: rejection isn't about you. It's about timing, circumstances, chemistry. Don't take it personally. The best players in the game have the most strikeouts. Keep swinging.",
   "Here's what separates the amateurs from the naturals: listening. Most people are just waiting for their turn to talk. Actually listen. Ask follow-up questions. Make them feel seen.",
 ];
 
@@ -138,7 +139,7 @@ export default function CoachScreen() {
   }, [setChatInputFocused]);
 
   // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
-  const inputBottomPadding = (isInputFocused && keyboardVisible) ? insets.bottom : tabBarHeight + 8;
+  const inputBottomPadding = (isInputFocused && keyboardVisible) ? Math.max(insets.bottom, 8) : tabBarHeight + 8;
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -172,15 +173,16 @@ export default function CoachScreen() {
     setShowCharacterPicker(false);
   };
 
-  const sendMessage = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessage = useCallback(async (messageText?: string) => {
+    const text = messageText ?? input;
+    if (!text.trim() || isLoading) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const userMessage: ChatMessage = {
       id: String(Date.now()),
       role: 'user',
-      content: input.trim(),
+      content: text.trim(),
       timestamp: Date.now(),
     };
 
@@ -242,8 +244,11 @@ export default function CoachScreen() {
             <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
           </View>
         )}
-        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
-          <Text style={[styles.messageText, isUser && styles.userText]}>
+        <View style={[
+          styles.messageBubble,
+          isUser ? styles.userBubble : [styles.aiBubble, isDark && styles.aiBubbleDark],
+        ]}>
+          <Text style={[styles.messageText, isDark && !isUser && styles.messageTextDark, isUser && styles.userText]}>
             {item.content}
           </Text>
         </View>
@@ -256,7 +261,7 @@ export default function CoachScreen() {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={isInputFocused ? 0 : 90}
+        keyboardVerticalOffset={keyboardVisible ? 0 : 90}
       >
         {/* Header with character selector */}
         <Pressable onPress={() => setShowCharacterPicker(true)} style={styles.header}>
@@ -313,7 +318,7 @@ export default function CoachScreen() {
                 <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
                   <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
                 </View>
-                <View style={styles.aiBubble}>
+                <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
                   <Text style={styles.loadingText}>{t('coach.sending')}</Text>
                 </View>
               </View>
@@ -321,29 +326,35 @@ export default function CoachScreen() {
           }
         />
 
-        {/* Input */}
-        <View style={[styles.inputContainer, { paddingBottom: inputBottomPadding }, isDark && styles.inputContainerDark]}>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder={t('coach.placeholder')}
-            placeholderTextColor="#A3A3A3"
-            multiline
-            maxLength={500}
-            onSubmitEditing={sendMessage}
-            returnKeyType="send"
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-          <Pressable
-            onPress={sendMessage}
-            style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
-            disabled={!input.trim() || isLoading}
-          >
-            <Ionicons name="arrow-up" size={20} color="#fff" />
-          </Pressable>
-        </View>
+        {/* Glass Input */}
+        <BlurView
+          intensity={isDark ? 40 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.inputBlur, { paddingBottom: inputBottomPadding }]}
+        >
+          <View style={[styles.inputContainer]}>
+            <TextInput
+              style={[styles.input, isDark && styles.inputDark]}
+              value={input}
+              onChangeText={setInput}
+              placeholder={t('coach.placeholder')}
+              placeholderTextColor="#A3A3A3"
+              multiline
+              maxLength={500}
+              onSubmitEditing={() => sendMessage()}
+              returnKeyType="send"
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <Pressable
+              onPress={() => sendMessage()}
+              style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
+              disabled={!input.trim() || isLoading}
+            >
+              <Ionicons name="arrow-up" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        </BlurView>
 
         {/* Character Picker Modal */}
         <Modal
@@ -352,16 +363,16 @@ export default function CoachScreen() {
           presentationStyle="pageSheet"
           onRequestClose={() => setShowCharacterPicker(false)}
         >
-          <SafeAreaView style={styles.modalSafeArea}>
+          <SafeAreaView style={[styles.modalSafeArea, isDark && styles.modalSafeAreaDark]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
+              <Text style={[styles.modalTitle, isDark && styles.modalTitleDark]}>
                 {locale === 'de' ? 'Wähle deinen Coach' : 'Choose Your Coach'}
               </Text>
-              <Pressable onPress={() => setShowCharacterPicker(false)} style={styles.modalClose}>
-                <Ionicons name="close" size={24} color="#737373" />
+              <Pressable onPress={() => setShowCharacterPicker(false)} style={[styles.modalClose, isDark && styles.modalCloseDark]}>
+                <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
               </Pressable>
             </View>
-            <Text style={styles.modalSubtitle}>
+            <Text style={[styles.modalSubtitle, isDark && styles.modalSubtitleDark]}>
               {locale === 'de'
                 ? 'Jeder Coach hat seinen eigenen Stil. Finde den, der zu dir passt.'
                 : 'Each coach has their own style. Find the one that fits you.'}
@@ -380,6 +391,7 @@ export default function CoachScreen() {
                     onPress={() => handleSelectCharacter(char.id)}
                     style={[
                       styles.characterCard,
+                      isDark && styles.characterCardDark,
                       isSelected && { borderColor: char.color, borderWidth: 2 },
                     ]}
                   >
@@ -389,7 +401,7 @@ export default function CoachScreen() {
                       </View>
                       <View style={styles.characterInfo}>
                         <View style={styles.characterNameRow}>
-                          <Text style={styles.characterName}>{char.name}</Text>
+                          <Text style={[styles.characterName, isDark && styles.characterNameDark]}>{char.name}</Text>
                           {char.id === recommendedCharacterId && !isSelected && (
                             <View style={styles.recommendedBadge}>
                               <Ionicons name="sparkles" size={10} color="#F59E0B" />
@@ -408,10 +420,10 @@ export default function CoachScreen() {
                             <Ionicons name="checkmark-circle" size={20} color={char.color} />
                           )}
                         </View>
-                        <Text style={styles.characterSubtitle}>{char.subtitle[locale]}</Text>
+                        <Text style={[styles.characterSubtitle, isDark && styles.characterSubtitleDark]}>{char.subtitle[locale]}</Text>
                       </View>
                     </View>
-                    <Text style={styles.characterDescription}>{char.description[locale]}</Text>
+                    <Text style={[styles.characterDescription, isDark && styles.characterDescriptionDark]}>{char.description[locale]}</Text>
                     {char.inspiration && (
                       <Text style={styles.characterInspiration}>
                         {locale === 'de' ? 'Inspiriert von' : 'Inspired by'}: {char.inspiration}
@@ -468,27 +480,37 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0.06)',
     borderBottomLeftRadius: 4,
   },
+  aiBubbleDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
   userBubble: { backgroundColor: '#E8435A', borderBottomRightRadius: 4 },
   messageText: { fontSize: 16, lineHeight: 22, color: '#171717' },
+  messageTextDark: { color: '#F5F5F5' },
   userText: { color: '#fff' },
   loadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
+
+  // Glass input area
+  inputBlur: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(0,0,0,0.06)',
+    overflow: 'hidden',
+  },
   inputContainer: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
     paddingHorizontal: 20, paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-    backgroundColor: 'rgba(250,250,250,0.95)',
-  },
-  inputContainerDark: {
-    backgroundColor: 'rgba(23,23,23,0.95)',
-    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   input: {
     flex: 1, minHeight: 40, maxHeight: 100,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
     borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10,
     fontSize: 16, color: '#171717',
     borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  inputDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: '#F5F5F5',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   sendButton: {
     width: 40, height: 40, borderRadius: 20,
@@ -498,25 +520,35 @@ const styles = StyleSheet.create({
 
   // Character picker modal
   modalSafeArea: { flex: 1, backgroundColor: '#FAFAFA' },
+  modalSafeAreaDark: { backgroundColor: '#171717' },
   modalHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4,
   },
   modalTitle: { fontSize: 28, fontWeight: '700', color: '#171717', letterSpacing: -0.5 },
+  modalTitleDark: { color: '#F5F5F5' },
   modalClose: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center', justifyContent: 'center',
   },
+  modalCloseDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
   modalSubtitle: {
     fontSize: 15, color: '#737373', paddingHorizontal: 20, marginTop: 4, marginBottom: 20,
   },
+  modalSubtitleDark: { color: '#A3A3A3' },
   characterList: { paddingHorizontal: 20, gap: 12 },
   characterCard: {
     backgroundColor: '#fff', borderRadius: 20, padding: 18,
     borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  characterCardDark: {
+    backgroundColor: '#252525',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   characterCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 10 },
   characterIcon: {
@@ -526,7 +558,9 @@ const styles = StyleSheet.create({
   characterInfo: { flex: 1 },
   characterNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   characterName: { fontSize: 18, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
+  characterNameDark: { color: '#F5F5F5' },
   characterSubtitle: { fontSize: 13, color: '#737373', marginTop: 2 },
+  characterSubtitleDark: { color: '#A3A3A3' },
   recommendedBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: 'rgba(245,158,11,0.1)',
@@ -540,6 +574,7 @@ const styles = StyleSheet.create({
   },
   proBadgeText: { fontSize: 10, fontWeight: '800', color: '#E8435A' },
   characterDescription: { fontSize: 14, lineHeight: 20, color: '#525252' },
+  characterDescriptionDark: { color: '#A3A3A3' },
   characterInspiration: {
     fontSize: 12, color: '#A3A3A3', fontStyle: 'italic', marginTop: 8,
   },
