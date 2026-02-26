@@ -8,10 +8,12 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { AddHabitModal } from '@/src/presentation/components/habits/add-habit-modal';
+import { HabitCalendar } from '@/src/presentation/components/habits/habit-calendar';
 import { WeeklyReview } from '@/src/presentation/components/habits/weekly-review';
 import { useHabitStore } from '@/src/store/habit-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { getTopNudge } from '@/src/core/habit-nudges';
+import type { Habit } from '@/src/core/entities/habit-types';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -75,42 +77,90 @@ const HabitRow = React.memo(function HabitRow({
   );
 });
 
+type TimeSlotKey = 'morning' | 'afternoon' | 'evening' | 'anytime';
+
+const TIME_SLOT_CONFIG: { key: TimeSlotKey; icon: string; en: string; de: string }[] = [
+  { key: 'morning', icon: 'sunny-outline', en: 'Morning', de: 'Morgens' },
+  { key: 'afternoon', icon: 'partly-sunny-outline', en: 'Afternoon', de: 'Nachmittags' },
+  { key: 'evening', icon: 'moon-outline', en: 'Evening', de: 'Abends' },
+  { key: 'anytime', icon: 'time-outline', en: 'Anytime', de: 'Jederzeit' },
+];
+
+function groupByTimeSlot(habits: Habit[]): Record<TimeSlotKey, Habit[]> {
+  const groups: Record<TimeSlotKey, Habit[]> = {
+    morning: [],
+    afternoon: [],
+    evening: [],
+    anytime: [],
+  };
+
+  for (const h of habits) {
+    const slot = h.scheduledTime ?? 'anytime';
+    const key = slot === null ? 'anytime' : slot;
+    groups[key].push(h);
+  }
+
+  return groups;
+}
+
 export default function HabitsScreen() {
   const locale = useSettingsStore((s) => s.locale);
   const characterId = useSettingsStore((s) => s.selectedCharacterId);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  // Granular selectors — only re-render when these specific slices change
   const habits = useHabitStore((s) => s.habits);
   const completions = useHabitStore((s) => s.completions);
   const toggleCompletion = useHabitStore((s) => s.toggleCompletion);
   const archiveHabit = useHabitStore((s) => s.archiveHabit);
   const isCompletedToday = useHabitStore((s) => s.isCompletedToday);
   const getStreak = useHabitStore((s) => s.getStreak);
+  const setHabitSchedule = useHabitStore((s) => s.setHabitSchedule);
 
   const [showModal, setShowModal] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
 
-  // Memoize derived data
   const activeHabits = useMemo(
     () => habits.filter((h) => !h.isArchived),
     [habits]
   );
 
-  const todayStats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const todayCompleted = new Set(
-      completions.filter((c) => c.date === today).map((c) => c.habitId)
-    );
-    const total = activeHabits.length;
-    const done = activeHabits.filter((h) => todayCompleted.has(h.id)).length;
-    return { done, total, allDone: total > 0 && done === total };
-  }, [activeHabits, completions]);
+  // Filter habits for the selected date's day-of-week
+  const habitsForDate = useMemo(() => {
+    const dayOfWeek = selectedDate.getDay();
+    return activeHabits.filter((h) => {
+      if (h.scheduledDays && h.scheduledDays.length > 0) {
+        return h.scheduledDays.includes(dayOfWeek);
+      }
+      return true;
+    });
+  }, [activeHabits, selectedDate]);
 
-  // Memoize nudge computation
+  const isToday = useMemo(() => {
+    const now = new Date();
+    return (
+      selectedDate.getFullYear() === now.getFullYear() &&
+      selectedDate.getMonth() === now.getMonth() &&
+      selectedDate.getDate() === now.getDate()
+    );
+  }, [selectedDate]);
+
+  const dateStr = useMemo(() => selectedDate.toISOString().split('T')[0], [selectedDate]);
+
+  const todayStats = useMemo(() => {
+    const completedIds = new Set(
+      completions.filter((c) => c.date === dateStr).map((c) => c.habitId)
+    );
+    const total = habitsForDate.length;
+    const done = habitsForDate.filter((h) => completedIds.has(h.id)).length;
+    return { done, total, allDone: total > 0 && done === total };
+  }, [habitsForDate, completions, dateStr]);
+
+  const timeGroups = useMemo(() => groupByTimeSlot(habitsForDate), [habitsForDate]);
+
   const nudge = useMemo(() => {
-    if (nudgeDismissed || activeHabits.length === 0) return null;
+    if (nudgeDismissed || activeHabits.length === 0 || !isToday) return null;
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     const contexts = activeHabits.map((h) => {
       const streak = getStreak(h.id);
@@ -124,21 +174,18 @@ export default function HabitsScreen() {
       };
     });
     return getTopNudge(contexts, characterId);
-  }, [activeHabits, completions, characterId, nudgeDismissed, getStreak, isCompletedToday]);
+  }, [activeHabits, completions, characterId, nudgeDismissed, getStreak, isCompletedToday, isToday]);
 
-  // Stable callbacks for HabitRow (prevents re-renders)
   const handleToggle = useCallback(
-    (habitId: string) => toggleCompletion(habitId),
-    [toggleCompletion]
+    (habitId: string) => toggleCompletion(habitId, dateStr),
+    [toggleCompletion, dateStr]
   );
 
   const handleArchive = useCallback(
     (habitId: string) => {
       Alert.alert(
-        locale === 'de' ? 'Archivieren' : 'Archive',
-        locale === 'de'
-          ? 'Diesen Habit archivieren? Du kannst ihn später wiederherstellen.'
-          : 'Archive this habit? You can restore it later.',
+        locale === 'de' ? 'Optionen' : 'Options',
+        '',
         [
           { text: locale === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
           {
@@ -149,13 +196,12 @@ export default function HabitsScreen() {
         ]
       );
     },
-    [locale, archiveHabit]
+    [locale, archiveHabit, setHabitSchedule]
   );
 
   const openModal = useCallback(() => setShowModal(true), []);
   const closeModal = useCallback(() => setShowModal(false), []);
 
-  // Empty state
   if (activeHabits.length === 0) {
     return (
       <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
@@ -180,6 +226,10 @@ export default function HabitsScreen() {
     );
   }
 
+  const isCompletedOnDate = (habitId: string) => {
+    return completions.some((c) => c.habitId === habitId && c.date === dateStr);
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
@@ -187,17 +237,26 @@ export default function HabitsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title */}
         <Text style={[styles.screenTitle, isDark && styles.textDark]}>
           Habits
         </Text>
 
-        {/* Today's Progress */}
+        {/* Weekly Calendar */}
+        <HabitCalendar
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          locale={locale}
+          isDark={isDark}
+        />
+
+        {/* Progress */}
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <View>
               <Text style={styles.progressLabel}>
-                {locale === 'de' ? 'Heute' : 'Today'}
+                {isToday
+                  ? (locale === 'de' ? 'Heute' : 'Today')
+                  : selectedDate.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               </Text>
               <Text style={[styles.progressValue, isDark && styles.textDark]}>
                 {todayStats.allDone
@@ -206,12 +265,12 @@ export default function HabitsScreen() {
               </Text>
             </View>
             <View style={styles.progressDots}>
-              {activeHabits.map((h) => (
+              {habitsForDate.map((h) => (
                 <View
                   key={h.id}
                   style={[
                     styles.progressDot,
-                    isCompletedToday(h.id) && styles.progressDotDone,
+                    isCompletedOnDate(h.id) && styles.progressDotDone,
                   ]}
                 />
               ))}
@@ -236,24 +295,39 @@ export default function HabitsScreen() {
           </GlassCard>
         )}
 
-        {/* Today's Habits */}
-        <View style={styles.habitsList}>
-          {activeHabits.map((habit) => {
-            const completed = isCompletedToday(habit.id);
-            const { current } = getStreak(habit.id);
-            return (
-              <HabitRow
-                key={habit.id}
-                habit={habit}
-                locale={locale}
-                isCompleted={completed}
-                streak={current}
-                onToggle={() => handleToggle(habit.id)}
-                onArchive={() => handleArchive(habit.id)}
-              />
-            );
-          })}
-        </View>
+        {/* Habits grouped by time slot */}
+        {TIME_SLOT_CONFIG.map((slot) => {
+          const group = timeGroups[slot.key];
+          if (group.length === 0) return null;
+
+          return (
+            <View key={slot.key} style={styles.timeSlotSection}>
+              <View style={styles.timeSlotHeader}>
+                <Ionicons name={slot.icon as any} size={16} color="#A3A3A3" />
+                <Text style={[styles.timeSlotTitle, isDark && styles.textMutedDark]}>
+                  {slot[locale]}
+                </Text>
+              </View>
+              <View style={styles.habitsList}>
+                {group.map((habit) => {
+                  const completed = isCompletedOnDate(habit.id);
+                  const { current } = getStreak(habit.id);
+                  return (
+                    <HabitRow
+                      key={habit.id}
+                      habit={habit}
+                      locale={locale}
+                      isCompleted={completed}
+                      streak={current}
+                      onToggle={() => handleToggle(habit.id)}
+                      onArchive={() => handleArchive(habit.id)}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
 
         {/* Add Habit Button */}
         <BrandButton
@@ -308,8 +382,18 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
+  // Time slot sections
+  timeSlotSection: { marginBottom: 8 },
+  timeSlotHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8,
+  },
+  timeSlotTitle: {
+    fontSize: 13, fontWeight: '700', color: '#A3A3A3',
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+
   // Habits list
-  habitsList: { gap: 8, marginBottom: 16 },
+  habitsList: { gap: 8, marginBottom: 8 },
   habitRow: { marginBottom: 0 },
   habitContent: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   checkbox: {

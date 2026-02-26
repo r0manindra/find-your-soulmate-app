@@ -14,7 +14,7 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-type NodeStatus = 'completed' | 'active' | 'locked';
+type NodeStatus = 'completed' | 'active';
 
 interface ChapterNodeProps {
   chapter: Chapter;
@@ -45,7 +45,6 @@ export function ChapterNode({
   }));
 
   const handlePressIn = () => {
-    if (status === 'locked') return;
     scale.value = withSpring(0.92, { damping: 15, stiffness: 400 });
   };
 
@@ -54,7 +53,6 @@ export function ChapterNode({
   };
 
   const handlePress = () => {
-    if (status === 'locked') return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onPress();
   };
@@ -89,16 +87,12 @@ export function ChapterNode({
               { width: nodeSize, height: nodeSize, borderRadius: nodeSize / 2 },
               status === 'completed' && styles.nodeCompleted,
               status === 'active' && styles.nodeActive,
-              status === 'locked' && styles.nodeLocked,
-              status === 'locked' && isDark && styles.nodeLockedDark,
             ]}
           >
             {status === 'completed' ? (
               <Ionicons name="checkmark" size={24} color="#fff" />
-            ) : status === 'locked' ? (
-              <Ionicons name="lock-closed" size={20} color="#A3A3A3" />
             ) : (
-              <Ionicons name={chapter.ionicon as any} size={24} color={status === 'active' ? '#E8435A' : '#525252'} />
+              <Ionicons name={chapter.ionicon as any} size={24} color="#E8435A" />
             )}
           </View>
         </AnimatedPressable>
@@ -107,7 +101,6 @@ export function ChapterNode({
           style={[
             styles.nodeLabel,
             isDark && styles.nodeLabelDark,
-            status === 'locked' && styles.nodeLabelLocked,
             status === 'active' && styles.nodeLabelActive,
           ]}
           numberOfLines={2}
@@ -116,7 +109,7 @@ export function ChapterNode({
         </Text>
       </View>
 
-      {isExpanded && status !== 'locked' && (
+      {isExpanded && (
         <Animated.View
           entering={FadeIn.duration(200)}
           style={styles.expandedCardWrapper}
@@ -196,15 +189,6 @@ const styles = StyleSheet.create({
     borderColor: '#E8435A',
     backgroundColor: '#fff',
   },
-  nodeLocked: {
-    backgroundColor: '#F5F5F5',
-    borderColor: '#E5E5E5',
-    opacity: 0.6,
-  },
-  nodeLockedDark: {
-    backgroundColor: '#1C1C1C',
-    borderColor: '#404040',
-  },
   nodeLabel: {
     fontSize: 12,
     fontWeight: '600',
@@ -214,9 +198,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   nodeLabelDark: {
-    color: '#A3A3A3',
-  },
-  nodeLabelLocked: {
     color: '#A3A3A3',
   },
   nodeLabelActive: {

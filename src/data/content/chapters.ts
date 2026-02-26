@@ -19,8 +19,8 @@ export const chapters: Chapter[] = [
     title: { en: 'The Mirror', de: 'Der Spiegel' },
     subtitle: { en: 'Know yourself first', de: 'Erkenne dich selbst zuerst' },
     summary: {
-      en: 'Before you can connect with someone else, you need to understand who you are. This chapter guides you through honest self-reflection — your values, your patterns, and what you truly want.',
-      de: 'Bevor du dich mit jemand anderem verbinden kannst, musst du verstehen, wer du bist. Dieses Kapitel führt dich durch ehrliche Selbstreflexion — deine Werte, deine Muster und was du wirklich willst.',
+      en: 'Before you can connect with someone else, you need to understand who you are. This chapter guides you through honest self-reflection: your values, your patterns, and what you truly want.',
+      de: 'Bevor du dich mit jemand anderem verbinden kannst, musst du verstehen, wer du bist. Dieses Kapitel führt dich durch ehrliche Selbstreflexion: deine Werte, deine Muster und was du wirklich willst.',
     },
   },
   {
@@ -32,8 +32,8 @@ export const chapters: Chapter[] = [
     title: { en: 'Confidence Bootcamp', de: 'Selbstbewusstsein Bootcamp' },
     subtitle: { en: 'Body language & posture', de: 'Körpersprache & Haltung' },
     summary: {
-      en: "Confidence isn't something you're born with — it's something you build. Learn the fundamentals of body language, posture, and how to project quiet confidence in any room.",
-      de: 'Selbstbewusstsein ist nichts, womit man geboren wird — es ist etwas, das man aufbaut. Lerne die Grundlagen der Körpersprache, Haltung und wie du in jedem Raum ruhiges Selbstbewusstsein ausstrahlst.',
+      en: "Confidence isn't something you're born with. It's something you build. Learn the fundamentals of body language, posture, and how to project quiet confidence in any room.",
+      de: 'Selbstbewusstsein ist nichts, womit man geboren wird. Es ist etwas, das man aufbaut. Lerne die Grundlagen der Körpersprache, Haltung und wie du in jedem Raum ruhiges Selbstbewusstsein ausstrahlst.',
     },
   },
   {
@@ -97,7 +97,7 @@ export const chapters: Chapter[] = [
     title: { en: 'Active Listening', de: 'Aktives Zuhören' },
     subtitle: { en: 'The most attractive skill', de: 'Die attraktivste Fähigkeit' },
     summary: {
-      en: 'People are drawn to those who truly listen. Master the art of active listening — asking better questions and making others feel heard.',
+      en: 'People are drawn to those who truly listen. Master the art of active listening, asking better questions and making others feel heard.',
       de: 'Menschen fühlen sich zu denen hingezogen, die wirklich zuhören. Meistere die Kunst des aktiven Zuhörens.',
     },
   },
@@ -188,8 +188,8 @@ export const chapters: Chapter[] = [
     title: { en: 'Handling Rejection', de: 'Mit Ablehnung umgehen' },
     subtitle: { en: 'Grace under fire', de: 'Anmut unter Druck' },
     summary: {
-      en: "Rejection is not failure — it's redirection. Learn to handle rejection with grace and use every 'no' as fuel for growth.",
-      de: 'Ablehnung ist kein Scheitern — es ist Umleitung. Lerne, mit Ablehnung würdevoll umzugehen.',
+      en: "Rejection is not failure, it's redirection. Learn to handle rejection with grace and use every 'no' as fuel for growth.",
+      de: 'Ablehnung ist kein Scheitern, es ist Umleitung. Lerne, mit Ablehnung würdevoll umzugehen.',
     },
   },
   {
@@ -253,8 +253,8 @@ export const chapters: Chapter[] = [
     title: { en: 'Keeping the Spark', de: 'Die Flamme am Leben halten' },
     subtitle: { en: 'Long-term flirting', de: 'Langzeit-Flirten' },
     summary: {
-      en: "The real challenge isn't finding love — it's keeping it exciting. Learn how to maintain attraction long-term.",
-      de: 'Die wahre Herausforderung ist nicht, Liebe zu finden — sondern sie aufregend zu halten.',
+      en: "The real challenge isn't finding love, it's keeping it exciting. Learn how to maintain attraction long-term.",
+      de: 'Die wahre Herausforderung ist nicht, Liebe zu finden, sondern sie aufregend zu halten.',
     },
   },
   {
@@ -266,8 +266,8 @@ export const chapters: Chapter[] = [
     title: { en: 'The Graduation', de: 'Der Abschluss' },
     subtitle: { en: 'You found your soulmate', de: 'Du hast deinen Seelenverwandten gefunden' },
     summary: {
-      en: "Congratulations — you've completed the journey. This final chapter celebrates your growth and prepares you for the beautiful relationship ahead.",
-      de: 'Herzlichen Glückwunsch — du hast die Reise abgeschlossen. Dieses letzte Kapitel feiert dein Wachstum.',
+      en: "Congratulations! You've completed the journey. This final chapter celebrates your growth and prepares you for the beautiful relationship ahead.",
+      de: 'Herzlichen Glückwunsch! Du hast die Reise abgeschlossen. Dieses letzte Kapitel feiert dein Wachstum.',
     },
   },
   {
@@ -279,8 +279,8 @@ export const chapters: Chapter[] = [
     title: { en: 'The Foundation', de: 'Das Fundament' },
     subtitle: { en: 'Hygiene, skincare & grooming', de: 'Hygiene, Hautpflege & Pflege' },
     summary: {
-      en: 'Before you can connect with someone else, you need the non-negotiables handled. Shower game, skincare routine, nails, teeth, hair — the foundation everything else is built on.',
-      de: 'Bevor du dich mit jemand anderem verbinden kannst, müssen die Basics stimmen. Dusch-Routine, Hautpflege, Nägel, Zähne, Haare — das Fundament für alles andere.',
+      en: 'Before you can connect with someone else, you need the non-negotiables handled. Shower game, skincare routine, nails, teeth, hair: the foundation everything else is built on.',
+      de: 'Bevor du dich mit jemand anderem verbinden kannst, müssen die Basics stimmen. Dusch-Routine, Hautpflege, Nägel, Zähne, Haare: das Fundament für alles andere.',
     },
   },
   {
@@ -331,8 +331,8 @@ export const chapters: Chapter[] = [
     title: { en: 'Social Practice', de: 'Soziale Praxis' },
     subtitle: { en: 'Start small, talk to everyone', de: 'Fang klein an, rede mit allen' },
     summary: {
-      en: "All the theory in the world means nothing if you don't practice. This chapter is your social gym — starting with low-stakes conversations and building up to making strangers laugh. The goal: make talking to anyone feel as natural as breathing.",
-      de: 'Die ganze Theorie der Welt bedeutet nichts, wenn du nicht übst. Dieses Kapitel ist dein soziales Fitnessstudio — angefangen mit lockeren Gesprächen bis hin dazu, Fremde zum Lachen zu bringen. Das Ziel: Mit jedem zu reden soll sich so natürlich anfühlen wie Atmen.',
+      en: "All the theory in the world means nothing if you don't practice. This chapter is your social gym, starting with low-stakes conversations and building up to making strangers laugh. The goal: make talking to anyone feel as natural as breathing.",
+      de: 'Die ganze Theorie der Welt bedeutet nichts, wenn du nicht übst. Dieses Kapitel ist dein soziales Fitnessstudio, angefangen mit lockeren Gesprächen bis hin dazu, Fremde zum Lachen zu bringen. Das Ziel: Mit jedem zu reden soll sich so natürlich anfühlen wie Atmen.',
     },
   },
 ];

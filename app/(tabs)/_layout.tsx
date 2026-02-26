@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Platform, StyleSheet, View, Pressable, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -10,11 +10,14 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withSequence,
+  withTiming,
   interpolate,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GLASS, BORDER_RADIUS, SHADOWS, withOpacity, supportsLiquidGlass } from '@/src/theme/glass';
+import { useUIStore } from '@/src/store/ui-store';
+import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import '@/src/i18n/config';
 
 const hasLiquidGlass = supportsLiquidGlass();
@@ -42,13 +45,14 @@ type TabConfig = {
   ioniconFocused: keyof typeof Ionicons.glyphMap;
   sfSymbol?: string;
   sfSymbolFocused?: string;
+  useCharismoIcon?: boolean;
 };
 
 const TAB_CONFIG: TabConfig[] = [
   { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home', sfSymbol: 'house', sfSymbolFocused: 'house.fill' },
   { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book', sfSymbol: 'book', sfSymbolFocused: 'book.fill' },
   { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle', sfSymbol: 'checkmark.circle', sfSymbolFocused: 'checkmark.circle.fill' },
-  { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles', sfSymbol: 'bubble.left.and.bubble.right', sfSymbolFocused: 'bubble.left.and.bubble.right.fill' },
+  { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles', sfSymbol: 'bubble.left.and.bubble.right', sfSymbolFocused: 'bubble.left.and.bubble.right.fill', useCharismoIcon: true },
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person', sfSymbol: 'person', sfSymbolFocused: 'person.fill' },
 ];
 
@@ -138,14 +142,18 @@ function BubbleTabButton({
   return (
     <Pressable onPress={handlePress} style={s.tab}>
       {focused && (
-        <View style={[s.activeIndicator, { backgroundColor: withOpacity(activeColor, 0.15) }]} />
+        <View style={[s.activeIndicator, { backgroundColor: config.useCharismoIcon ? withOpacity('#E8435A', 0.15) : withOpacity(activeColor, 0.15) }]} />
       )}
       <Animated.View style={animatedStyle}>
-        <Ionicons
-          name={focused ? config.ioniconFocused : config.ionicon}
-          size={23}
-          color={color}
-        />
+        {config.useCharismoIcon ? (
+          <CharismoIcon size={25} color={focused ? '#E8435A' : inactiveColor} />
+        ) : (
+          <Ionicons
+            name={focused ? config.ioniconFocused : config.ionicon}
+            size={23}
+            color={color}
+          />
+        )}
       </Animated.View>
     </Pressable>
   );
@@ -156,15 +164,27 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const isIOS = Platform.OS === 'ios';
+  const chatInputFocused = useUIStore((s) => s.chatInputFocused);
+
+  const tabBarProgress = useSharedValue(1);
+
+  useEffect(() => {
+    tabBarProgress.value = withTiming(chatInputFocused ? 0 : 1, { duration: 250 });
+  }, [chatInputFocused]);
+
+  const tabBarAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: tabBarProgress.value,
+    transform: [{ translateY: interpolate(tabBarProgress.value, [0, 1], [80, 0]) }],
+  }));
 
   const visibleRoutes = state.routes.filter((route: any) =>
     TAB_CONFIG.some((tab) => tab.name === route.name)
   );
 
   return (
-    <View
-      style={[s.wrapper, { paddingBottom: insets.bottom + 12 }]}
-      pointerEvents="box-none"
+    <Animated.View
+      style={[s.wrapper, { paddingBottom: insets.bottom + 12 }, tabBarAnimatedStyle]}
+      pointerEvents={chatInputFocused ? 'none' : 'box-none'}
     >
       <View
         style={[
@@ -227,7 +247,7 @@ function FloatingGlassTabBar({ state, descriptors, navigation }: any) {
           })}
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

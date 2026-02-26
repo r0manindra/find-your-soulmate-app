@@ -5,6 +5,8 @@ export interface PresetHabit {
   chapterId: number;
 }
 
+export type HabitTimeSlot = 'morning' | 'afternoon' | 'evening' | null;
+
 export interface Habit {
   id: string;
   title: { en: string; de: string };
@@ -14,6 +16,8 @@ export interface Habit {
   isCustom: boolean;
   createdAt: string;
   isArchived: boolean;
+  scheduledTime?: HabitTimeSlot;
+  scheduledDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat. Default: all days
 }
 
 export interface HabitCompletion {

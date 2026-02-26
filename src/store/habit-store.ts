@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Habit, HabitCompletion } from '@/src/core/entities/habit-types';
+import type { Habit, HabitCompletion, HabitTimeSlot } from '@/src/core/entities/habit-types';
 
 function getToday(): string {
   return new Date().toISOString().split('T')[0];
@@ -24,6 +24,8 @@ interface HabitStore {
   isPresetAlreadyAdded: (presetId: string) => boolean;
   getTodayCompletedCount: () => number;
   getTodayTotalCount: () => number;
+  setHabitSchedule: (habitId: string, time: HabitTimeSlot, days: number[]) => void;
+  getHabitsForDate: (date: Date) => Habit[];
 }
 
 export const useHabitStore = create<HabitStore>()(
@@ -174,14 +176,46 @@ export const useHabitStore = create<HabitStore>()(
 
       getTodayCompletedCount: () => {
         const today = getToday();
+        const dayOfWeek = new Date().getDay();
         const { habits, completions } = get();
         const todayCompleted = new Set(
           completions.filter((c) => c.date === today).map((c) => c.habitId)
         );
-        return habits.filter((h) => !h.isArchived && todayCompleted.has(h.id)).length;
+        return habits.filter((h) => {
+          if (h.isArchived) return false;
+          if (h.scheduledDays && h.scheduledDays.length > 0 && !h.scheduledDays.includes(dayOfWeek)) return false;
+          return todayCompleted.has(h.id);
+        }).length;
       },
 
-      getTodayTotalCount: () => get().habits.filter((h) => !h.isArchived).length,
+      getTodayTotalCount: () => {
+        const dayOfWeek = new Date().getDay();
+        return get().habits.filter((h) => {
+          if (h.isArchived) return false;
+          if (h.scheduledDays && h.scheduledDays.length > 0) {
+            return h.scheduledDays.includes(dayOfWeek);
+          }
+          return true;
+        }).length;
+      },
+
+      setHabitSchedule: (habitId, time, days) =>
+        set((state) => ({
+          habits: state.habits.map((h) =>
+            h.id === habitId ? { ...h, scheduledTime: time, scheduledDays: days } : h
+          ),
+        })),
+
+      getHabitsForDate: (date) => {
+        const dayOfWeek = date.getDay();
+        return get().habits.filter((h) => {
+          if (h.isArchived) return false;
+          if (h.scheduledDays && h.scheduledDays.length > 0) {
+            return h.scheduledDays.includes(dayOfWeek);
+          }
+          return true;
+        });
+      },
     }),
     {
       name: 'habit-storage',

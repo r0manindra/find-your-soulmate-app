@@ -24,7 +24,7 @@
       "A genuine compliment can make someone's entire day. Try it.",
       "A no is better than not knowing.",
       "Too late is a missed chance.",
-      "'I'll talk to her next time' — you won't."
+      "'I'll talk to her next time'... you won't."
     ]
   },
   "guide": {
@@ -69,7 +69,7 @@
       "title": "Oh, you downloaded a dating app.",
       "body": "Not a dating app. THE dating app.\nThe one that actually teaches you how to not be terrible at this.\n\nWelcome to Charismo. We're about to turn your love life from a dumpster fire into... well, at least a campfire.",
       "cta": "I'm ready to be roasted",
-      "skip": "Skip — I'm already irresistible"
+      "skip": "Skip, I'm already irresistible"
     },
     "gender": {
       "title": "One important thing first.",
@@ -92,15 +92,15 @@
     "ageGroup": {
       "title": "How long have you been failing at this?",
       "subtitle": "(Kidding. Sort of.)",
-      "age_18_24": "18-24 — I still think 'U up?' is a conversation starter.",
-      "age_25_34": "25-34 — I've been hurt enough to download this app.",
-      "age_35_44": "35-44 — I have a 401k but no one to share it with.",
-      "age_45_plus": "45+ — I've got stories. Teach me the new rules."
+      "age_18_24": "18-24: I still think 'U up?' is a conversation starter.",
+      "age_25_34": "25-34: I've been hurt enough to download this app.",
+      "age_35_44": "35-44: I have a 401k but no one to share it with.",
+      "age_45_plus": "45+: I've got stories. Teach me the new rules."
     },
     "basics": {
       "male": {
         "title": "Real talk: how's your grooming game?",
-        "subtitle": "Hygiene, skincare, style — the stuff she notices first.",
+        "subtitle": "Hygiene, skincare, style: the stuff she notices first.",
         "none": "What's moisturizer? I use 3-in-1 shampoo for everything.",
         "some": "I shower daily and own deodorant. That counts, right?",
         "solid": "Skincare routine, nice clothes, I smell good.",
@@ -168,7 +168,7 @@
       "coach": "Your AI Coach",
       "startingChapter": "Starting Chapter",
       "skipNote": "We're skipping the baby stuff",
-      "basicsNote": "Starting with the fundamentals — trust the process",
+      "basicsNote": "Starting with the fundamentals. Trust the process.",
       "cta": "Let's do this",
       "settingsNote": "You can change all of this in settings. We're flexible like that."
     },
@@ -258,7 +258,7 @@
   "graduate": {
     "title": "Congratulations!",
     "subtitle": "You've completed the journey",
-    "message": "You've grown so much. You don't need us anymore — go live your beautiful love story.",
+    "message": "You've grown so much. You don't need us anymore. Go live your beautiful love story.",
     "share": "Share Achievement",
     "delete": "Graduate & Delete App"
   }

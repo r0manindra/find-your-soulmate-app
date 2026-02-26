@@ -518,8 +518,8 @@ const styles = StyleSheet.create({
   },
 
   // Graduate
-  graduateCard: { marginBottom: 20, alignItems: 'center', paddingVertical: 24 },
-  graduateTitle: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginTop: 12 },
+  graduateCard: { marginTop: 8, marginBottom: 20, alignItems: 'center', paddingVertical: 24 },
+  graduateTitle: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginTop: 12, textAlign: 'center' },
   graduateDesc: { fontSize: 14, color: '#737373', textAlign: 'center', marginTop: 6, marginBottom: 16, paddingHorizontal: 16 },
 
   // Text variants

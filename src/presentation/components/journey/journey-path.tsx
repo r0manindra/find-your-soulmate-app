@@ -28,11 +28,9 @@ function getNodePosition(indexInPhase: number): 'left' | 'center' | 'right' {
 function getChapterStatus(
   chapterId: number,
   completedChapters: number[]
-): 'completed' | 'active' | 'locked' {
+): 'completed' | 'active' {
   if (completedChapters.includes(chapterId)) return 'completed';
-  if (chapterId === 1) return 'active';
-  if (completedChapters.includes(chapterId - 1)) return 'active';
-  return 'locked';
+  return 'active';
 }
 
 export function JourneyPath() {

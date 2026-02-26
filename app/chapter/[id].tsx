@@ -152,6 +152,49 @@ export default function ChapterDetailScreen() {
             onPress={handleToggleComplete}
           />
         </View>
+
+        {/* Next Chapter card */}
+        {isCompleted && (() => {
+          const nextChapter = chapters.find((c) => c.id === chapterId + 1) ??
+            chapters.find((c) => !completedChapters.includes(c.id) && c.id !== chapterId);
+          if (!nextChapter) return null;
+          return (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push(`/chapter/${nextChapter.id}`);
+              }}
+              style={styles.nextChapterContainer}
+            >
+              <LinearGradient
+                colors={['#E8435A', '#FF7854']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.nextChapterCard}
+              >
+                <View style={styles.nextChapterContent}>
+                  <View style={styles.nextChapterIconContainer}>
+                    <Ionicons name={nextChapter.ionicon as any} size={24} color="#fff" />
+                  </View>
+                  <View style={styles.nextChapterText}>
+                    <Text style={styles.nextChapterLabel}>
+                      {locale === 'de' ? 'Nächstes Kapitel' : 'Next Chapter'}
+                    </Text>
+                    <Text style={styles.nextChapterTitle} numberOfLines={1}>
+                      {nextChapter.title[locale]}
+                    </Text>
+                    <Text style={styles.nextChapterSubtitle} numberOfLines={1}>
+                      {locale === 'de' ? 'Kapitel' : 'Chapter'} {nextChapter.id} · {nextChapter.subtitle[locale]}
+                    </Text>
+                  </View>
+                  <View style={styles.nextChapterArrow}>
+                    <Ionicons name="arrow-forward" size={20} color="#fff" />
+                  </View>
+                </View>
+              </LinearGradient>
+            </Pressable>
+          );
+        })()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -336,5 +379,63 @@ const styles = StyleSheet.create({
   actionContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
+  },
+
+  // Next Chapter
+  nextChapterContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  nextChapterCard: {
+    borderRadius: 20,
+    padding: 18,
+    shadowColor: '#E8435A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  nextChapterContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  nextChapterIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextChapterText: {
+    flex: 1,
+  },
+  nextChapterLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.7)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  nextChapterTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: -0.3,
+    marginTop: 2,
+  },
+  nextChapterSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  nextChapterArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

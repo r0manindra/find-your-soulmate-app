@@ -9,11 +9,22 @@ import { useHabitStore } from '@/src/store/habit-store';
 import { presetHabits } from '@/src/data/content/preset-habits';
 import { phases } from '@/src/data/content/chapters';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
+import type { HabitTimeSlot } from '@/src/core/entities/habit-types';
 
 const EMOJI_GRID = [
   '🔥', '💪', '🧠', '📝', '🏃', '🧘', '💧', '🥗', '😊', '🎯',
   '⭐', '🌟', '💎', '🎵', '📚', '🌅', '🧹', '💤', '🙏', '❤️',
 ];
+
+const TIME_OPTIONS: { key: HabitTimeSlot; icon: string; en: string; de: string }[] = [
+  { key: 'morning', icon: 'sunny-outline', en: 'Morning', de: 'Morgens' },
+  { key: 'afternoon', icon: 'partly-sunny-outline', en: 'Afternoon', de: 'Nachmittags' },
+  { key: 'evening', icon: 'moon-outline', en: 'Evening', de: 'Abends' },
+];
+
+const DAY_LABELS_EN = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_LABELS_DE = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 interface AddHabitModalProps {
   visible: boolean;
@@ -22,9 +33,24 @@ interface AddHabitModalProps {
 }
 
 export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) {
-  const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded } = useHabitStore();
+  const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded, setHabitSchedule } = useHabitStore();
   const [customEmoji, setCustomEmoji] = useState('🔥');
   const [customName, setCustomName] = useState('');
+  const [selectedTime, setSelectedTime] = useState<HabitTimeSlot>(null);
+  const [selectedDays, setSelectedDays] = useState<number[]>(ALL_DAYS);
+
+  const dayLabels = locale === 'de' ? DAY_LABELS_DE : DAY_LABELS_EN;
+
+  const toggleDay = (day: number) => {
+    Haptics.selectionAsync();
+    setSelectedDays((prev) => {
+      if (prev.includes(day)) {
+        if (prev.length <= 1) return prev; // keep at least 1 day
+        return prev.filter((d) => d !== day);
+      }
+      return [...prev, day].sort();
+    });
+  };
 
   const handleAddPreset = (preset: typeof presetHabits[0]) => {
     if (isPresetAlreadyAdded(preset.id)) return;
@@ -36,8 +62,19 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
     if (!customName.trim()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     addCustomHabit(customEmoji, customName.trim());
+
+    // Apply schedule to the newly created habit
+    const habits = useHabitStore.getState().habits;
+    const newHabit = habits[habits.length - 1];
+    if (newHabit) {
+      const days = selectedDays.length === 7 ? [] : selectedDays;
+      setHabitSchedule(newHabit.id, selectedTime, days);
+    }
+
     setCustomName('');
     setCustomEmoji('🔥');
+    setSelectedTime(null);
+    setSelectedDays(ALL_DAYS);
     onClose();
   };
 
@@ -89,6 +126,63 @@ export function AddHabitModal({ visible, onClose, locale }: AddHabitModalProps) 
               placeholderTextColor="#A3A3A3"
               maxLength={50}
             />
+
+            {/* Time of day picker */}
+            <Text style={styles.scheduleLabel}>
+              {locale === 'de' ? 'Tageszeit' : 'Time of day'}
+            </Text>
+            <View style={styles.timeRow}>
+              {TIME_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt.key}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setSelectedTime((prev) => (prev === opt.key ? null : opt.key));
+                  }}
+                  style={[
+                    styles.timeButton,
+                    selectedTime === opt.key && styles.timeButtonActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={opt.icon as any}
+                    size={16}
+                    color={selectedTime === opt.key ? '#E8435A' : '#A3A3A3'}
+                  />
+                  <Text style={[
+                    styles.timeButtonText,
+                    selectedTime === opt.key && styles.timeButtonTextActive,
+                  ]}>
+                    {opt[locale]}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Day of week selector */}
+            <Text style={styles.scheduleLabel}>
+              {locale === 'de' ? 'Wochentage' : 'Days'}
+            </Text>
+            <View style={styles.daysRow}>
+              {ALL_DAYS.map((day) => (
+                <Pressable
+                  key={day}
+                  onPress={() => toggleDay(day)}
+                  style={[
+                    styles.dayToggle,
+                    selectedDays.includes(day) && styles.dayToggleActive,
+                  ]}
+                >
+                  <Text style={[
+                    styles.dayToggleText,
+                    selectedDays.includes(day) && styles.dayToggleTextActive,
+                  ]}>
+                    {dayLabels[day]}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
             <Pressable
               onPress={handleAddCustom}
               style={[styles.addCustomButton, !customName.trim() && styles.addCustomButtonDisabled]}
@@ -185,8 +279,49 @@ const styles = StyleSheet.create({
   input: {
     height: 44, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 12,
     paddingHorizontal: 14, fontSize: 16, color: '#171717',
-    marginBottom: 12,
+    marginBottom: 14,
   },
+
+  // Schedule
+  scheduleLabel: {
+    fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: 8,
+  },
+  timeRow: {
+    flexDirection: 'row', gap: 8, marginBottom: 14,
+  },
+  timeButton: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 4, paddingVertical: 10, borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+  },
+  timeButtonActive: {
+    backgroundColor: 'rgba(232,67,90,0.1)',
+    borderWidth: 1.5, borderColor: '#E8435A',
+  },
+  timeButtonText: {
+    fontSize: 12, fontWeight: '600', color: '#A3A3A3',
+  },
+  timeButtonTextActive: {
+    color: '#E8435A',
+  },
+  daysRow: {
+    flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16,
+  },
+  dayToggle: {
+    width: 38, height: 38, borderRadius: 19,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.03)',
+  },
+  dayToggleActive: {
+    backgroundColor: '#E8435A',
+  },
+  dayToggleText: {
+    fontSize: 13, fontWeight: '700', color: '#A3A3A3',
+  },
+  dayToggleTextActive: {
+    color: '#fff',
+  },
+
   addCustomButton: {
     backgroundColor: '#E8435A', borderRadius: 14,
     paddingVertical: 12, alignItems: 'center',

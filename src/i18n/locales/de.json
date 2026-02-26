@@ -24,7 +24,7 @@
       "Ein ehrliches Kompliment kann jemandem den ganzen Tag verschönern. Probiere es.",
       "Ein Nein ist besser als Unwissenheit.",
       "Zu spät ist eine verpasste Chance.",
-      "'Ich spreche sie nächstes Mal an' — wirst du nicht."
+      "'Ich spreche sie nächstes Mal an'... wirst du nicht."
     ]
   },
   "guide": {
@@ -69,7 +69,7 @@
       "title": "Oh, du hast eine Dating-App heruntergeladen.",
       "body": "Keine Dating-App. DIE Dating-App.\nDie, die dir tatsächlich beibringt, wie du nicht schrecklich darin bist.\n\nWillkommen bei Charismo. Wir verwandeln dein Liebesleben von einem Dumpster Fire in... naja, zumindest ein Lagerfeuer.",
       "cta": "Ich bin bereit, geröstet zu werden",
-      "skip": "Überspringen — Ich bin bereits unwiderstehlich"
+      "skip": "Überspringen, ich bin bereits unwiderstehlich"
     },
     "gender": {
       "title": "Eine wichtige Sache zuerst.",
@@ -92,15 +92,15 @@
     "ageGroup": {
       "title": "Wie lange versagst du schon dabei?",
       "subtitle": "(Spaß. Irgendwie.)",
-      "age_18_24": "18-24 — Ich denke immer noch, 'Na, wach?' ist ein Gesprächseröffner.",
-      "age_25_34": "25-34 — Ich wurde genug verletzt, um diese App herunterzuladen.",
-      "age_35_44": "35-44 — Ich habe eine Altersvorsorge, aber niemanden zum Teilen.",
-      "age_45_plus": "45+ — Ich habe Geschichten. Lehrt mich die neuen Regeln."
+      "age_18_24": "18-24: Ich denke immer noch, 'Na, wach?' ist ein Gesprächseröffner.",
+      "age_25_34": "25-34: Ich wurde genug verletzt, um diese App herunterzuladen.",
+      "age_35_44": "35-44: Ich habe eine Altersvorsorge, aber niemanden zum Teilen.",
+      "age_45_plus": "45+: Ich habe Geschichten. Lehrt mich die neuen Regeln."
     },
     "basics": {
       "male": {
         "title": "Klartext: Wie steht's um dein Pflege-Game?",
-        "subtitle": "Hygiene, Hautpflege, Style — das, was sie zuerst bemerkt.",
+        "subtitle": "Hygiene, Hautpflege, Style: das, was sie zuerst bemerkt.",
         "none": "Was ist Feuchtigkeitscreme? Ich benutze 3-in-1 Shampoo für alles.",
         "some": "Ich dusche täglich und besitze Deo. Zählt das?",
         "solid": "Hautpflege-Routine, gute Klamotten, ich rieche gut.",
@@ -168,7 +168,7 @@
       "coach": "Dein KI-Coach",
       "startingChapter": "Startkapitel",
       "skipNote": "Wir überspringen die Basics",
-      "basicsNote": "Wir starten mit den Grundlagen — vertrau dem Prozess",
+      "basicsNote": "Wir starten mit den Grundlagen. Vertrau dem Prozess.",
       "cta": "Los geht's",
       "settingsNote": "Du kannst das alles in den Einstellungen ändern. Wir sind flexibel."
     },
@@ -258,7 +258,7 @@
   "graduate": {
     "title": "Herzlichen Glückwunsch!",
     "subtitle": "Du hast die Reise abgeschlossen",
-    "message": "Du bist so sehr gewachsen. Du brauchst uns nicht mehr — lebe deine wunderschöne Liebesgeschichte.",
+    "message": "Du bist so sehr gewachsen. Du brauchst uns nicht mehr. Lebe deine wunderschöne Liebesgeschichte.",
     "share": "Achievement teilen",
     "delete": "Abschluss & App löschen"
   }

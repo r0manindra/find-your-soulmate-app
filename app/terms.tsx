@@ -46,8 +46,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Durch die Nutzung der FlirtIQ-App ("App"), bereitgestellt von Pulsify Experience GmbH ("wir", "uns"), stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie die App bitte nicht.'
-            : 'By using the FlirtIQ app ("App"), provided by Pulsify Experience GmbH ("we", "us", "our"), you agree to these Terms of Service. If you do not agree to these terms, please do not use the App.'}
+            ? 'Durch die Nutzung der FlirtIQ-App ("App"), bereitgestellt von FlirtIQ ("wir", "uns"), stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie die App bitte nicht.'
+            : 'By using the FlirtIQ app ("App"), provided by FlirtIQ ("we", "us", "our"), you agree to these Terms of Service. If you do not agree to these terms, please do not use the App.'}
         </Text>
 
         {/* Section 2: Description */}
@@ -76,8 +76,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@pulsify.app kontaktieren.'
-            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@pulsify.app.'}
+            ? 'Einige Funktionen erfordern ein Benutzerkonto. Sie sind verantwortlich für:\n\n• Die Sicherheit Ihrer Anmeldedaten\n• Alle Aktivitäten unter Ihrem Konto\n• Die Richtigkeit der angegebenen Kontoinformationen\n\nSie können Ihr Konto jederzeit löschen, indem Sie uns unter privacy@flirt-iq.com kontaktieren.'
+            : 'Some features require a user account. You are responsible for:\n\n• Keeping your login credentials secure\n• All activities that occur under your account\n• Ensuring your account information is accurate\n\nYou may delete your account at any time by contacting us at privacy@flirt-iq.com.'}
         </Text>
 
         {/* Section 5: Subscriptions */}
@@ -116,8 +116,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Alle Inhalte der App, einschließlich Text, Grafiken, Logos, Kursstruktur und Software, sind Eigentum von Pulsify Experience GmbH und durch Urheberrecht und andere Gesetze zum Schutz geistigen Eigentums geschützt. Sie erhalten eine begrenzte, nicht-exklusive, nicht übertragbare Lizenz zur persönlichen, nicht-kommerziellen Nutzung.'
-            : 'All content in the App, including text, graphics, logos, course structure, and software, is the property of Pulsify Experience GmbH and is protected by copyright and other intellectual property laws. You are granted a limited, non-exclusive, non-transferable license for personal, non-commercial use.'}
+            ? 'Alle Inhalte der App, einschließlich Text, Grafiken, Logos, Kursstruktur und Software, sind Eigentum von FlirtIQ und durch Urheberrecht und andere Gesetze zum Schutz geistigen Eigentums geschützt. Sie erhalten eine begrenzte, nicht-exklusive, nicht übertragbare Lizenz zur persönlichen, nicht-kommerziellen Nutzung.'
+            : 'All content in the App, including text, graphics, logos, course structure, and software, is the property of FlirtIQ and is protected by copyright and other intellectual property laws. You are granted a limited, non-exclusive, non-transferable license for personal, non-commercial use.'}
         </Text>
 
         {/* Section 9: Disclaimers */}
@@ -136,8 +136,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Soweit gesetzlich zulässig, haftet Pulsify Experience GmbH nicht für indirekte, zufällige, besondere oder Folgeschäden, die sich aus der Nutzung oder der Unfähigkeit zur Nutzung der App ergeben. Unsere Gesamthaftung ist auf den Betrag beschränkt, den Sie in den 12 Monaten vor dem Anspruch für die App bezahlt haben.\n\nDiese Beschränkung gilt nicht für Schäden, die durch Vorsatz oder grobe Fahrlässigkeit verursacht werden, oder für die Haftung für Personenschäden gemäß deutschem Recht.'
-            : 'To the maximum extent permitted by law, Pulsify Experience GmbH shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of or inability to use the App. Our total liability is limited to the amount you paid for the App in the 12 months preceding the claim.\n\nThis limitation does not apply to damages caused by willful intent or gross negligence, or to liability for personal injury under German law.'}
+            ? 'Soweit gesetzlich zulässig, haftet FlirtIQ nicht für indirekte, zufällige, besondere oder Folgeschäden, die sich aus der Nutzung oder der Unfähigkeit zur Nutzung der App ergeben. Unsere Gesamthaftung ist auf den Betrag beschränkt, den Sie in den 12 Monaten vor dem Anspruch für die App bezahlt haben.\n\nDiese Beschränkung gilt nicht für Schäden, die durch Vorsatz oder grobe Fahrlässigkeit verursacht werden, oder für die Haftung für Personenschäden gemäß österreichischem Recht.'
+            : 'To the maximum extent permitted by law, FlirtIQ shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of or inability to use the App. Our total liability is limited to the amount you paid for the App in the 12 months preceding the claim.\n\nThis limitation does not apply to damages caused by willful intent or gross negligence, or to liability for personal injury under Austrian law.'}
         </Text>
 
         {/* Section 11: Termination */}
@@ -166,8 +166,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Diese Bedingungen unterliegen dem Recht der Bundesrepublik Deutschland. Für Verbraucher in der EU gelten zusätzlich die zwingenden Verbraucherschutzvorschriften des Landes, in dem Sie Ihren gewöhnlichen Aufenthalt haben.'
-            : 'These terms are governed by the laws of the Federal Republic of Germany. For consumers in the EU, the mandatory consumer protection provisions of the country of your habitual residence additionally apply.'}
+            ? 'Diese Bedingungen unterliegen dem Recht der Republik Österreich. Für Verbraucher in der EU gelten zusätzlich die zwingenden Verbraucherschutzvorschriften des Landes, in dem Sie Ihren gewöhnlichen Aufenthalt haben.'
+            : 'These terms are governed by the laws of the Republic of Austria. For consumers in the EU, the mandatory consumer protection provisions of the country of your habitual residence additionally apply.'}
         </Text>
 
         {/* Section 14: Contact */}
@@ -176,8 +176,8 @@ export default function TermsScreen() {
         </Text>
         <Text style={[styles.body, { color: mutedColor }]}>
           {isDE
-            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nPulsify Experience GmbH\nE-Mail: support@pulsify.app'
-            : 'For questions about these Terms of Service, contact us at:\n\nPulsify Experience GmbH\nEmail: support@pulsify.app'}
+            ? 'Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:\n\nFlirtIQ\nE-Mail: support@flirt-iq.com'
+            : 'For questions about these Terms of Service, contact us at:\n\nFlirtIQ\nEmail: support@flirt-iq.com'}
         </Text>
 
         <View style={styles.bottomSpacer} />

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  View, Text, TextInput, FlatList, Pressable, ScrollView, Modal, StyleSheet, KeyboardAvoidingView, Platform,
+  View, Text, TextInput, FlatList, Pressable, ScrollView, Modal, StyleSheet, KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useUIStore } from '@/src/store/ui-store';
 import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
@@ -61,10 +62,38 @@ export default function CoachScreen() {
   const isDark = colorScheme === 'dark';
   const activeCharacter = getCharacter(selectedCharacterId);
   const insets = useSafeAreaInsets();
+  const setChatInputFocused = useUIStore((s) => s.setChatInputFocused);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  // Calculate bottom padding to account for floating tab bar
-  // Tab bar height is approximately 64px (48 item + 8*2 padding) + insets.bottom + 12
+  // Tab bar height for when it's visible
   const tabBarHeight = 64 + insets.bottom + 12;
+
+  // Track keyboard visibility
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
+
+  const handleInputFocus = useCallback(() => {
+    setIsInputFocused(true);
+    setChatInputFocused(true);
+  }, [setChatInputFocused]);
+
+  const handleInputBlur = useCallback(() => {
+    setIsInputFocused(false);
+    setChatInputFocused(false);
+  }, [setChatInputFocused]);
+
+  // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
+  const inputBottomPadding = (isInputFocused && keyboardVisible) ? insets.bottom : tabBarHeight + 8;
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -181,7 +210,7 @@ export default function CoachScreen() {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={90}
+        keyboardVerticalOffset={isInputFocused ? 0 : 90}
       >
         {/* Header with character selector */}
         <Pressable onPress={() => setShowCharacterPicker(true)} style={styles.header}>
@@ -247,7 +276,7 @@ export default function CoachScreen() {
         />
 
         {/* Input */}
-        <View style={[styles.inputContainer, { paddingBottom: tabBarHeight + 8 }, isDark && styles.inputContainerDark]}>
+        <View style={[styles.inputContainer, { paddingBottom: inputBottomPadding }, isDark && styles.inputContainerDark]}>
           <TextInput
             style={styles.input}
             value={input}
@@ -258,6 +287,8 @@ export default function CoachScreen() {
             maxLength={500}
             onSubmitEditing={sendMessage}
             returnKeyType="send"
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
           />
           <Pressable
             onPress={sendMessage}
@@ -400,10 +431,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingTop: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.06)',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: 'rgba(250,250,250,0.95)',
   },
   inputContainerDark: {
-    backgroundColor: '#171717',
+    backgroundColor: 'rgba(23,23,23,0.95)',
     borderTopColor: 'rgba(255,255,255,0.06)',
   },
   input: {

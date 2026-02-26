@@ -153,14 +153,14 @@ function JourneyMiniMap({ completedChapters, isDark }: { completedChapters: numb
   );
 }
 
-function QuickActionButton({ icon, label, onPress, isDark, delay }: { icon: string; label: string; onPress: () => void; isDark: boolean; delay: number }) {
+function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay }: { icon: string; label: string; subtitle?: string; onPress: () => void; isDark: boolean; delay: number }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   return (
-    <Animated.View entering={FadeInDown.delay(delay).duration(400).springify()}>
+    <Animated.View style={{ flex: 1 }} entering={FadeInDown.delay(delay).duration(400).springify()}>
       <AnimatedPressable
         style={[animatedStyle, styles.quickAction, isDark && styles.quickActionDark]}
         onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 400 }); }}
@@ -170,8 +170,11 @@ function QuickActionButton({ icon, label, onPress, isDark, delay }: { icon: stri
           onPress();
         }}
       >
-        <Ionicons name={icon as any} size={22} color="#E8435A" />
+        <Ionicons name={icon as any} size={24} color="#E8435A" />
         <Text style={[styles.quickActionLabel, isDark && styles.quickActionLabelDark]}>{label}</Text>
+        {subtitle ? (
+          <Text style={[styles.quickActionStat, isDark && styles.quickActionStatDark]}>{subtitle}</Text>
+        ) : null}
       </AnimatedPressable>
     </Animated.View>
   );
@@ -228,6 +231,7 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="book-outline"
             label={locale === 'de' ? 'Guide' : 'Guide'}
+            subtitle={`${completedChapters.length}/${chapters.length}`}
             onPress={() => router.push('/guide' as any)}
             isDark={isDark}
             delay={200}
@@ -235,6 +239,7 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="checkmark-circle-outline"
             label="Habits"
+            subtitle={habitsTotalToday > 0 ? `${habitsCompletedToday}/${habitsTotalToday}` : undefined}
             onPress={() => router.push('/habits' as any)}
             isDark={isDark}
             delay={250}
@@ -265,32 +270,14 @@ export default function HomeScreen() {
                 <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedBooks.length}/10</Text>
                 <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.books')}</Text>
               </View>
-              {habitsTotalToday > 0 && (
-                <View>
-                  <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{habitsCompletedToday}/{habitsTotalToday}</Text>
-                  <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{locale === 'de' ? 'Habits heute' : 'Habits today'}</Text>
-                </View>
-              )}
+              <View style={styles.streakStatRow}>
+                <Ionicons name="flame" size={20} color="#FF7854" />
+                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{streak}</Text>
+                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.streak')}</Text>
+              </View>
             </View>
           </View>
           <JourneyMiniMap completedChapters={completedChapters} isDark={isDark} />
-        </GlassCard>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(450).duration(400)}>
-        <GlassCard style={styles.streakCard}>
-          <LinearGradient
-            colors={['#E8435A', '#FF7854']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.streakGradient}
-          >
-            <Ionicons name="flame" size={40} color="#fff" />
-            <View>
-              <Text style={styles.streakNumber}>{streak}</Text>
-              <Text style={styles.streakLabel}>{t('home.streak')}</Text>
-            </View>
-          </LinearGradient>
         </GlassCard>
         </Animated.View>
 
@@ -438,31 +425,39 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   quickAction: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 18,
     borderRadius: 16,
     backgroundColor: 'rgba(232,67,90,0.06)',
-    gap: 6,
+    gap: 4,
   },
   quickActionDark: {
     backgroundColor: 'rgba(232,67,90,0.12)',
   },
   quickActionLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#525252',
   },
   quickActionLabelDark: {
     color: '#A3A3A3',
   },
+  quickActionStat: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#A3A3A3',
+  },
+  quickActionStatDark: {
+    color: '#737373',
+  },
 
-  // Streak
-  streakCard: { marginBottom: 16, overflow: 'hidden' },
-  streakGradient: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 20, margin: -16, borderRadius: 20 },
-  streakNumber: { fontSize: 36, fontWeight: '700', color: '#fff', letterSpacing: -1 },
-  streakLabel: { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '600' },
+  // Streak (compact, in progress card)
+  streakStatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
 
   // Tip
   tipCard: { marginBottom: 16 },
