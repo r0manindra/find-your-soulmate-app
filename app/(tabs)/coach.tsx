@@ -152,7 +152,7 @@ export default function CoachScreen() {
   // Ensure active conversation exists on mount
   useEffect(() => {
     if (!chatStore.activeConversationId || !chatStore.getActiveConversation()) {
-      chatStore.createConversation(selectedCharacterId, t('coach.greeting'));
+      chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
     }
   }, []);
 
@@ -189,8 +189,8 @@ export default function CoachScreen() {
   };
 
   const handleNewChat = useCallback(() => {
-    chatStore.createConversation(selectedCharacterId, t('coach.greeting'));
-  }, [selectedCharacterId, t]);
+    chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
+  }, [selectedCharacterId, activeCharacter, locale]);
 
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;

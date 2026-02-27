@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flirtiq.app",
-      "buildNumber": "19",
+      "buildNumber": "20",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -44,7 +44,13 @@
       "expo-localization",
       "expo-apple-authentication",
       "expo-calendar",
-      ["@config-plugins/react-native-webrtc", { "cameraPermission": false, "microphonePermission": "Charismo uses your microphone for voice coaching." }]
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": false,
+          "microphonePermission": "Charismo uses your microphone for voice coaching."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

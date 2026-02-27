@@ -187,7 +187,7 @@ router.post('/session', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const sessionData = await response.json();
+    const sessionData = await response.json() as any;
 
     res.json({
       clientSecret: sessionData.client_secret?.value,
