@@ -329,7 +329,7 @@ export default function ChapterDetailScreen() {
               >
                 <Ionicons name="chevron-back" size={16} color="#E8435A" />
                 <Text style={styles.chapterNavText} numberOfLines={1}>
-                  {prevChapter.id}
+                  {prevChapter.phase === 0 ? prevChapter.title[locale] : prevChapter.id}
                 </Text>
               </Pressable>
             ) : null}
@@ -342,7 +342,7 @@ export default function ChapterDetailScreen() {
                 style={[styles.chapterNavBtn, isDark && styles.chapterNavBtnDark]}
               >
                 <Text style={styles.chapterNavText} numberOfLines={1}>
-                  {nextChapterNav.id}
+                  {nextChapterNav.phase === 0 ? nextChapterNav.title[locale] : nextChapterNav.id}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color="#E8435A" />
               </Pressable>
@@ -361,7 +361,9 @@ export default function ChapterDetailScreen() {
             <Ionicons name={chapter.ionicon as any} size={32} color="#fff" />
           </View>
           <Text style={styles.introLabel}>
-            {locale === 'de' ? 'Kapitel' : 'Chapter'} {chapter.id}
+            {chapter.phase === 0
+              ? (locale === 'de' ? 'Grundlagen' : 'Basics')
+              : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${chapter.id}`}
           </Text>
           <Text style={styles.introTitle}>{chapter.title[locale]}</Text>
           <Text style={styles.introSubtitle}>{chapter.subtitle[locale]}</Text>
@@ -575,7 +577,9 @@ export default function ChapterDetailScreen() {
                       {nextChapter.title[locale]}
                     </Text>
                     <Text style={styles.nextChapterSubtitle} numberOfLines={1}>
-                      {locale === 'de' ? 'Kapitel' : 'Chapter'} {nextChapter.id} · {nextChapter.subtitle[locale]}
+                      {nextChapter.phase === 0
+                        ? nextChapter.subtitle[locale]
+                        : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
                     </Text>
                   </View>
                   <View style={styles.nextChapterArrow}>

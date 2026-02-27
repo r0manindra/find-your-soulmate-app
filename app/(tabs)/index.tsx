@@ -97,7 +97,9 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
               {nextChapter.title[locale]}
             </Text>
             <Text style={styles.continueSubtitle} numberOfLines={1}>
-              {locale === 'de' ? 'Kapitel' : 'Chapter'} {nextChapter.id} · {nextChapter.subtitle[locale]}
+              {nextChapter.phase === 0
+                ? nextChapter.subtitle[locale]
+                : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
             </Text>
           </View>
           <View style={styles.continueArrow}>

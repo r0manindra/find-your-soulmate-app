@@ -547,7 +547,9 @@ function ProfileRevealPage({
                 <View style={styles.planInfo}>
                   <Text style={styles.planLabel}>{t('onboarding.profileReveal.startingChapter')}</Text>
                   <Text style={[styles.planValue, isDark && styles.textLight]}>
-                    {locale === 'de' ? 'Kapitel' : 'Chapter'} {suggestedChapter.id}: {suggestedChapter.title[locale as 'en' | 'de']}
+                    {suggestedChapter.phase === 0
+                      ? suggestedChapter.title[locale as 'en' | 'de']
+                      : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${suggestedChapter.id}: ${suggestedChapter.title[locale as 'en' | 'de']}`}
                   </Text>
                   {showSkipNote && (
                     <Text style={styles.planSkipNote}>{t('onboarding.profileReveal.skipNote')}</Text>

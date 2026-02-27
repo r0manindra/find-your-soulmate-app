@@ -116,7 +116,9 @@ export function ChapterNode({
         >
           <GlassCard style={styles.expandedCard} borderRadius={16} padding={16}>
             <Text style={[styles.expandedChapter, isDark && styles.expandedChapterDark]}>
-              {locale === 'de' ? 'Kapitel' : 'Chapter'} {chapter.id}
+              {chapter.phase === 0
+                ? (locale === 'de' ? 'Grundlagen' : 'Basics')
+                : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${chapter.id}`}
             </Text>
             <Text style={[styles.expandedTitle, isDark && styles.expandedTitleDark]}>{chapter.title[locale]}</Text>
             <Text style={[styles.expandedSubtitle, isDark && styles.expandedSubtitleDark]}>{chapter.subtitle[locale]}</Text>
