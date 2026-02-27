@@ -80,6 +80,16 @@
       "cta": "Ich bin bereit, geröstet zu werden",
       "skip": "Überspringen, ich bin bereits unwiderstehlich"
     },
+    "appearance": {
+      "title": "Wähl deinen Style.",
+      "subtitle": "Hell, dunkel oder automatisch. Du kannst das jederzeit ändern.",
+      "light": "Light Mode",
+      "lightNote": "Clean und hell, wie dein zukünftiges Liebesleben",
+      "dark": "Dark Mode",
+      "darkNote": "Augenfreundlich, mysteriöse Energie",
+      "system": "Auto",
+      "systemNote": "Automatisch an dein Handy anpassen"
+    },
     "gender": {
       "title": "Eine wichtige Sache zuerst.",
       "subtitle": "Das ändert alles. (Wirklich, die ganze App.)",

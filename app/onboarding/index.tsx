@@ -17,14 +17,14 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { OptionCard } from '@/src/presentation/components/onboarding/option-card';
 import { ProgressDots } from '@/src/presentation/components/onboarding/progress-dots';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
-import { useSettingsStore } from '@/src/store/settings-store';
+import { useSettingsStore, type ThemeMode } from '@/src/store/settings-store';
 import { useProgressStore } from '@/src/store/progress-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { getCharacter } from '@/src/data/content/coach-characters';
 import { chapters } from '@/src/data/content/chapters';
 import type { SocialEnergy, AgeGroup, BasicsLevel, SkillLevel, Goal, UserGender } from '@/src/store/user-profile-store';
 
-const TOTAL_PAGES = 8;
+const TOTAL_PAGES = 9;
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
@@ -37,6 +37,8 @@ export default function OnboardingScreen() {
   const isDark = colorScheme === 'dark';
 
   const locale = useSettingsStore((s) => s.locale);
+  const themeMode = useSettingsStore((s) => s.themeMode);
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const {
@@ -94,6 +96,18 @@ export default function OnboardingScreen() {
     switch (item) {
       case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} isDark={isDark} />;
       case 1: return (
+        <AppearancePage
+          isDark={isDark}
+          t={t}
+          themeMode={themeMode}
+          onSelect={(mode) => {
+            setThemeMode(mode);
+            setTimeout(advance, 400);
+          }}
+          width={width}
+        />
+      );
+      case 2: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -112,7 +126,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 2: return (
+      case 3: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -133,7 +147,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 3: return (
+      case 4: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -153,7 +167,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 4: return (
+      case 5: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -173,7 +187,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 5: return (
+      case 6: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -194,7 +208,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 6: return (
+      case 7: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -215,7 +229,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 7: return (
+      case 8: return (
         <ProfileRevealPage
           locale={locale}
           isDark={isDark}
@@ -233,13 +247,13 @@ export default function OnboardingScreen() {
       default: return null;
     }
   }, [
-    locale, t, width, g, isDark, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
+    locale, t, width, g, isDark, themeMode, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
     personalization, recommendedCharacter, suggestedChapter,
     advance, handleSkip, handleComplete,
-    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
+    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal, setThemeMode,
   ]);
 
-  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7], []);
+  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7, 8], []);
 
   return (
     <View style={[styles.screen, isDark && styles.screenDark, { paddingTop: insets.top }]}>
@@ -309,6 +323,55 @@ function WelcomePage({
         <BrandButton title={t('onboarding.welcome.cta')} onPress={onAdvance} />
         <GlassButton title={t('onboarding.welcome.skip')} onPress={onSkip} />
       </Animated.View>
+    </View>
+  );
+}
+
+/* ---------- Appearance Page ---------- */
+
+const APPEARANCE_OPTIONS: { mode: ThemeMode; icon: string; emoji: string }[] = [
+  { mode: 'light', icon: 'sunny', emoji: '☀️' },
+  { mode: 'dark', icon: 'moon', emoji: '🌙' },
+  { mode: 'system', icon: 'phone-portrait', emoji: '📱' },
+];
+
+function AppearancePage({
+  isDark,
+  t,
+  themeMode,
+  onSelect,
+  width,
+}: {
+  isDark: boolean;
+  t: any;
+  themeMode: ThemeMode;
+  onSelect: (mode: ThemeMode) => void;
+  width: number;
+}) {
+  return (
+    <View style={[styles.page, { width }]}>
+      <ScrollView
+        contentContainerStyle={styles.pageContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeInDown.duration(500)} style={styles.questionHeader}>
+          <Text style={[styles.questionTitle, isDark && styles.textLight]}>{t('onboarding.appearance.title')}</Text>
+          <Text style={[styles.questionSubtitle, isDark && styles.textMutedDark]}>{t('onboarding.appearance.subtitle')}</Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.optionsList}>
+          {APPEARANCE_OPTIONS.map((opt) => (
+            <OptionCard
+              key={opt.mode}
+              emoji={opt.emoji}
+              label={t(`onboarding.appearance.${opt.mode}`)}
+              note={t(`onboarding.appearance.${opt.mode}Note`)}
+              selected={themeMode === opt.mode}
+              onSelect={() => onSelect(opt.mode)}
+            />
+          ))}
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }

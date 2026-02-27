@@ -80,6 +80,16 @@
       "cta": "I'm ready to be roasted",
       "skip": "Skip, I'm already irresistible"
     },
+    "appearance": {
+      "title": "Pick your vibe.",
+      "subtitle": "Light, dark, or let your phone decide. You can always change this later.",
+      "light": "Light Mode",
+      "lightNote": "Clean and bright, like your future love life",
+      "dark": "Dark Mode",
+      "darkNote": "Easy on the eyes, mysterious energy",
+      "system": "Auto",
+      "systemNote": "Match your phone's setting automatically"
+    },
     "gender": {
       "title": "One important thing first.",
       "subtitle": "This changes everything. (Literally, the whole app.)",
