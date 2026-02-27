@@ -2,7 +2,7 @@ import React, { useRef, useState, useCallback, useMemo } from 'react';
 import {
   View, Text, FlatList, StyleSheet, useWindowDimensions, ScrollView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
+import { useColorScheme } from '@/components/useColorScheme';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { GlassButton } from '@/src/presentation/components/ui/glass-button';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
@@ -31,6 +32,9 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const locale = useSettingsStore((s) => s.locale);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
@@ -88,10 +92,11 @@ export default function OnboardingScreen() {
 
   const renderPage = useCallback(({ item }: { item: number }) => {
     switch (item) {
-      case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} />;
+      case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} isDark={isDark} />;
       case 1: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t('onboarding.gender.title')}
           subtitle={t('onboarding.gender.subtitle')}
           footnote={t('onboarding.gender.footnote')}
@@ -110,6 +115,7 @@ export default function OnboardingScreen() {
       case 2: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t('onboarding.socialEnergy.title')}
           subtitle={t('onboarding.socialEnergy.subtitle')}
           footnote={t('onboarding.socialEnergy.footnote')}
@@ -130,6 +136,7 @@ export default function OnboardingScreen() {
       case 3: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t('onboarding.ageGroup.title')}
           subtitle={t('onboarding.ageGroup.subtitle')}
           options={[
@@ -149,6 +156,7 @@ export default function OnboardingScreen() {
       case 4: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t(`onboarding.basics.${g}.title`)}
           subtitle={t(`onboarding.basics.${g}.subtitle`)}
           options={[
@@ -168,6 +176,7 @@ export default function OnboardingScreen() {
       case 5: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t('onboarding.skillLevel.title')}
           subtitle={t('onboarding.skillLevel.subtitle')}
           question={t('onboarding.skillLevel.question')}
@@ -188,6 +197,7 @@ export default function OnboardingScreen() {
       case 6: return (
         <QuestionPage
           locale={locale}
+          isDark={isDark}
           title={t('onboarding.goal.title')}
           subtitle={t('onboarding.goal.subtitle')}
           options={[
@@ -208,6 +218,7 @@ export default function OnboardingScreen() {
       case 7: return (
         <ProfileRevealPage
           locale={locale}
+          isDark={isDark}
           t={t}
           personalization={personalization}
           recommendedCharacter={recommendedCharacter}
@@ -222,7 +233,7 @@ export default function OnboardingScreen() {
       default: return null;
     }
   }, [
-    locale, t, width, g, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
+    locale, t, width, g, isDark, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
     personalization, recommendedCharacter, suggestedChapter,
     advance, handleSkip, handleComplete,
     setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
@@ -231,28 +242,26 @@ export default function OnboardingScreen() {
   const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7], []);
 
   return (
-    <View style={styles.screen}>
-      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
-        <View style={styles.dotsContainer}>
-          <ProgressDots total={TOTAL_PAGES} current={currentPage} />
-        </View>
+    <View style={[styles.screen, isDark && styles.screenDark, { paddingTop: insets.top }]}>
+      <View style={styles.dotsContainer}>
+        <ProgressDots total={TOTAL_PAGES} current={currentPage} />
+      </View>
 
-        <FlatList
-          ref={flatListRef}
-          data={pages}
-          keyExtractor={(item) => String(item)}
-          renderItem={renderPage}
-          horizontal
-          pagingEnabled
-          scrollEnabled={false}
-          showsHorizontalScrollIndicator={false}
-          getItemLayout={(_, index) => ({
-            length: width,
-            offset: width * index,
-            index,
-          })}
-        />
-      </SafeAreaView>
+      <FlatList
+        ref={flatListRef}
+        data={pages}
+        keyExtractor={(item) => String(item)}
+        renderItem={renderPage}
+        horizontal
+        pagingEnabled
+        scrollEnabled={false}
+        showsHorizontalScrollIndicator={false}
+        getItemLayout={(_, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
+      />
     </View>
   );
 }
@@ -264,11 +273,13 @@ function WelcomePage({
   t,
   onAdvance,
   onSkip,
+  isDark,
 }: {
   locale: string;
   t: any;
   onAdvance: () => void;
   onSkip: () => void;
+  isDark: boolean;
 }) {
   const { width } = useWindowDimensions();
 
@@ -289,12 +300,12 @@ function WelcomePage({
               <Text style={styles.welcomeEmoji}>🏕️</Text>
             </LinearGradient>
           </View>
-          <Text style={styles.welcomeTitle}>{t('onboarding.welcome.title')}</Text>
-          <Text style={styles.welcomeBody}>{t('onboarding.welcome.body')}</Text>
+          <Text style={[styles.welcomeTitle, isDark && styles.textLight]}>{t('onboarding.welcome.title')}</Text>
+          <Text style={[styles.welcomeBody, isDark && styles.textMutedDark]}>{t('onboarding.welcome.body')}</Text>
         </Animated.View>
       </ScrollView>
 
-      <Animated.View entering={FadeInUp.delay(600).duration(500)} style={styles.bottomActions}>
+      <Animated.View entering={FadeInUp.delay(600).duration(500)} style={[styles.bottomActions, isDark && styles.bottomActionsDark]}>
         <BrandButton title={t('onboarding.welcome.cta')} onPress={onAdvance} />
         <GlassButton title={t('onboarding.welcome.skip')} onPress={onSkip} />
       </Animated.View>
@@ -313,6 +324,7 @@ interface QuestionOption {
 
 function QuestionPage({
   locale,
+  isDark,
   title,
   subtitle,
   question,
@@ -323,6 +335,7 @@ function QuestionPage({
   width,
 }: {
   locale: string;
+  isDark: boolean;
   title: string;
   subtitle: string;
   question?: string;
@@ -339,9 +352,9 @@ function QuestionPage({
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(500)} style={styles.questionHeader}>
-          <Text style={styles.questionTitle}>{title}</Text>
-          <Text style={styles.questionSubtitle}>{subtitle}</Text>
-          {question && <Text style={styles.questionExtra}>{question}</Text>}
+          <Text style={[styles.questionTitle, isDark && styles.textLight]}>{title}</Text>
+          <Text style={[styles.questionSubtitle, isDark && styles.textMutedDark]}>{subtitle}</Text>
+          {question && <Text style={[styles.questionExtra, isDark && styles.textSecondaryDark]}>{question}</Text>}
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.optionsList}>
@@ -369,6 +382,7 @@ function QuestionPage({
 
 function ProfileRevealPage({
   locale,
+  isDark,
   t,
   personalization,
   recommendedCharacter,
@@ -380,6 +394,7 @@ function ProfileRevealPage({
   onComplete,
 }: {
   locale: string;
+  isDark: boolean;
   t: any;
   personalization: ReturnType<typeof getPersonalization>;
   recommendedCharacter: ReturnType<typeof getCharacter>;
@@ -414,8 +429,8 @@ function ProfileRevealPage({
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(500)} style={styles.revealHeader}>
-          <Text style={styles.revealTitle}>{t('onboarding.profileReveal.title')}</Text>
-          <Text style={styles.revealSubtitle}>{t('onboarding.profileReveal.subtitle')}</Text>
+          <Text style={[styles.revealTitle, isDark && styles.textLight]}>{t('onboarding.profileReveal.title')}</Text>
+          <Text style={[styles.revealSubtitle, isDark && styles.textMutedDark]}>{t('onboarding.profileReveal.subtitle')}</Text>
         </Animated.View>
 
         {/* Profile Summary Card */}
@@ -425,19 +440,19 @@ function ProfileRevealPage({
             <View style={styles.revealGrid}>
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>⚡</Text>
-                <Text style={styles.revealStatValue}>{socialLabel}</Text>
+                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{socialLabel}</Text>
               </View>
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>🧼</Text>
-                <Text style={styles.revealStatValue}>{basicsLabel}</Text>
+                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{basicsLabel}</Text>
               </View>
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>📊</Text>
-                <Text style={styles.revealStatValue}>{skillLabel}</Text>
+                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{skillLabel}</Text>
               </View>
               <View style={styles.revealStat}>
                 <Text style={styles.revealStatEmoji}>🎯</Text>
-                <Text style={styles.revealStatValue}>{goalLabel}</Text>
+                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{goalLabel}</Text>
               </View>
             </View>
           </GlassCard>
@@ -449,26 +464,26 @@ function ProfileRevealPage({
             <Text style={styles.revealCardTitle}>{t('onboarding.profileReveal.planTitle')}</Text>
 
             {/* Coach */}
-            <View style={styles.planRow}>
+            <View style={[styles.planRow, isDark && styles.planRowDark]}>
               <View style={[styles.planIcon, { backgroundColor: `${recommendedCharacter.color}15` }]}>
                 <Ionicons name={recommendedCharacter.icon as any} size={22} color={recommendedCharacter.color} />
               </View>
               <View style={styles.planInfo}>
                 <Text style={styles.planLabel}>{t('onboarding.profileReveal.coach')}</Text>
-                <Text style={styles.planValue}>{recommendedCharacter.name}</Text>
-                <Text style={styles.planSub}>{recommendedCharacter.subtitle[locale as 'en' | 'de']}</Text>
+                <Text style={[styles.planValue, isDark && styles.textLight]}>{recommendedCharacter.name}</Text>
+                <Text style={[styles.planSub, isDark && styles.textMutedDark]}>{recommendedCharacter.subtitle[locale as 'en' | 'de']}</Text>
               </View>
             </View>
 
             {/* Starting Chapter */}
             {suggestedChapter && (
-              <View style={styles.planRow}>
+              <View style={[styles.planRow, isDark && styles.planRowDark]}>
                 <View style={styles.planIcon}>
                   <Ionicons name={suggestedChapter.ionicon as any} size={22} color="#E8435A" />
                 </View>
                 <View style={styles.planInfo}>
                   <Text style={styles.planLabel}>{t('onboarding.profileReveal.startingChapter')}</Text>
-                  <Text style={styles.planValue}>
+                  <Text style={[styles.planValue, isDark && styles.textLight]}>
                     {locale === 'de' ? 'Kapitel' : 'Chapter'} {suggestedChapter.id}: {suggestedChapter.title[locale as 'en' | 'de']}
                   </Text>
                   {showSkipNote && (
@@ -486,7 +501,7 @@ function ProfileRevealPage({
         <Text style={styles.settingsNote}>{t('onboarding.profileReveal.settingsNote')}</Text>
       </ScrollView>
 
-      <Animated.View entering={FadeInUp.delay(600).duration(500)} style={styles.bottomActions}>
+      <Animated.View entering={FadeInUp.delay(600).duration(500)} style={[styles.bottomActions, isDark && styles.bottomActionsDark]}>
         <BrandButton title={t('onboarding.profileReveal.cta')} onPress={onComplete} />
       </Animated.View>
     </View>
@@ -500,12 +515,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  flex: {
-    flex: 1,
+  screenDark: {
+    backgroundColor: '#171717',
   },
   dotsContainer: {
     paddingTop: 12,
     paddingBottom: 8,
+  },
+
+  /* Dark mode text helpers */
+  textLight: {
+    color: '#F5F5F5',
+  },
+  textMutedDark: {
+    color: '#A3A3A3',
+  },
+  textSecondaryDark: {
+    color: '#D4D4D4',
   },
 
   /* Page */
@@ -571,6 +597,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     gap: 10,
     backgroundColor: 'rgba(250,250,250,0.9)',
+  },
+  bottomActionsDark: {
+    backgroundColor: 'rgba(23,23,23,0.9)',
   },
 
   /* Question Pages */
@@ -661,6 +690,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.06)',
+  },
+  planRowDark: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
   },
   planIcon: {
     width: 44,
