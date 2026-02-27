@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -36,6 +36,7 @@ export function VoiceCoachModal({ visible, onClose, characterId, locale, chapter
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
   const character = getCharacter(characterId);
   const { state, error, elapsed, isAISpeaking, start, stop, remaining } = useVoiceSession();
 
@@ -162,8 +163,8 @@ export function VoiceCoachModal({ visible, onClose, characterId, locale, chapter
       presentationStyle="fullScreen"
       onRequestClose={handleClose}
     >
-      <View style={[styles.container, isDark && styles.containerDark]}>
-        <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.container, isDark && styles.containerDark, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.safeArea}>
           {/* Top bar */}
           <View style={styles.topBar}>
             <View style={styles.topBarSpacer} />
@@ -275,7 +276,7 @@ export function VoiceCoachModal({ visible, onClose, characterId, locale, chapter
               </Text>
             )}
           </View>
-        </SafeAreaView>
+        </View>
       </View>
     </Modal>
   );
