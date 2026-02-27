@@ -40,10 +40,10 @@
     "placeholder": "Ask Hank anything...",
     "greeting": "Hey! I'm Hank, your dating coach. Think of me as that friend who's brutally honest but always has your back. What's on your mind?",
     "sending": "Hank is thinking...",
-    "limitReached": "You've used all your free messages for today. Upgrade to Premium for unlimited coaching!",
+    "limitReached": "You've used all your free messages for today. Upgrade to Pro for unlimited coaching!",
     "errorMessage": "Sorry, I'm having trouble right now. Try again in a moment.",
     "signInForAI": "Sign in for AI-powered coaching",
-    "upgradeForUnlimited": "Go Premium for unlimited messages",
+    "upgradeForUnlimited": "Go Pro for unlimited messages",
     "welcomeTitle": "Your AI Coach",
     "welcomeDesc": "Ask anything about dating, confidence, or social skills. Try the exercise modes above to practice opening lines, handle rejection, or simulate a first date.",
     "exerciseModes": "Exercise Modes",
@@ -366,8 +366,11 @@
     "practiceTitle": "Practice with Voice Coach",
     "practiceDesc": "Have a real-time voice conversation with your AI coach",
     "idleTip": "Tap the call button to start a live voice conversation with your coach. Practice conversation, get feedback, or just chat.",
-    "premiumRequired": "Premium required for voice coaching",
-    "sessionLimit": "10 min max per session"
+    "premiumRequired": "Pro+ required for voice coaching",
+    "proRequired": "Pro subscription required",
+    "proPlusRequired": "Pro+ subscription required for voice coaching",
+    "sessionLimit": "10 min max per session",
+    "dailyLimitReached": "Daily voice session limit reached"
   },
   "graduate": {
     "title": "Congratulations!",

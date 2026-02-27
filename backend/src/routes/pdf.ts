@@ -34,9 +34,10 @@ router.get('/guide', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    if (user.subscriptionStatus !== 'PREMIUM') {
+    const isSubscribed = user.subscriptionStatus === 'PRO' || user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM';
+    if (!isSubscribed) {
       res.status(403).json({
-        error: 'Premium subscription required',
+        error: 'Pro subscription required',
         upgrade: true,
       });
       return;

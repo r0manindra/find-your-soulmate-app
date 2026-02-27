@@ -44,6 +44,7 @@ export default function CoachScreen() {
   const incrementChatCount = useProgressStore((s) => s.incrementChatCount);
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const isPremium = useAuthStore((s) => s.isPremium);
+  const isProPlus = useAuthStore((s) => s.isProPlus);
   const locale = useSettingsStore((s) => s.locale);
   const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
@@ -322,7 +323,7 @@ export default function CoachScreen() {
                 onPress={(e) => {
                   e.stopPropagation();
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  if (!isPremium) {
+                  if (!isProPlus) {
                     router.push('/paywall');
                   } else {
                     setVoiceCoachVisible(true);
@@ -332,7 +333,7 @@ export default function CoachScreen() {
                 hitSlop={8}
               >
                 <Ionicons name="mic" size={18} color="#fff" />
-                {!isPremium && (
+                {!isProPlus && (
                   <View style={styles.voiceCallLockBadge}>
                     <Ionicons name="lock-closed" size={7} color="#fff" />
                   </View>

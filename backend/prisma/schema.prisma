@@ -34,6 +34,8 @@ model User {
   // Rate limiting
   dailyCoachMessages  Int      @default(0)
   lastCoachResetDate  String   @default("")
+  dailyVoiceSessions  Int      @default(0)
+  lastVoiceResetDate  String   @default("")
 
   chatMessages        ChatMessage[]
 
@@ -55,6 +57,8 @@ model ChatMessage {
 enum SubscriptionStatus {
   FREE
   PREMIUM
+  PRO
+  PRO_PLUS
   EXPIRED
 }
 

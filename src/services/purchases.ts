@@ -9,7 +9,11 @@ import { useAuthStore } from '@/src/store/auth-store';
 const REVENUECAT_IOS_KEY = 'appl_oEBYbSyaCrCchGgTgGBjYxPKKgV';
 const REVENUECAT_ANDROID_KEY = 'goog_YOUR_ANDROID_KEY_HERE';
 
-const ENTITLEMENT_ID = 'premium';
+const ENTITLEMENT_PRO = 'pro';
+const ENTITLEMENT_PRO_PLUS = 'pro_plus';
+const ENTITLEMENT_LEGACY_PREMIUM = 'premium';
+
+type SubscriptionTier = 'free' | 'pro' | 'pro_plus';
 
 let isInitialized = false;
 
@@ -26,31 +30,36 @@ export async function initPurchases(userId?: string) {
   isInitialized = true;
 }
 
-export async function getOfferings() {
+export interface TieredOfferings {
+  proMonthly: PurchasesPackage | null;
+  proAnnual: PurchasesPackage | null;
+  proPlusMonthly: PurchasesPackage | null;
+  proPlusAnnual: PurchasesPackage | null;
+}
+
+export async function getOfferings(): Promise<TieredOfferings | null> {
   try {
     const offerings = await Purchases.getOfferings();
-    if (offerings.current) {
-      return {
-        monthly: offerings.current.availablePackages.find(
-          (p) => p.packageType === 'MONTHLY'
-        ),
-        annual: offerings.current.availablePackages.find(
-          (p) => p.packageType === 'ANNUAL'
-        ),
-        allPackages: offerings.current.availablePackages,
-      };
-    }
-    return null;
+
+    const proOffering = offerings.all['pro'] || null;
+    const proPlusOffering = offerings.all['pro_plus'] || offerings.current || null;
+
+    return {
+      proMonthly: proOffering?.availablePackages.find((p) => p.packageType === 'MONTHLY') ?? null,
+      proAnnual: proOffering?.availablePackages.find((p) => p.packageType === 'ANNUAL') ?? null,
+      proPlusMonthly: proPlusOffering?.availablePackages.find((p) => p.packageType === 'MONTHLY') ?? null,
+      proPlusAnnual: proPlusOffering?.availablePackages.find((p) => p.packageType === 'ANNUAL') ?? null,
+    };
   } catch (e) {
     console.warn('Failed to get offerings:', e);
     return null;
   }
 }
 
-export async function purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+export async function purchasePackage(pkg: PurchasesPackage): Promise<SubscriptionTier | false> {
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
-    return checkPremiumStatus(customerInfo);
+    return checkSubscriptionTier(customerInfo);
   } catch (e: any) {
     if (e.userCancelled) {
       return false;
@@ -59,35 +68,48 @@ export async function purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
   }
 }
 
-export async function restorePurchases(): Promise<boolean> {
+export async function restorePurchases(): Promise<SubscriptionTier | false> {
   try {
     const customerInfo = await Purchases.restorePurchases();
-    return checkPremiumStatus(customerInfo);
+    const tier = checkSubscriptionTier(customerInfo);
+    return tier === 'free' ? false : tier;
   } catch (e) {
     console.warn('Restore failed:', e);
     return false;
   }
 }
 
-export async function checkSubscriptionStatus(): Promise<boolean> {
+export async function checkSubscriptionStatus(): Promise<SubscriptionTier> {
   try {
     const customerInfo = await Purchases.getCustomerInfo();
-    return checkPremiumStatus(customerInfo);
+    return checkSubscriptionTier(customerInfo);
   } catch (e) {
     console.warn('Failed to check status:', e);
-    return false;
+    return 'free';
   }
 }
 
-function checkPremiumStatus(customerInfo: CustomerInfo): boolean {
-  const isPremium =
-    customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+function checkSubscriptionTier(customerInfo: CustomerInfo): SubscriptionTier {
+  const active = customerInfo.entitlements.active;
 
-  // Update the auth store
+  // Pro+ check (also treat legacy 'premium' as Pro+)
+  if (active[ENTITLEMENT_PRO_PLUS] !== undefined || active[ENTITLEMENT_LEGACY_PREMIUM] !== undefined) {
+    const { setSubscriptionStatus } = useAuthStore.getState();
+    setSubscriptionStatus('PRO_PLUS');
+    return 'pro_plus';
+  }
+
+  // Pro check
+  if (active[ENTITLEMENT_PRO] !== undefined) {
+    const { setSubscriptionStatus } = useAuthStore.getState();
+    setSubscriptionStatus('PRO');
+    return 'pro';
+  }
+
+  // Free
   const { setSubscriptionStatus } = useAuthStore.getState();
-  setSubscriptionStatus(isPremium ? 'PREMIUM' : 'FREE');
-
-  return isPremium;
+  setSubscriptionStatus('FREE');
+  return 'free';
 }
 
 export async function loginRevenueCat(userId: string) {

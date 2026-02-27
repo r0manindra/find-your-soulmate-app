@@ -237,6 +237,8 @@ export async function createVoiceSession(params: {
     clientSecret: string;
     expiresAt: number;
     sessionId: string;
+    voiceSessionsUsed: number;
+    voiceSessionsLimit: number;
   }>('/voice/session', {
     method: 'POST',
     body: JSON.stringify(params),
@@ -247,15 +249,19 @@ export async function createVoiceSession(params: {
 export async function getSubscriptionStatus() {
   return request<{
     status: string;
+    tier: 'free' | 'pro' | 'pro_plus';
     isPremium: boolean;
+    isPro: boolean;
+    isProPlus: boolean;
     freeChapters: number;
     freeCoachMessagesPerDay: number;
+    voiceSessionsPerDay: number;
   }>('/subscription/status');
 }
 
-export async function devUnlock(key: string) {
+export async function devUnlock(key: string, tier?: 'pro' | 'pro_plus') {
   return request<{ success: boolean; subscriptionStatus: string }>('/auth/dev-unlock', {
     method: 'POST',
-    body: JSON.stringify({ key }),
+    body: JSON.stringify({ key, ...(tier ? { tier } : {}) }),
   });
 }

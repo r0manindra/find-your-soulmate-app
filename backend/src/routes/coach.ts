@@ -55,27 +55,29 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
   try {
     const { message, characterId, context, exerciseMode } = messageSchema.parse(req.body);
 
-    // Premium characters require premium subscription
+    // Premium characters require Pro or Pro+ subscription
     const FREE_CHARACTERS = ['charismo', 'bestfriend'];
+    const isSubscribed = (status: string) => status === 'PRO' || status === 'PRO_PLUS' || status === 'PREMIUM';
+
     if (!FREE_CHARACTERS.includes(characterId)) {
       const userForSub = await prisma.user.findUnique({
         where: { id: req.userId },
         select: { subscriptionStatus: true },
       });
-      if (userForSub?.subscriptionStatus !== 'PREMIUM') {
-        res.status(403).json({ error: 'Premium subscription required for this character', upgrade: true });
+      if (!userForSub || !isSubscribed(userForSub.subscriptionStatus)) {
+        res.status(403).json({ error: 'Pro subscription required for this character', upgrade: true });
         return;
       }
     }
 
-    // Premium exercise modes require premium subscription
+    // Premium exercise modes require Pro or Pro+ subscription
     if (exerciseMode && isPremiumExerciseMode(exerciseMode as ExerciseModeId)) {
       const userForSub = await prisma.user.findUnique({
         where: { id: req.userId },
         select: { subscriptionStatus: true },
       });
-      if (userForSub?.subscriptionStatus !== 'PREMIUM') {
-        res.status(403).json({ error: 'Premium subscription required for this exercise mode', upgrade: true });
+      if (!userForSub || !isSubscribed(userForSub.subscriptionStatus)) {
+        res.status(403).json({ error: 'Pro subscription required for this exercise mode', upgrade: true });
         return;
       }
     }
@@ -106,7 +108,7 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (user.subscriptionStatus === 'FREE' && dailyCount >= env.freeCoachMessagesPerDay) {
+    if (!isSubscribed(user.subscriptionStatus) && dailyCount >= env.freeCoachMessagesPerDay) {
       res.status(429).json({
         error: 'Daily message limit reached',
         limit: env.freeCoachMessagesPerDay,
@@ -157,7 +159,7 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     res.json({
       response: aiResponse,
       messagesUsed: dailyCount + 1,
-      messagesLimit: user.subscriptionStatus === 'FREE' ? env.freeCoachMessagesPerDay : null,
+      messagesLimit: isSubscribed(user.subscriptionStatus) ? null : env.freeCoachMessagesPerDay,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

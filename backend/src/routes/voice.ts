@@ -131,10 +131,32 @@ Evaluate: pace (words per minute), filler words (um, uh, like, you know, basical
 // POST /api/voice/session — Mint ephemeral token for OpenAI Realtime API
 router.post('/session', async (req: AuthRequest, res: Response) => {
   try {
-    // Premium gate
+    // Pro+ gate
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!user || user.subscriptionStatus !== 'PREMIUM') {
-      res.status(403).json({ error: 'Premium subscription required for voice coaching' });
+    if (!user || user.subscriptionStatus !== 'PRO_PLUS') {
+      res.status(403).json({ error: 'Pro+ subscription required for voice coaching', upgrade: true });
+      return;
+    }
+
+    // Daily voice session limit
+    const today = new Date().toISOString().split('T')[0];
+    let dailyVoiceSessions = user.dailyVoiceSessions;
+
+    if (user.lastVoiceResetDate !== today) {
+      dailyVoiceSessions = 0;
+      await prisma.user.update({
+        where: { id: req.userId },
+        data: { dailyVoiceSessions: 0, lastVoiceResetDate: today },
+      });
+    }
+
+    if (dailyVoiceSessions >= env.proVoiceSessionsPerDay) {
+      res.status(429).json({
+        error: 'Daily voice session limit reached',
+        limit: env.proVoiceSessionsPerDay,
+        used: dailyVoiceSessions,
+        resetAt: 'midnight',
+      });
       return;
     }
 
@@ -203,10 +225,21 @@ router.post('/session', async (req: AuthRequest, res: Response) => {
 
     const sessionData = await response.json() as any;
 
+    // Increment daily voice session count
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        dailyVoiceSessions: dailyVoiceSessions + 1,
+        lastVoiceResetDate: today,
+      },
+    });
+
     res.json({
       clientSecret: sessionData.client_secret?.value,
       expiresAt: sessionData.client_secret?.expires_at,
       sessionId: sessionData.id,
+      voiceSessionsUsed: dailyVoiceSessions + 1,
+      voiceSessionsLimit: env.proVoiceSessionsPerDay,
     });
   } catch (err: any) {
     console.error('Voice session error:', err);

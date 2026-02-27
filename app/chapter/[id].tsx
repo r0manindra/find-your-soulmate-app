@@ -77,6 +77,7 @@ export default function ChapterDetailScreen() {
   const [quizVisible, setQuizVisible] = useState(false);
   const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
   const isPremium = useAuthStore((s) => s.isPremium);
+  const isProPlus = useAuthStore((s) => s.isProPlus);
   const quizScore = progressStore.quizScores[chapterId];
   const [coachMessages, setCoachMessages] = useState<CoachMessage[]>([]);
   const [coachInput, setCoachInput] = useState('');
@@ -422,11 +423,11 @@ export default function ChapterDetailScreen() {
               <VoiceTrainer />
             </View>
 
-            {/* Practice with Voice Coach (Premium) */}
+            {/* Practice with Voice Coach (Pro+) */}
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                if (!isPremium) {
+                if (!isProPlus) {
                   router.push('/paywall');
                 } else {
                   setVoiceCoachVisible(true);
@@ -447,10 +448,10 @@ export default function ChapterDetailScreen() {
                       {locale === 'de' ? 'Echtzeit-Sprachgespräch mit deinem KI-Coach' : 'Real-time voice conversation with your AI coach'}
                     </Text>
                   </View>
-                  {!isPremium ? (
+                  {!isProPlus ? (
                     <View style={styles.voiceCoachLock}>
                       <Ionicons name="lock-closed" size={14} color="#E8435A" />
-                      <Text style={styles.voiceCoachLockText}>PRO</Text>
+                      <Text style={styles.voiceCoachLockText}>PRO+</Text>
                     </View>
                   ) : (
                     <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />

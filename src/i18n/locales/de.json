@@ -40,10 +40,10 @@
     "placeholder": "Frag Hank etwas...",
     "greeting": "Hey! Ich bin Hank, dein Dating-Coach. Denk an mich als den Freund, der brutal ehrlich ist, aber immer hinter dir steht. Was beschäftigt dich?",
     "sending": "Hank denkt nach...",
-    "limitReached": "Du hast alle kostenlosen Nachrichten für heute verbraucht. Upgrade auf Premium für unbegrenztes Coaching!",
+    "limitReached": "Du hast alle kostenlosen Nachrichten für heute verbraucht. Upgrade auf Pro für unbegrenztes Coaching!",
     "errorMessage": "Sorry, ich habe gerade ein Problem. Versuch es gleich nochmal.",
     "signInForAI": "Anmelden für KI-gestütztes Coaching",
-    "upgradeForUnlimited": "Premium für unbegrenzte Nachrichten",
+    "upgradeForUnlimited": "Pro für unbegrenzte Nachrichten",
     "welcomeTitle": "Dein KI-Coach",
     "welcomeDesc": "Frag mich alles zu Dating, Selbstbewusstsein oder Social Skills. Probier die Übungsmodi oben aus - Opening Lines üben, mit Abfuhren umgehen oder ein First Date simulieren.",
     "exerciseModes": "Übungsmodi",
@@ -366,8 +366,11 @@
     "practiceTitle": "Mit Sprach-Coach üben",
     "practiceDesc": "Führe ein Echtzeit-Sprachgespräch mit deinem KI-Coach",
     "idleTip": "Tippe auf den Anruf-Button um ein Live-Sprachgespräch mit deinem Coach zu starten. Übe Konversation, bekomme Feedback oder chatte einfach.",
-    "premiumRequired": "Premium erforderlich für Sprach-Coaching",
-    "sessionLimit": "Max. 10 Min. pro Sitzung"
+    "premiumRequired": "Pro+ erforderlich für Sprach-Coaching",
+    "proRequired": "Pro-Abo erforderlich",
+    "proPlusRequired": "Pro+ Abo erforderlich für Sprach-Coaching",
+    "sessionLimit": "Max. 10 Min. pro Sitzung",
+    "dailyLimitReached": "Tägliches Sprach-Sitzungslimit erreicht"
   },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",

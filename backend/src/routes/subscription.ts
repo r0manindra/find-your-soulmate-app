@@ -20,11 +20,22 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    const status = user.subscriptionStatus;
+    const isPro = status === 'PRO' || status === 'PRO_PLUS' || status === 'PREMIUM';
+    const isProPlus = status === 'PRO_PLUS' || status === 'PREMIUM';
+
+    // Map to tier string for frontend
+    const tier = isProPlus ? 'pro_plus' : isPro ? 'pro' : 'free';
+
     res.json({
       status: user.subscriptionStatus,
-      isPremium: user.subscriptionStatus === 'PREMIUM',
+      tier,
+      isPremium: isPro, // backward compat
+      isPro,
+      isProPlus,
       freeChapters: env.freeChaptersCount,
       freeCoachMessagesPerDay: env.freeCoachMessagesPerDay,
+      voiceSessionsPerDay: env.proVoiceSessionsPerDay,
     });
   } catch (err) {
     console.error('Subscription status error:', err);
@@ -34,7 +45,7 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
 
 const webhookSchema = z.object({
   revenuecatId: z.string(),
-  status: z.enum(['PREMIUM', 'EXPIRED', 'FREE']),
+  status: z.enum(['PREMIUM', 'PRO', 'PRO_PLUS', 'EXPIRED', 'FREE']),
 });
 
 // POST /api/subscription/webhook — RevenueCat webhook
