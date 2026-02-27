@@ -43,7 +43,16 @@
     "limitReached": "You've used all your free messages for today. Upgrade to Premium for unlimited coaching!",
     "errorMessage": "Sorry, I'm having trouble right now. Try again in a moment.",
     "signInForAI": "Sign in for AI-powered coaching",
-    "upgradeForUnlimited": "Go Premium for unlimited messages"
+    "upgradeForUnlimited": "Go Premium for unlimited messages",
+    "welcomeTitle": "Your AI Coach",
+    "welcomeDesc": "Ask anything about dating, confidence, or social skills. Try the exercise modes above to practice opening lines, handle rejection, or simulate a first date.",
+    "exerciseModes": "Exercise Modes",
+    "exerciseModesSubtitle": "Sharpen your skills with interactive AI exercises",
+    "deactivate": "Tap to deactivate",
+    "chatHistory": "Chat History",
+    "newChat": "New Chat",
+    "noChatsYet": "No conversations yet",
+    "deleteChat": "Delete Chat"
   },
   "booksScreen": {
     "title": "Recommended Books",
@@ -301,7 +310,54 @@
     "grade4": "Great job! You really understand the material.",
     "grade3": "Solid! You got the key concepts.",
     "grade2": "Good start — revisiting the lessons might help.",
-    "grade1": "No worries — review the chapter and try again!"
+    "grade1": "No worries - review the chapter and try again!",
+    "skip": "Skip",
+    "continueNext": "Continue to Next Chapter"
+  },
+  "voice": {
+    "title": "Voice Trainer",
+    "instructions": "Record yourself speaking for 10 seconds or more. We'll analyze your pace, filler words, and overall delivery.",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "keepGoing": "Keep going... {{seconds}}s left",
+    "recordingActive": "Recording...",
+    "recorded": "Recording Complete",
+    "play": "Play",
+    "reRecord": "Re-record",
+    "analyze": "Analyze My Voice",
+    "analyzing": "Analyzing your voice...",
+    "overallScore": "Overall Score",
+    "pace": "Speaking Pace",
+    "wpm": "words/min",
+    "words": "words",
+    "fillerWords": "Filler Words",
+    "tips": "Coaching Tips",
+    "tryAgain": "Try Again",
+    "paceRating": {
+      "too_slow": "Too Slow",
+      "good": "Good",
+      "too_fast": "Too Fast"
+    },
+    "permissionDenied": "Microphone permission is required to record.",
+    "recordingError": "Recording failed. Please try again.",
+    "analysisError": "Analysis failed. Please try again."
+  },
+  "voiceCoach": {
+    "title": "Voice Coach",
+    "readyToTalk": "Ready to talk",
+    "connecting": "Connecting...",
+    "listening": "Listening...",
+    "speaking": "Coach is speaking...",
+    "sessionEnded": "Session ended",
+    "connectionError": "Connection error",
+    "startCall": "Start Call",
+    "endCall": "End Call",
+    "done": "Done",
+    "practiceTitle": "Practice with Voice Coach",
+    "practiceDesc": "Have a real-time voice conversation with your AI coach",
+    "idleTip": "Tap the call button to start a live voice conversation with your coach. Practice conversation, get feedback, or just chat.",
+    "premiumRequired": "Premium required for voice coaching",
+    "sessionLimit": "10 min max per session"
   },
   "graduate": {
     "title": "Congratulations!",

@@ -21,7 +21,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCalendarsUsageDescription": "Charismo uses your calendar to schedule habit reminders.",
-        "NSCalendarsFullAccessUsageDescription": "Charismo uses your calendar to create recurring habit events."
+        "NSCalendarsFullAccessUsageDescription": "Charismo uses your calendar to create recurring habit events.",
+        "NSMicrophoneUsageDescription": "Charismo uses your microphone for real-time voice coaching."
       }
     },
     "android": {
@@ -42,7 +43,8 @@
       "expo-router",
       "expo-localization",
       "expo-apple-authentication",
-      "expo-calendar"
+      "expo-calendar",
+      ["@config-plugins/react-native-webrtc", { "cameraPermission": false, "microphonePermission": "Charismo uses your microphone for voice coaching." }]
     ],
     "experiments": {
       "typedRoutes": true

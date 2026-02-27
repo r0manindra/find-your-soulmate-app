@@ -71,7 +71,7 @@ export default function BooksScreen() {
               </Text>
             </Pressable>
             <Text style={[styles.title, isDark && { color: '#F5F5F5' }]}>{t('booksScreen.title')}</Text>
-            <Text style={styles.subtitle}>{t('booksScreen.subtitle')}</Text>
+            <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>{t('booksScreen.subtitle')}</Text>
           </View>
         }
         renderItem={({ item }) => {
@@ -85,7 +85,7 @@ export default function BooksScreen() {
                 </View>
                 <View style={styles.cardContent}>
                   <View style={styles.bookTitleRow}>
-                    <Text style={[styles.bookTitle, { flex: 1 }]}>{item.title}</Text>
+                    <Text style={[styles.bookTitle, isDark && styles.bookTitleDark, { flex: 1 }]}>{item.title}</Text>
                     {isRecommended && !isRead && (
                       <View style={styles.recommendedBadge}>
                         <Ionicons name="sparkles" size={10} color="#F59E0B" />
@@ -93,7 +93,7 @@ export default function BooksScreen() {
                     )}
                   </View>
                   <Text style={styles.bookAuthor}>{t('booksScreen.by')} {item.author}</Text>
-                  <Text style={styles.bookDesc} numberOfLines={3}>
+                  <Text style={[styles.bookDesc, isDark && styles.bookDescDark]} numberOfLines={3}>
                     {item.description[locale]}
                   </Text>
                 </View>
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   header: { marginBottom: 20 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717' },
   subtitle: { fontSize: 15, color: '#737373', marginTop: 4 },
+  subtitleDark: { color: '#A3A3A3' },
   card: { marginBottom: 12 },
   cardRead: { opacity: 0.65 },
   cardRow: { flexDirection: 'row', gap: 14 },
@@ -150,8 +151,10 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   bookTitle: { fontSize: 17, fontWeight: '600', color: '#171717', letterSpacing: -0.2 },
+  bookTitleDark: { color: '#F5F5F5' },
   bookAuthor: { fontSize: 14, fontWeight: '500', color: '#E8435A', marginTop: 2 },
   bookDesc: { fontSize: 14, color: '#525252', marginTop: 6, lineHeight: 20 },
+  bookDescDark: { color: '#A3A3A3' },
   buttonRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
   readButton: {
     flex: 1, paddingVertical: 10,

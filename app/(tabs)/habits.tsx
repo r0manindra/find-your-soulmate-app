@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -158,6 +158,7 @@ export default function HabitsScreen() {
   const characterId = useSettingsStore((s) => s.selectedCharacterId);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
 
   const habits = useHabitStore((s) => s.habits);
   const completions = useHabitStore((s) => s.completions);
@@ -275,7 +276,7 @@ export default function HabitsScreen() {
 
   if (activeHabits.length === 0) {
     return (
-      <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
+      <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📋</Text>
           <Text style={[styles.emptyTitle, isDark && styles.textDark]}>
@@ -293,7 +294,7 @@ export default function HabitsScreen() {
           />
         </View>
         <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} isDark={isDark} />
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -302,7 +303,7 @@ export default function HabitsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
+    <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -416,7 +417,7 @@ export default function HabitsScreen() {
       </ScrollView>
 
       <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} isDark={isDark} />
-    </SafeAreaView>
+    </View>
   );
 }
 

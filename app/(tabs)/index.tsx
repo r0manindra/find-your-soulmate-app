@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -188,6 +188,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   // Habits data
   const habitsCompletedToday = useHabitStore((s) => s.getTodayCompletedCount());
@@ -212,7 +213,7 @@ export default function HomeScreen() {
   }, [t]);
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
+    <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -316,7 +317,7 @@ export default function HomeScreen() {
         </GlassCard>
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

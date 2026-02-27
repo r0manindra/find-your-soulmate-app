@@ -43,7 +43,16 @@
     "limitReached": "Du hast alle kostenlosen Nachrichten für heute verbraucht. Upgrade auf Premium für unbegrenztes Coaching!",
     "errorMessage": "Sorry, ich habe gerade ein Problem. Versuch es gleich nochmal.",
     "signInForAI": "Anmelden für KI-gestütztes Coaching",
-    "upgradeForUnlimited": "Premium für unbegrenzte Nachrichten"
+    "upgradeForUnlimited": "Premium für unbegrenzte Nachrichten",
+    "welcomeTitle": "Dein KI-Coach",
+    "welcomeDesc": "Frag mich alles zu Dating, Selbstbewusstsein oder Social Skills. Probier die Übungsmodi oben aus - Opening Lines üben, mit Abfuhren umgehen oder ein First Date simulieren.",
+    "exerciseModes": "Übungsmodi",
+    "exerciseModesSubtitle": "Verbessere deine Skills mit interaktiven KI-Übungen",
+    "deactivate": "Tippen zum Deaktivieren",
+    "chatHistory": "Chatverlauf",
+    "newChat": "Neuer Chat",
+    "noChatsYet": "Noch keine Gespräche",
+    "deleteChat": "Chat löschen"
   },
   "booksScreen": {
     "title": "Buchempfehlungen",
@@ -301,7 +310,54 @@
     "grade4": "Super! Du verstehst den Stoff wirklich gut.",
     "grade3": "Solide! Du hast die wichtigsten Konzepte verstanden.",
     "grade2": "Guter Anfang — die Lektionen nochmal durchgehen könnte helfen.",
-    "grade1": "Kein Stress — lies das Kapitel nochmal und versuch es erneut!"
+    "grade1": "Kein Stress - lies das Kapitel nochmal und versuch es erneut!",
+    "skip": "Überspringen",
+    "continueNext": "Weiter zum nächsten Kapitel"
+  },
+  "voice": {
+    "title": "Stimmtrainer",
+    "instructions": "Nimm dich 10 Sekunden oder länger auf. Wir analysieren dein Tempo, Füllwörter und deinen Gesamteindruck.",
+    "startRecording": "Aufnahme starten",
+    "stopRecording": "Aufnahme stoppen",
+    "keepGoing": "Weiter... noch {{seconds}}s",
+    "recordingActive": "Aufnahme läuft...",
+    "recorded": "Aufnahme abgeschlossen",
+    "play": "Abspielen",
+    "reRecord": "Neu aufnehmen",
+    "analyze": "Stimme analysieren",
+    "analyzing": "Stimme wird analysiert...",
+    "overallScore": "Gesamtbewertung",
+    "pace": "Sprechtempo",
+    "wpm": "Wörter/Min",
+    "words": "Wörter",
+    "fillerWords": "Füllwörter",
+    "tips": "Coaching-Tipps",
+    "tryAgain": "Nochmal versuchen",
+    "paceRating": {
+      "too_slow": "Zu langsam",
+      "good": "Gut",
+      "too_fast": "Zu schnell"
+    },
+    "permissionDenied": "Mikrofonberechtigung wird für die Aufnahme benötigt.",
+    "recordingError": "Aufnahme fehlgeschlagen. Bitte versuche es erneut.",
+    "analysisError": "Analyse fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "voiceCoach": {
+    "title": "Sprach-Coach",
+    "readyToTalk": "Bereit zum Reden",
+    "connecting": "Verbinde...",
+    "listening": "Hört zu...",
+    "speaking": "Coach spricht...",
+    "sessionEnded": "Sitzung beendet",
+    "connectionError": "Verbindungsfehler",
+    "startCall": "Anruf starten",
+    "endCall": "Auflegen",
+    "done": "Fertig",
+    "practiceTitle": "Mit Sprach-Coach üben",
+    "practiceDesc": "Führe ein Echtzeit-Sprachgespräch mit deinem KI-Coach",
+    "idleTip": "Tippe auf den Anruf-Button um ein Live-Sprachgespräch mit deinem Coach zu starten. Übe Konversation, bekomme Feedback oder chatte einfach.",
+    "premiumRequired": "Premium erforderlich für Sprach-Coaching",
+    "sessionLimit": "Max. 10 Min. pro Sitzung"
   },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",

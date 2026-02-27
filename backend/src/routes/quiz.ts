@@ -50,8 +50,8 @@ router.post('/generate', async (req: AuthRequest, res: Response) => {
     ].join('\n');
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1500,
       system: `You generate quiz questions for a dating/social skills education app. Based on the chapter content below, create 5 multiple-choice questions that test comprehension of key concepts. Questions should be practical and test understanding, not memorization. Wrong options must be plausible.\n\n${chapterContent}`,
       messages: [{ role: 'user', content: `Generate a 5-question quiz in ${locale === 'de' ? 'German' : 'English'}.` }],
       tools: [{

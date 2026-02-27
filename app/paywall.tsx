@@ -17,6 +17,7 @@ const FEATURES = [
   { icon: 'book' as const, title: { en: 'All 20 Chapters', de: 'Alle 20 Kapitel' }, description: { en: 'Unlock the full guide from self-discovery to commitment', de: 'Der komplette Guide von Selbstfindung bis Beziehung' } },
   { icon: 'chatbubbles' as const, title: { en: 'Unlimited AI Coach', de: 'Unbegrenzter KI-Coach' }, description: { en: 'No daily message limits with Coach Hank', de: 'Keine täglichen Nachrichtenlimits mit Coach Hank' } },
   { icon: 'document-text' as const, title: { en: 'Premium PDF Guide', de: 'Premium PDF Guide' }, description: { en: 'Download the complete guide as a beautifully formatted PDF', de: 'Lade den kompletten Guide als PDF herunter' } },
+  { icon: 'mic' as const, title: { en: 'Real-Time Voice Coach', de: 'Echtzeit-Sprach-Coach' }, description: { en: 'Practice with your AI coach in real-time voice conversations', de: 'Übe mit deinem KI-Coach in Echtzeit-Sprachgesprächen' } },
   { icon: 'star' as const, title: { en: 'Priority Support', de: 'Prioritäts-Support' }, description: { en: 'Get help faster when you need it', de: 'Schnellere Hilfe, wenn du sie brauchst' } },
 ];
 
@@ -121,8 +122,8 @@ export default function PaywallScreen() {
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Close button */}
-        <Pressable onPress={() => router.back()} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color="#737373" />
+        <Pressable onPress={() => router.back()} style={[styles.closeButton, isDark && styles.closeButtonDark]}>
+          <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
         </Pressable>
 
         {/* Hero */}
@@ -152,8 +153,8 @@ export default function PaywallScreen() {
                   <Ionicons name={feature.icon} size={22} color="#E8435A" />
                 </View>
                 <View style={styles.featureText}>
-                  <Text style={styles.featureTitle}>{feature.title[locale]}</Text>
-                  <Text style={styles.featureDesc}>{feature.description[locale]}</Text>
+                  <Text style={[styles.featureTitle, isDark && styles.featureTitleDark]}>{feature.title[locale]}</Text>
+                  <Text style={[styles.featureDesc, isDark && styles.featureDescDark]}>{feature.description[locale]}</Text>
                 </View>
               </View>
             </GlassCard>
@@ -165,12 +166,12 @@ export default function PaywallScreen() {
           <Pressable onPress={() => selectPlan('yearly')}>
             <GlassCard style={[styles.planCard, selectedPlan === 'yearly' && styles.planSelected]}>
               <View style={styles.planHeader}>
-                <View style={[styles.radio, selectedPlan === 'yearly' && styles.radioSelected]}>
+                <View style={[styles.radio, isDark && styles.radioDark, selectedPlan === 'yearly' && styles.radioSelected]}>
                   {selectedPlan === 'yearly' && <View style={styles.radioDot} />}
                 </View>
                 <View style={styles.planInfo}>
                   <View style={styles.planTitleRow}>
-                    <Text style={styles.planTitle}>
+                    <Text style={[styles.planTitle, isDark && styles.planTitleDark]}>
                       {locale === 'de' ? 'Jährlich' : 'Yearly'}
                     </Text>
                     <View style={styles.saveBadge}>
@@ -179,10 +180,10 @@ export default function PaywallScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Text style={styles.planPrice}>
+                  <Text style={[styles.planPrice, isDark && styles.planPriceDark]}>
                     $49.99/{locale === 'de' ? 'Jahr' : 'year'}
                   </Text>
-                  <Text style={styles.planPerMonth}>
+                  <Text style={[styles.planPerMonth, isDark && styles.planPerMonthDark]}>
                     $4.17/{locale === 'de' ? 'Monat' : 'month'}
                   </Text>
                 </View>
@@ -193,14 +194,14 @@ export default function PaywallScreen() {
           <Pressable onPress={() => selectPlan('monthly')}>
             <GlassCard style={[styles.planCard, selectedPlan === 'monthly' && styles.planSelected]}>
               <View style={styles.planHeader}>
-                <View style={[styles.radio, selectedPlan === 'monthly' && styles.radioSelected]}>
+                <View style={[styles.radio, isDark && styles.radioDark, selectedPlan === 'monthly' && styles.radioSelected]}>
                   {selectedPlan === 'monthly' && <View style={styles.radioDot} />}
                 </View>
                 <View style={styles.planInfo}>
-                  <Text style={styles.planTitle}>
+                  <Text style={[styles.planTitle, isDark && styles.planTitleDark]}>
                     {locale === 'de' ? 'Monatlich' : 'Monthly'}
                   </Text>
-                  <Text style={styles.planPrice}>
+                  <Text style={[styles.planPrice, isDark && styles.planPriceDark]}>
                     $9.99/{locale === 'de' ? 'Monat' : 'month'}
                   </Text>
                 </View>
@@ -220,12 +221,12 @@ export default function PaywallScreen() {
             onPress={handleSubscribe}
             disabled={loading}
           />
-          <Text style={styles.trialNote}>
+          <Text style={[styles.trialNote, isDark && styles.trialNoteDark]}>
             {locale === 'de'
               ? '7 Tage kostenlos testen. Jederzeit kündbar.'
               : '7-day free trial. Cancel anytime.'}
           </Text>
-          <Text style={styles.terms}>
+          <Text style={[styles.terms, isDark && styles.termsDark]}>
             {locale === 'de'
               ? 'Die Zahlung wird nach Ablauf der Testphase über deinen App Store Account abgerechnet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der aktuellen Laufzeit gekündigt wird.'
               : 'Payment will be charged to your App Store account after the trial period. Subscription renews automatically unless cancelled at least 24 hours before the end of the current period.'}
@@ -234,7 +235,7 @@ export default function PaywallScreen() {
 
         {/* Restore */}
         <Pressable onPress={handleRestore} style={styles.restoreButton} disabled={loading}>
-          <Text style={styles.restoreText}>
+          <Text style={[styles.restoreText, isDark && styles.restoreTextDark]}>
             {locale === 'de' ? 'Käufe wiederherstellen' : 'Restore Purchases'}
           </Text>
         </Pressable>
@@ -252,6 +253,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center', justifyContent: 'center',
     alignSelf: 'flex-end', marginBottom: 8,
+  },
+  closeButtonDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   hero: {
     borderRadius: 24, padding: 32,
@@ -275,7 +279,9 @@ const styles = StyleSheet.create({
   },
   featureText: { flex: 1 },
   featureTitle: { fontSize: 16, fontWeight: '600', color: '#171717' },
+  featureTitleDark: { color: '#F5F5F5' },
   featureDesc: { fontSize: 13, color: '#737373', marginTop: 2 },
+  featureDescDark: { color: '#A3A3A3' },
 
   // Plans
   plans: { gap: 10, marginBottom: 20 },
@@ -287,17 +293,21 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: '#D4D4D4',
     alignItems: 'center', justifyContent: 'center',
   },
+  radioDark: { borderColor: '#525252' },
   radioSelected: { borderColor: '#E8435A' },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#E8435A' },
   planInfo: { flex: 1 },
   planTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   planTitle: { fontSize: 17, fontWeight: '700', color: '#171717' },
+  planTitleDark: { color: '#F5F5F5' },
   saveBadge: {
     backgroundColor: '#E8435A', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6,
   },
   saveText: { fontSize: 11, fontWeight: '700', color: '#fff' },
   planPrice: { fontSize: 15, fontWeight: '600', color: '#525252', marginTop: 2 },
+  planPriceDark: { color: '#D4D4D4' },
   planPerMonth: { fontSize: 13, color: '#737373', marginTop: 1 },
+  planPerMonthDark: { color: '#A3A3A3' },
 
   // CTA
   ctaContainer: { gap: 8, marginBottom: 16 },
@@ -305,12 +315,15 @@ const styles = StyleSheet.create({
     fontSize: 14, fontWeight: '600', color: '#171717',
     textAlign: 'center',
   },
+  trialNoteDark: { color: '#F5F5F5' },
   terms: {
     fontSize: 11, color: '#A3A3A3', textAlign: 'center',
     lineHeight: 16, paddingHorizontal: 16,
   },
+  termsDark: { color: '#737373' },
 
   // Restore
   restoreButton: { alignItems: 'center', paddingVertical: 12 },
   restoreText: { fontSize: 14, color: '#A3A3A3', fontWeight: '500' },
+  restoreTextDark: { color: '#737373' },
 });

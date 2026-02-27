@@ -1,59 +1,51 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, Modal, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Modal, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { QuizQuestionView } from './quiz-question';
 import { QuizResults } from './quiz-results';
-import * as api from '@/src/services/api';
+import { getQuizTemplate } from '@/src/data/content/quiz-templates';
 import type { QuizQuestion } from '@/src/core/entities/types';
 
-type Phase = 'loading' | 'question' | 'results' | 'error';
+type Phase = 'question' | 'results';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   chapterId: number;
   locale: string;
-  gender: 'male' | 'female' | null;
   isDark: boolean;
   onComplete: (score: number) => void;
+  onSkip?: () => void;
+  onNavigateNext?: () => void;
 }
 
-export function QuizModal({ visible, onClose, chapterId, locale, gender, isDark, onComplete }: Props) {
+export function QuizModal({ visible, onClose, chapterId, locale, isDark, onComplete, onSkip, onNavigateNext }: Props) {
   const { t } = useTranslation();
-  const [phase, setPhase] = useState<Phase>('loading');
+  const [phase, setPhase] = useState<Phase>('question');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const hasLoaded = useRef(false);
 
-  const loadQuiz = useCallback(async () => {
-    setPhase('loading');
-    setCurrentIndex(0);
-    setScore(0);
-    setQuestions([]);
-    try {
-      const data = await api.generateQuiz(chapterId, locale, gender);
-      setQuestions(data.questions);
-      setPhase('question');
-    } catch (err) {
-      console.error('Quiz load error:', err);
-      setPhase('error');
-    }
-  }, [chapterId, locale, gender]);
-
-  // Load quiz when modal becomes visible (works on both iOS and Android)
+  // Load quiz instantly from static templates
   useEffect(() => {
     if (visible && !hasLoaded.current) {
       hasLoaded.current = true;
-      loadQuiz();
+      const qs = getQuizTemplate(chapterId, locale);
+      setQuestions(qs);
+      setCurrentIndex(0);
+      setScore(0);
+      setPhase('question');
     }
     if (!visible) {
       hasLoaded.current = false;
     }
-  }, [visible, loadQuiz]);
+  }, [visible, chapterId, locale]);
+
+  const finalScoreRef = useRef(0);
 
   const handleAnswer = useCallback((selectedIndex: number) => {
     const isCorrect = selectedIndex === questions[currentIndex].correctIndex;
@@ -61,17 +53,28 @@ export function QuizModal({ visible, onClose, chapterId, locale, gender, isDark,
     if (isCorrect) setScore(newScore);
 
     if (currentIndex + 1 >= questions.length) {
+      finalScoreRef.current = newScore;
       setPhase('results');
-      // Use newScore since setState is async
-      setTimeout(() => onComplete(newScore), 0);
     } else {
       setCurrentIndex(currentIndex + 1);
     }
-  }, [questions, currentIndex, score, onComplete]);
+  }, [questions, currentIndex, score]);
 
   const handleClose = useCallback(() => {
+    const wasResults = phase === 'results';
     onClose();
-  }, [onClose]);
+    if (wasResults) {
+      setTimeout(() => onComplete(finalScoreRef.current), 300);
+    }
+  }, [onClose, onComplete, phase]);
+
+  const handleSkip = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onClose();
+    if (onSkip) {
+      setTimeout(() => onSkip(), 300);
+    }
+  }, [onClose, onSkip]);
 
   return (
     <Modal
@@ -86,38 +89,22 @@ export function QuizModal({ visible, onClose, chapterId, locale, gender, isDark,
           <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
             {t('quiz.title')}
           </Text>
-          <Pressable
-            onPress={handleClose}
-            style={[styles.closeBtn, isDark && styles.closeBtnDark]}
-          >
-            <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
-          </Pressable>
+          <View style={styles.headerRight}>
+            {phase === 'question' && onSkip && (
+              <Pressable onPress={handleSkip} style={styles.skipBtn}>
+                <Text style={styles.skipText}>{t('quiz.skip')}</Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={handleClose}
+              style={[styles.closeBtn, isDark && styles.closeBtnDark]}
+            >
+              <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Content */}
-        {phase === 'loading' && (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#E8435A" />
-            <Text style={[styles.loadingText, isDark && styles.loadingTextDark]}>
-              {t('quiz.generating')}
-            </Text>
-          </View>
-        )}
-
-        {phase === 'error' && (
-          <View style={styles.centered}>
-            <Ionicons name="alert-circle-outline" size={48} color="#E8435A" />
-            <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
-              {t('quiz.error')}
-            </Text>
-            <Pressable onPress={loadQuiz} style={styles.retryButton}>
-              <Text style={styles.retryButtonText}>
-                {t('quiz.retake')}
-              </Text>
-            </Pressable>
-          </View>
-        )}
-
         {phase === 'question' && questions[currentIndex] && (
           <QuizQuestionView
             key={currentIndex}
@@ -134,6 +121,7 @@ export function QuizModal({ visible, onClose, chapterId, locale, gender, isDark,
             score={score}
             total={questions.length}
             onClose={handleClose}
+            onNavigateNext={onNavigateNext}
             isDark={isDark}
           />
         )}
@@ -169,6 +157,20 @@ const styles = StyleSheet.create({
   headerTitleDark: {
     color: '#F5F5F5',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  skipBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  skipText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#A3A3A3',
+  },
   closeBtn: {
     width: 36,
     height: 36,
@@ -179,40 +181,5 @@ const styles = StyleSheet.create({
   },
   closeBtnDark: {
     backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    paddingHorizontal: 40,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#737373',
-  },
-  loadingTextDark: {
-    color: '#A3A3A3',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#525252',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  errorTextDark: {
-    color: '#D4D4D4',
-  },
-  retryButton: {
-    backgroundColor: '#E8435A',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 14,
-    marginTop: 8,
-  },
-  retryButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
   },
 });

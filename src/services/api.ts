@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE = __DEV__
-  ? 'http://localhost:3000/api'
-  : 'https://find-your-soulmate-app-production.up.railway.app/api';
+const API_BASE = 'https://find-your-soulmate-app-production.up.railway.app/api';
 
 const TOKEN_KEY = 'auth_token';
 
@@ -189,26 +187,60 @@ export async function getCoachHistory() {
   }>('/coach/history');
 }
 
-// Quiz
-export interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctIndex: number;
-  explanation: string;
+// Voice Analysis
+export interface VoiceAnalysis {
+  wordCount: number;
+  wordsPerMinute: number;
+  paceRating: 'too_slow' | 'good' | 'too_fast';
+  fillerWords: { word: string; count: number }[];
+  totalFillerCount: number;
+  overallScore: number;
+  tips: string[];
 }
 
-export async function generateQuiz(chapterId: number, locale: string, gender: 'male' | 'female' | null) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    return await request<{ questions: QuizQuestion[] }>('/quiz/generate', {
-      method: 'POST',
-      body: JSON.stringify({ chapterId, locale, gender }),
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeout);
+export async function analyzeVoice(audioUri: string, locale: string): Promise<{
+  transcript: string;
+  duration: number;
+  analysis: VoiceAnalysis;
+}> {
+  const token = await getToken();
+  const formData = new FormData();
+  formData.append('audio', {
+    uri: audioUri,
+    type: 'audio/m4a',
+    name: 'recording.m4a',
+  } as any);
+  formData.append('locale', locale);
+
+  const res = await fetch(`${API_BASE}/voice/analyze`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new ApiError(data.error || 'Voice analysis failed', res.status, data);
   }
+  return data;
+}
+
+// Voice Coach (Realtime)
+export async function createVoiceSession(params: {
+  characterId: string;
+  locale: string;
+  chapterContext?: string;
+}) {
+  return request<{
+    clientSecret: string;
+    expiresAt: number;
+    sessionId: string;
+  }>('/voice/session', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 // Subscription

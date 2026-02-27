@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ interface Props {
   score: number;
   total: number;
   onClose: () => void;
+  onNavigateNext?: () => void;
   isDark: boolean;
 }
 
@@ -20,13 +22,20 @@ function getGrade(score: number, total: number): { emoji: string; key: string } 
   return { emoji: '\uD83D\uDCAA', key: 'grade1' };
 }
 
-export function QuizResults({ score, total, onClose, isDark }: Props) {
+export function QuizResults({ score, total, onClose, onNavigateNext, isDark }: Props) {
   const { t } = useTranslation();
   const grade = getGrade(score, total);
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onClose();
+  };
+
+  const handleNavigateNext = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onClose();
+    // Navigate after modal dismisses
+    setTimeout(() => onNavigateNext?.(), 300);
   };
 
   return (
@@ -44,11 +53,22 @@ export function QuizResults({ score, total, onClose, isDark }: Props) {
         </Text>
       </View>
 
-      <Pressable onPress={handleClose} style={styles.completeButton}>
-        <Text style={styles.completeButtonText}>
-          {t('quiz.complete')}
-        </Text>
-      </Pressable>
+      <View style={styles.buttons}>
+        <Pressable onPress={handleClose} style={styles.completeButton}>
+          <Text style={styles.completeButtonText}>
+            {t('quiz.complete')}
+          </Text>
+        </Pressable>
+
+        {onNavigateNext && (
+          <Pressable onPress={handleNavigateNext} style={[styles.nextButton, isDark && styles.nextButtonDark]}>
+            <Text style={[styles.nextButtonText, isDark && styles.nextButtonTextDark]}>
+              {t('quiz.continueNext')}
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color={isDark ? '#F5F5F5' : '#171717'} />
+          </Pressable>
+        )}
+      </View>
     </Animated.View>
   );
 }
@@ -100,6 +120,9 @@ const styles = StyleSheet.create({
   gradeTextDark: {
     color: '#D4D4D4',
   },
+  buttons: {
+    gap: 10,
+  },
   completeButton: {
     backgroundColor: '#E8435A',
     paddingVertical: 16,
@@ -110,5 +133,28 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     color: '#fff',
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+  },
+  nextButtonDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  nextButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#171717',
+  },
+  nextButtonTextDark: {
+    color: '#F5F5F5',
   },
 });

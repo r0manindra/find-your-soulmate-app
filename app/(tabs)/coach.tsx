@@ -10,12 +10,12 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
-import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUIStore } from '@/src/store/ui-store';
 import { useHabitStore } from '@/src/store/habit-store';
+import { useChatHistoryStore } from '@/src/store/chat-history-store';
 import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
 import { chapters } from '@/src/data/content/chapters';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -23,9 +23,11 @@ import { getPersonalization } from '@/src/core/personalization';
 import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
-import { ExerciseModeSelector } from '@/src/presentation/components/coach/exercise-mode-selector';
 import { ExerciseBanner } from '@/src/presentation/components/coach/exercise-banner';
 import { getExerciseMode } from '@/src/data/content/exercise-modes';
+import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach-modal';
+import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
+import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
 
 const FALLBACK_RESPONSES = [
   "Good question. Here's the thing: confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
@@ -52,6 +54,11 @@ export default function CoachScreen() {
   const recommendedCharacterId = userProfile.hasCompletedOnboarding
     ? getPersonalization(userProfile).recommendedCharacterId
     : null;
+
+  // Chat history store
+  const chatStore = useChatHistoryStore();
+  const activeConversation = chatStore.getActiveConversation();
+  const messages = activeConversation?.messages ?? [];
 
   // Chapter order from phases — used to determine current chapter
   const chapterOrder = React.useMemo(
@@ -97,14 +104,9 @@ export default function CoachScreen() {
   const setExerciseMode = useUIStore((s) => s.setExerciseMode);
 
   const [showCharacterPicker, setShowCharacterPicker] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '0',
-      role: 'assistant',
-      content: t('coach.greeting'),
-      timestamp: Date.now(),
-    },
-  ]);
+  const [showExerciseModeModal, setShowExerciseModeModal] = useState(false);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messagesUsed, setMessagesUsed] = useState(0);
@@ -145,23 +147,30 @@ export default function CoachScreen() {
   }, [setChatInputFocused]);
 
   // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
-  const inputBottomPadding = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight + 8;
+  const inputBottomPadding = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight;
 
-  // Load chat history from backend if logged in
+  // Ensure active conversation exists on mount
+  useEffect(() => {
+    if (!chatStore.activeConversationId || !chatStore.getActiveConversation()) {
+      chatStore.createConversation(selectedCharacterId, t('coach.greeting'));
+    }
+  }, []);
+
+  // One-time migration: import from backend if logged in and store is empty
   useEffect(() => {
     if (!isLoggedIn) return;
+    if (chatStore.conversations.length > 1) return; // already has history
     api.getCoachHistory().then(({ messages: history }) => {
       if (history.length > 0) {
+        const conv = chatStore.getActiveConversation();
+        if (!conv) return;
         const mapped: ChatMessage[] = history.map((m) => ({
           id: m.id,
           role: m.role as 'user' | 'assistant',
           content: m.content,
           timestamp: new Date(m.createdAt).getTime(),
         }));
-        setMessages([
-          { id: '0', role: 'assistant', content: t('coach.greeting'), timestamp: 0 },
-          ...mapped,
-        ]);
+        mapped.forEach((msg) => chatStore.addMessage(conv.id, msg));
       }
     }).catch(() => {});
   }, [isLoggedIn]);
@@ -179,9 +188,16 @@ export default function CoachScreen() {
     setShowCharacterPicker(false);
   };
 
+  const handleNewChat = useCallback(() => {
+    chatStore.createConversation(selectedCharacterId, t('coach.greeting'));
+  }, [selectedCharacterId, t]);
+
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;
     if (!text.trim() || isLoading) return;
+
+    const convId = chatStore.activeConversationId;
+    if (!convId) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -192,7 +208,7 @@ export default function CoachScreen() {
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    chatStore.addMessage(convId, userMessage);
     setInput('');
     setIsLoading(true);
     incrementChatCount();
@@ -210,7 +226,7 @@ export default function CoachScreen() {
           content: data.response,
           timestamp: Date.now(),
         };
-        setMessages((prev) => [...prev, aiMessage]);
+        chatStore.addMessage(convId, aiMessage);
       } else {
         await new Promise((resolve) => setTimeout(resolve, 1200));
         const response = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
@@ -220,7 +236,7 @@ export default function CoachScreen() {
           content: response,
           timestamp: Date.now(),
         };
-        setMessages((prev) => [...prev, aiMessage]);
+        chatStore.addMessage(convId, aiMessage);
       }
     } catch (err: any) {
       const errorMsg = err?.status === 429
@@ -234,11 +250,14 @@ export default function CoachScreen() {
         content: errorMsg,
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, aiMessage]);
+      chatStore.addMessage(convId, aiMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore]);
+
+  // Exercise mode button state
+  const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
@@ -263,7 +282,7 @@ export default function CoachScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
+    <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -288,6 +307,37 @@ export default function CoachScreen() {
                   <Text style={styles.limitText}>{messagesUsed}/{messagesLimit}</Text>
                 </View>
               )}
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (!isPremium) {
+                    router.push('/paywall');
+                  } else {
+                    setVoiceCoachVisible(true);
+                  }
+                }}
+                style={styles.voiceCallBtn}
+                hitSlop={8}
+              >
+                <Ionicons name="mic" size={18} color="#fff" />
+                {!isPremium && (
+                  <View style={styles.voiceCallLockBadge}>
+                    <Ionicons name="lock-closed" size={7} color="#fff" />
+                  </View>
+                )}
+              </Pressable>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowChatHistory(true);
+                }}
+                style={styles.voiceCallBtn}
+                hitSlop={8}
+              >
+                <Ionicons name="chatbubbles-outline" size={18} color="#fff" />
+              </Pressable>
               <Ionicons name="chevron-down" size={18} color="rgba(255,255,255,0.7)" />
             </View>
           </LinearGradient>
@@ -309,14 +359,10 @@ export default function CoachScreen() {
           </Pressable>
         )}
 
-        {/* Exercise mode selector */}
-        {isLoggedIn && <ExerciseModeSelector />}
-
         {/* Active exercise banner */}
         {activeExerciseMode && (
           <ExerciseBanner
             onEndExercise={() => {
-              const mode = getExerciseMode(activeExerciseMode);
               const debriefMsg = locale === 'de'
                 ? 'Bitte gib mir ein abschließendes Feedback und eine Zusammenfassung der Übung.'
                 : 'Please give me a final debrief and summary of this exercise.';
@@ -335,6 +381,19 @@ export default function CoachScreen() {
           contentContainerStyle={styles.messageList}
           showsVerticalScrollIndicator={false}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          ListHeaderComponent={
+            messages.length <= 1 ? (
+              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
+                <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
+                <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
+                  {t('coach.welcomeTitle')}
+                </Text>
+                <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
+                  {t('coach.welcomeDesc')}
+                </Text>
+              </View>
+            ) : null
+          }
           ListFooterComponent={
             isLoading ? (
               <View style={styles.messageRow}>
@@ -349,35 +408,81 @@ export default function CoachScreen() {
           }
         />
 
-        {/* Glass Input */}
-        <BlurView
-          intensity={isDark ? 40 : 80}
-          tint={isDark ? 'dark' : 'light'}
-          style={[styles.inputBlur, { paddingBottom: inputBottomPadding }]}
-        >
-          <View style={[styles.inputContainer]}>
-            <TextInput
-              style={[styles.input, isDark && styles.inputDark]}
-              value={input}
-              onChangeText={setInput}
-              placeholder={t('coach.placeholder')}
-              placeholderTextColor="#A3A3A3"
-              multiline
-              maxLength={500}
-              onSubmitEditing={() => sendMessage()}
-              returnKeyType="send"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
+        {/* Floating Glass Input */}
+        <View style={[styles.floatingInputWrapper, { marginBottom: inputBottomPadding }]}>
+          <View style={styles.floatingInputOuter}>
+            <BlurView
+              intensity={isDark ? 40 : 80}
+              tint={isDark ? 'dark' : 'light'}
+              style={StyleSheet.absoluteFill}
             />
-            <Pressable
-              onPress={() => sendMessage()}
-              style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
-              disabled={!input.trim() || isLoading}
-            >
-              <Ionicons name="arrow-up" size={20} color="#fff" />
-            </Pressable>
+            <View style={[styles.floatingInputOverlay, isDark && styles.floatingInputOverlayDark]} />
+            <View style={styles.floatingInputContent}>
+              {/* Exercise mode toggle button */}
+              {isLoggedIn && (
+                <Pressable
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowExerciseModeModal(true);
+                  }}
+                  style={[
+                    styles.exerciseModeBtn,
+                    exerciseModeForButton
+                      ? { backgroundColor: `${exerciseModeForButton.color}20` }
+                      : isDark ? styles.exerciseModeBtnDark : {},
+                  ]}
+                >
+                  <Ionicons
+                    name={(exerciseModeForButton?.icon ?? 'flash') as any}
+                    size={18}
+                    color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
+                  />
+                </Pressable>
+              )}
+              <TextInput
+                style={[styles.input, isDark && styles.inputDark]}
+                value={input}
+                onChangeText={setInput}
+                placeholder={t('coach.placeholder')}
+                placeholderTextColor="#A3A3A3"
+                multiline
+                maxLength={500}
+                onSubmitEditing={() => sendMessage()}
+                returnKeyType="send"
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+              <Pressable
+                onPress={() => sendMessage()}
+                style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
+                disabled={!input.trim() || isLoading}
+              >
+                <Ionicons name="arrow-up" size={20} color="#fff" />
+              </Pressable>
+            </View>
           </View>
-        </BlurView>
+        </View>
+
+        {/* Voice Coach Modal */}
+        <VoiceCoachModal
+          visible={voiceCoachVisible}
+          onClose={() => setVoiceCoachVisible(false)}
+          characterId={selectedCharacterId}
+          locale={locale}
+        />
+
+        {/* Exercise Mode Modal */}
+        <ExerciseModeModal
+          visible={showExerciseModeModal}
+          onClose={() => setShowExerciseModeModal(false)}
+        />
+
+        {/* Chat History Modal */}
+        <ChatHistoryModal
+          visible={showChatHistory}
+          onClose={() => setShowChatHistory(false)}
+          onNewChat={handleNewChat}
+        />
 
         {/* Character Picker Modal */}
         <Modal
@@ -460,7 +565,7 @@ export default function CoachScreen() {
           </SafeAreaView>
         </Modal>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -477,6 +582,17 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  voiceCallBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  voiceCallLockBadge: {
+    position: 'absolute', top: -2, right: -2,
+    width: 14, height: 14, borderRadius: 7,
+    backgroundColor: '#E8435A',
+    alignItems: 'center', justifyContent: 'center',
+  },
   limitBadge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10,
@@ -489,7 +605,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 12,
   },
   upgradeBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#E8435A' },
-  messageList: { paddingHorizontal: 20, paddingBottom: 8 },
+  messageList: { paddingHorizontal: 20, paddingBottom: 80 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
@@ -504,8 +620,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   aiBubbleDark: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   userBubble: { backgroundColor: '#E8435A', borderBottomRightRadius: 4 },
   messageText: { fontSize: 16, lineHeight: 22, color: '#171717' },
@@ -513,31 +629,67 @@ const styles = StyleSheet.create({
   userText: { color: '#fff' },
   loadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
 
-  // Glass input area
-  inputBlur: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-    overflow: 'hidden',
+  // Welcome card
+  welcomeCard: {
+    alignItems: 'center', paddingVertical: 20, paddingHorizontal: 24,
+    marginBottom: 12, borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.02)',
   },
-  inputContainer: {
+  welcomeCardDark: { backgroundColor: 'rgba(255,255,255,0.03)' },
+  welcomeTitle: {
+    fontSize: 16, fontWeight: '700', color: '#171717',
+    letterSpacing: -0.2, marginTop: 8,
+  },
+  welcomeTitleDark: { color: '#F5F5F5' },
+  welcomeDesc: {
+    fontSize: 14, color: '#737373', textAlign: 'center',
+    lineHeight: 20, marginTop: 4,
+  },
+  welcomeDescDark: { color: '#A3A3A3' },
+
+  // Floating glass input bar
+  floatingInputWrapper: {
+    paddingHorizontal: 16,
+  },
+  floatingInputOuter: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.1)',
+  },
+  floatingInputOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  floatingInputOverlayDark: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  floatingInputContent: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    paddingHorizontal: 20, paddingTop: 8,
+    paddingHorizontal: 10, paddingVertical: 8,
+  },
+  exerciseModeBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 2,
+  },
+  exerciseModeBtnDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   input: {
-    flex: 1, minHeight: 40, maxHeight: 100,
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10,
+    flex: 1, minHeight: 36, maxHeight: 100,
+    paddingHorizontal: 6, paddingVertical: 8,
     fontSize: 16, color: '#171717',
-    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: 'transparent',
   },
   inputDark: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
     color: '#F5F5F5',
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   sendButton: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
+    marginBottom: 2,
   },
   sendButtonDisabled: { opacity: 0.4 },
 

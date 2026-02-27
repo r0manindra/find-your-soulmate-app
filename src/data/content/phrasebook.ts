@@ -73,8 +73,8 @@ export const phrases: Phrase[] = [
     categoryId: 'opening_lines',
     situation: { en: 'Coffee shop', de: 'Café' },
     text: {
-      en: "Excuse me — what did you order? I've been staring at this menu for way too long.",
-      de: 'Entschuldige — was hast du bestellt? Ich starre schon viel zu lange auf die Karte.',
+      en: "Excuse me - what did you order? I've been staring at this menu for way too long.",
+      de: 'Entschuldige - was hast du bestellt? Ich starre schon viel zu lange auf die Karte.',
     },
     explanation: {
       en: "Casual, situational, and gives them an easy way to respond. Doesn't feel forced.",
@@ -229,8 +229,8 @@ export const phrases: Phrase[] = [
       de: 'Erstes Mal hier? Ich bin komplett neu und tue so, als wüsste ich was ich tue.',
     },
     explanation: {
-      en: 'Relatable vulnerability. Everyone feels like the new kid — admitting it is refreshing.',
-      de: 'Nachvollziehbare Verletzlichkeit. Jeder fühlt sich als Neuling — es zuzugeben ist erfrischend.',
+      en: 'Relatable vulnerability. Everyone feels like the new kid - admitting it is refreshing.',
+      de: 'Nachvollziehbare Verletzlichkeit. Jeder fühlt sich als Neuling - es zuzugeben ist erfrischend.',
     },
     isPremium: true,
     forGender: 'all',
@@ -312,8 +312,8 @@ export const phrases: Phrase[] = [
       de: 'Dein Lachen ist ansteckend. Ich versuch immer wieder was Lustiges zu sagen, nur um es nochmal zu hören.',
     },
     explanation: {
-      en: 'Specific, genuine, and a little vulnerable — you admit they affect you.',
-      de: 'Spezifisch, ehrlich und ein bisschen verletzlich — du gibst zu, dass sie dich berühren.',
+      en: 'Specific, genuine, and a little vulnerable - you admit they affect you.',
+      de: 'Spezifisch, ehrlich und ein bisschen verletzlich - du gibst zu, dass sie dich berühren.',
     },
     isPremium: true,
     forGender: 'all',
@@ -323,8 +323,8 @@ export const phrases: Phrase[] = [
     categoryId: 'compliments',
     situation: { en: 'Their passion', de: 'Ihre Leidenschaft' },
     text: {
-      en: "The way you talk about [their interest] — your whole face lights up. It's really cool to see.",
-      de: 'Wie du über [ihr Interesse] redest — dein ganzes Gesicht leuchtet dabei. Das ist echt toll zu sehen.',
+      en: "The way you talk about [their interest] - your whole face lights up. It's really cool to see.",
+      de: 'Wie du über [ihr Interesse] redest - dein ganzes Gesicht leuchtet dabei. Das ist echt toll zu sehen.',
     },
     explanation: {
       en: "Shows you're paying attention to them as a person, not just going through motions.",
@@ -368,8 +368,8 @@ export const phrases: Phrase[] = [
     categoryId: 'compliments',
     situation: { en: 'Their kindness', de: 'Ihre Freundlichkeit' },
     text: {
-      en: "The way you treated that waiter just now — that says a lot about you. And all good things.",
-      de: 'Wie du gerade den Kellner behandelt hast — das sagt viel über dich. Und nur Gutes.',
+      en: "The way you treated that waiter just now - that says a lot about you. And all good things.",
+      de: 'Wie du gerade den Kellner behandelt hast - das sagt viel über dich. Und nur Gutes.',
     },
     explanation: {
       en: 'Noticing how they treat others shows deep observation. Very powerful.',
@@ -387,8 +387,8 @@ export const phrases: Phrase[] = [
       de: 'Du hast richtig ausdrucksstarke Augen. Ich hab das Gefühl, ich weiß was du denkst, bevor du es sagst.',
     },
     explanation: {
-      en: "Intimate but not creepy — focuses on expressiveness, not color. Shows you're engaged.",
-      de: 'Intim aber nicht gruselig — fokussiert auf Ausdruck, nicht Farbe. Zeigt Engagement.',
+      en: "Intimate but not creepy - focuses on expressiveness, not color. Shows you're engaged.",
+      de: 'Intim aber nicht gruselig - fokussiert auf Ausdruck, nicht Farbe. Zeigt Engagement.',
     },
     isPremium: true,
     forGender: 'all',
@@ -435,7 +435,7 @@ export const phrases: Phrase[] = [
     situation: { en: 'Learning about them', de: 'Mehr erfahren' },
     text: {
       en: "If you could wake up tomorrow with any skill fully mastered, what would it be?",
-      de: 'Wenn du morgen aufwachen könntest und eine Fähigkeit perfekt beherrschen würdest — welche wäre es?',
+      de: 'Wenn du morgen aufwachen könntest und eine Fähigkeit perfekt beherrschen würdest - welche wäre es?',
     },
     explanation: {
       en: 'Reveals their values and dreams. Much more interesting than "What do you do?"',
@@ -733,10 +733,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_1',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Italian — effortless charm', de: 'Italienisch — müheloser Charme' },
+    situation: { en: 'Italian - effortless charm', de: 'Italienisch - müheloser Charme' },
     text: {
-      en: 'Sprezzatura — the art of making everything you do look effortless, as if you weren\'t even trying.',
-      de: 'Sprezzatura — die Kunst, alles mühelos aussehen zu lassen, als würdest du es nicht einmal versuchen.',
+      en: 'Sprezzatura - the art of making everything you do look effortless, as if you weren\'t even trying.',
+      de: 'Sprezzatura - die Kunst, alles mühelos aussehen zu lassen, als würdest du es nicht einmal versuchen.',
     },
     explanation: {
       en: 'Coined by Castiglione in 1528. The most attractive people never look like they\'re performing.',
@@ -748,10 +748,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_2',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'French — electric chemistry', de: 'Französisch — elektrische Chemie' },
+    situation: { en: 'French - electric chemistry', de: 'Französisch - elektrische Chemie' },
     text: {
-      en: 'Frisson — that sudden shiver of excitement when chemistry hits. The electric moment before a first kiss.',
-      de: 'Frisson — dieses plötzliche Schaudern der Aufregung, wenn die Chemie stimmt. Der elektrische Moment vor dem ersten Kuss.',
+      en: 'Frisson - that sudden shiver of excitement when chemistry hits. The electric moment before a first kiss.',
+      de: 'Frisson - dieses plötzliche Schaudern der Aufregung, wenn die Chemie stimmt. Der elektrische Moment vor dem ersten Kuss.',
     },
     explanation: {
       en: 'Learning to notice and create these micro-moments is what separates good dates from unforgettable ones.',
@@ -763,10 +763,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_3',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'English — magnetic storytelling', de: 'Englisch — magnetisches Erzählen' },
+    situation: { en: 'English - magnetic storytelling', de: 'Englisch - magnetisches Erzählen' },
     text: {
-      en: 'Raconteur — someone who tells stories with such flair that everyone leans in and forgets their phone exists.',
-      de: 'Raconteur — jemand, der Geschichten so erzählt, dass alle sich vorbeugen und ihr Handy vergessen.',
+      en: 'Raconteur - someone who tells stories with such flair that everyone leans in and forgets their phone exists.',
+      de: 'Raconteur - jemand, der Geschichten so erzählt, dass alle sich vorbeugen und ihr Handy vergessen.',
     },
     explanation: {
       en: 'The person at the party everyone gravitates toward. A learnable skill, not a born talent.',
@@ -780,10 +780,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_4',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Portuguese — bittersweet longing', de: 'Portugiesisch — bittersüße Sehnsucht' },
+    situation: { en: 'Portuguese - bittersweet longing', de: 'Portugiesisch - bittersüße Sehnsucht' },
     text: {
-      en: 'Saudade — the deep, melancholic longing for someone or something absent. The beautiful ache of missing what once was.',
-      de: 'Saudade — die tiefe, melancholische Sehnsucht nach jemandem oder etwas Abwesendem. Der schöne Schmerz des Vermissens.',
+      en: 'Saudade - the deep, melancholic longing for someone or something absent. The beautiful ache of missing what once was.',
+      de: 'Saudade - die tiefe, melancholische Sehnsucht nach jemandem oder etwas Abwesendem. Der schöne Schmerz des Vermissens.',
     },
     explanation: {
       en: 'Use it when you want to describe missing someone in a way that sounds poetic, not needy.',
@@ -795,14 +795,14 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_5',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Psychology — obsessive infatuation', de: 'Psychologie — obsessive Verliebtheit' },
+    situation: { en: 'Psychology - obsessive infatuation', de: 'Psychologie - obsessive Verliebtheit' },
     text: {
-      en: 'Limerence — the involuntary state of obsessive romantic infatuation. Not love, not a crush — a neurochemical storm.',
-      de: 'Limerence — der unwillkürliche Zustand obsessiver romantischer Verliebtheit. Keine Liebe, kein Schwarm — ein neurochemischer Sturm.',
+      en: 'Limerence - the involuntary state of obsessive romantic infatuation. Not love, not a crush - a neurochemical storm.',
+      de: 'Limerence - der unwillkürliche Zustand obsessiver romantischer Verliebtheit. Keine Liebe, kein Schwarm - ein neurochemischer Sturm.',
     },
     explanation: {
-      en: 'Knowing this word helps you recognize when you\'re in it — and talk about it intelligently.',
-      de: 'Dieses Wort zu kennen hilft dir zu erkennen, wenn du drin steckst — und darüber zu reden.',
+      en: 'Knowing this word helps you recognize when you\'re in it - and talk about it intelligently.',
+      de: 'Dieses Wort zu kennen hilft dir zu erkennen, wenn du drin steckst - und darüber zu reden.',
     },
     isPremium: true,
     forGender: 'all',
@@ -810,10 +810,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_6',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'French — cool nonchalance', de: 'Französisch — coole Lässigkeit' },
+    situation: { en: 'French - cool nonchalance', de: 'Französisch - coole Lässigkeit' },
     text: {
-      en: 'Insouciance — a carefree, almost reckless nonchalance. The vibe of someone who genuinely doesn\'t need your approval.',
-      de: 'Insouciance — eine sorglose, fast verwegene Gelassenheit. Die Ausstrahlung von jemandem, der deine Anerkennung nicht braucht.',
+      en: 'Insouciance - a carefree, almost reckless nonchalance. The vibe of someone who genuinely doesn\'t need your approval.',
+      de: 'Insouciance - eine sorglose, fast verwegene Gelassenheit. Die Ausstrahlung von jemandem, der deine Anerkennung nicht braucht.',
     },
     explanation: {
       en: 'The opposite of trying too hard. Drop this in conversation and watch people lean in.',
@@ -825,10 +825,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_7',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Spanish — raw authentic presence', de: 'Spanisch — rohe authentische Präsenz' },
+    situation: { en: 'Spanish - raw authentic presence', de: 'Spanisch - rohe authentische Präsenz' },
     text: {
-      en: 'Duende — that raw, almost primal authenticity that moves people on a gut level. You can\'t fake it; you can only stop suppressing it.',
-      de: 'Duende — diese rohe, fast ursprüngliche Authentizität, die Menschen auf einer tiefen Ebene berührt. Man kann es nicht vortäuschen; man kann nur aufhören, es zu unterdrücken.',
+      en: 'Duende - that raw, almost primal authenticity that moves people on a gut level. You can\'t fake it; you can only stop suppressing it.',
+      de: 'Duende - diese rohe, fast ursprüngliche Authentizität, die Menschen auf einer tiefen Ebene berührt. Man kann es nicht vortäuschen; man kann nur aufhören, es zu unterdrücken.',
     },
     explanation: {
       en: 'Garcia Lorca said duende is the spirit of the earth. It\'s what makes someone unforgettable.',
@@ -840,14 +840,14 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_8',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'French — social instinct', de: 'Französisch — sozialer Instinkt' },
+    situation: { en: 'French - social instinct', de: 'Französisch - sozialer Instinkt' },
     text: {
-      en: 'Savoir-faire — the instinctive ability to say and do the right thing in any social situation, without thinking about it.',
-      de: 'Savoir-faire — die instinktive Fähigkeit, in jeder sozialen Situation das Richtige zu sagen und zu tun, ohne darüber nachzudenken.',
+      en: 'Savoir-faire - the instinctive ability to say and do the right thing in any social situation, without thinking about it.',
+      de: 'Savoir-faire - die instinktive Fähigkeit, in jeder sozialen Situation das Richtige zu sagen und zu tun, ohne darüber nachzudenken.',
     },
     explanation: {
-      en: 'Beyond social skills — it\'s social elegance. The person who never has an awkward moment.',
-      de: 'Mehr als Social Skills — es ist soziale Eleganz. Die Person, die nie einen peinlichen Moment hat.',
+      en: 'Beyond social skills - it\'s social elegance. The person who never has an awkward moment.',
+      de: 'Mehr als Social Skills - es ist soziale Eleganz. Die Person, die nie einen peinlichen Moment hat.',
     },
     isPremium: true,
     forGender: 'all',
@@ -855,10 +855,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_9',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Greek — soulful passion', de: 'Griechisch — seelenvolle Leidenschaft' },
+    situation: { en: 'Greek - soulful passion', de: 'Griechisch - seelenvolle Leidenschaft' },
     text: {
-      en: 'Meraki — doing something with absolute soul and passion, pouring yourself completely into the moment.',
-      de: 'Meraki — etwas mit absoluter Seele und Leidenschaft tun, sich komplett in den Moment hineingeben.',
+      en: 'Meraki - doing something with absolute soul and passion, pouring yourself completely into the moment.',
+      de: 'Meraki - etwas mit absoluter Seele und Leidenschaft tun, sich komplett in den Moment hineingeben.',
     },
     explanation: {
       en: 'When you cook for someone with meraki, they taste the love. Apply it to everything.',
@@ -870,10 +870,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_10',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'English — devastating brevity', de: 'Englisch — vernichtende Kürze' },
+    situation: { en: 'English - devastating brevity', de: 'Englisch - vernichtende Kürze' },
     text: {
-      en: 'Laconic — the art of saying more with less. A devastatingly brief response that lands harder than a paragraph ever could.',
-      de: 'Lakonisch — die Kunst, mit weniger mehr zu sagen. Eine vernichtend kurze Antwort, die härter trifft als jeder Absatz.',
+      en: 'Laconic - the art of saying more with less. A devastatingly brief response that lands harder than a paragraph ever could.',
+      de: 'Lakonisch - die Kunst, mit weniger mehr zu sagen. Eine vernichtend kurze Antwort, die härter trifft als jeder Absatz.',
     },
     explanation: {
       en: 'Named after the Spartans of Laconia, famous for brutal one-liners in the face of threats.',
@@ -885,10 +885,10 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_11',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'Japanese — imperfect beauty', de: 'Japanisch — unvollkommene Schönheit' },
+    situation: { en: 'Japanese - imperfect beauty', de: 'Japanisch - unvollkommene Schönheit' },
     text: {
-      en: 'Wabi-sabi — finding beauty in imperfection. The crack in the cup, the scar with a story, the awkward laugh that\'s more charming than a perfect smile.',
-      de: 'Wabi-Sabi — Schönheit in der Unvollkommenheit finden. Der Riss in der Tasse, die Narbe mit Geschichte, das unbeholfene Lachen, das charmanter ist als ein perfektes Lächeln.',
+      en: 'Wabi-sabi - finding beauty in imperfection. The crack in the cup, the scar with a story, the awkward laugh that\'s more charming than a perfect smile.',
+      de: 'Wabi-Sabi - Schönheit in der Unvollkommenheit finden. Der Riss in der Tasse, die Narbe mit Geschichte, das unbeholfene Lachen, das charmanter ist als ein perfektes Lächeln.',
     },
     explanation: {
       en: 'The antidote to trying to seem perfect. Your flaws, owned well, are your most attractive features.',
@@ -900,14 +900,14 @@ export const phrases: Phrase[] = [
   {
     id: 'sv_12',
     categoryId: 'smart_vocabulary',
-    situation: { en: 'French — the joy of living', de: 'Französisch — Lebensfreude' },
+    situation: { en: 'French - the joy of living', de: 'Französisch - Lebensfreude' },
     text: {
-      en: 'Joie de vivre — an infectious, exuberant love of life that makes everyone around you feel more alive.',
-      de: 'Joie de vivre — eine ansteckende, überschwängliche Lebensfreude, die alle um dich herum lebendiger fühlen lässt.',
+      en: 'Joie de vivre - an infectious, exuberant love of life that makes everyone around you feel more alive.',
+      de: 'Joie de vivre - eine ansteckende, überschwängliche Lebensfreude, die alle um dich herum lebendiger fühlen lässt.',
     },
     explanation: {
-      en: 'The single most attractive quality. People don\'t fall for perfection — they fall for aliveness.',
-      de: 'Die attraktivste Eigenschaft überhaupt. Menschen verlieben sich nicht in Perfektion — sondern in Lebendigkeit.',
+      en: 'The single most attractive quality. People don\'t fall for perfection - they fall for aliveness.',
+      de: 'Die attraktivste Eigenschaft überhaupt. Menschen verlieben sich nicht in Perfektion - sondern in Lebendigkeit.',
     },
     isPremium: true,
     forGender: 'all',
@@ -923,8 +923,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'Getting their number', de: 'Nummer bekommen' },
     text: {
-      en: "I've really enjoyed this. We should continue it — can I get your number?",
-      de: 'Das hat mir echt Spaß gemacht. Wir sollten das fortsetzen — kann ich deine Nummer haben?',
+      en: "I've really enjoyed this. We should continue it - can I get your number?",
+      de: 'Das hat mir echt Spaß gemacht. Wir sollten das fortsetzen - kann ich deine Nummer haben?',
     },
     explanation: {
       en: "Direct, honest, no games. Referencing the good time you just had makes it natural.",
@@ -938,8 +938,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'Suggesting a next date', de: 'Nächstes Date vorschlagen' },
     text: {
-      en: "You mentioned you love [thing they said]. There's this great [related place] — want to check it out together this week?",
-      de: 'Du hast erwähnt, dass du [was sie gesagt haben] liebst. Es gibt diesen tollen [verwandten Ort] — wollen wir uns das diese Woche zusammen anschauen?',
+      en: "You mentioned you love [thing they said]. There's this great [related place] - want to check it out together this week?",
+      de: 'Du hast erwähnt, dass du [was sie gesagt haben] liebst. Es gibt diesen tollen [verwandten Ort] - wollen wir uns das diese Woche zusammen anschauen?',
     },
     explanation: {
       en: "Shows you listened, gives a specific plan, and sets a timeframe. Don't leave it vague.",
@@ -957,8 +957,8 @@ export const phrases: Phrase[] = [
       de: 'Ich muss los, aber ich bin echt froh, dass ich rübergekommen bin und dich angesprochen habe.',
     },
     explanation: {
-      en: 'Leaves on a high note. Shows intentionality — you chose to approach and you\'re glad you did.',
-      de: 'Geht auf einem Höhepunkt. Zeigt Absicht — du hast dich entschieden anzusprechen und bist froh darüber.',
+      en: 'Leaves on a high note. Shows intentionality - you chose to approach and you\'re glad you did.',
+      de: 'Geht auf einem Höhepunkt. Zeigt Absicht - du hast dich entschieden anzusprechen und bist froh darüber.',
     },
     isPremium: false,
     forGender: 'all',
@@ -970,8 +970,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'Confident number exchange', de: 'Selbstsicherer Nummerntausch' },
     text: {
-      en: "Here — put your number in. I'll text you something that'll make you smile.",
-      de: 'Hier — gib deine Nummer ein. Ich schicke dir was, das dich zum Lächeln bringt.',
+      en: "Here - put your number in. I'll text you something that'll make you smile.",
+      de: 'Hier - gib deine Nummer ein. Ich schicke dir was, das dich zum Lächeln bringt.',
     },
     explanation: {
       en: 'Assertive and fun. Handing your phone over shows confidence. The promise creates anticipation.',
@@ -1000,8 +1000,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'After a great date', de: 'Nach einem tollen Date' },
     text: {
-      en: "Tonight was genuinely fun. I'd love to do this again — and next time you pick the place.",
-      de: 'Heute Abend war echt toll. Ich würde das gerne wiederholen — und nächstes Mal suchst du den Ort aus.',
+      en: "Tonight was genuinely fun. I'd love to do this again - and next time you pick the place.",
+      de: 'Heute Abend war echt toll. Ich würde das gerne wiederholen - und nächstes Mal suchst du den Ort aus.',
     },
     explanation: {
       en: 'Affirms the date, shows interest in a second, and involves them in planning.',
@@ -1030,8 +1030,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'Leaving a group setting', de: 'Eine Gruppenrunde verlassen' },
     text: {
-      en: "Hey, I'm heading out — but it was really nice meeting you. Can I message you sometime?",
-      de: 'Hey, ich gehe jetzt — aber es war echt nett, dich kennenzulernen. Darf ich dir mal schreiben?',
+      en: "Hey, I'm heading out - but it was really nice meeting you. Can I message you sometime?",
+      de: 'Hey, ich gehe jetzt - aber es war echt nett, dich kennenzulernen. Darf ich dir mal schreiben?',
     },
     explanation: {
       en: 'Simple, polite, and direct. Pulling someone aside briefly shows genuine interest.',
@@ -1060,8 +1060,8 @@ export const phrases: Phrase[] = [
     categoryId: 'closing_lines',
     situation: { en: 'Bold & direct', de: 'Mutig & direkt' },
     text: {
-      en: "Look, I'll be direct — I think you're great and I'd regret not asking. Coffee this weekend?",
-      de: 'Ich sag es direkt — ich finde dich toll und würde es bereuen, nicht zu fragen. Kaffee am Wochenende?',
+      en: "Look, I'll be direct - I think you're great and I'd regret not asking. Coffee this weekend?",
+      de: 'Ich sag es direkt - ich finde dich toll und würde es bereuen, nicht zu fragen. Kaffee am Wochenende?',
     },
     explanation: {
       en: 'Directness is attractive. Framing it as "I\'d regret not asking" shows courage, not desperation.',
