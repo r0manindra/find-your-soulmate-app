@@ -123,11 +123,14 @@ export default function CoachScreen() {
   // Tab bar height for when it's visible
   const tabBarHeight = 64 + insets.bottom + 12;
 
-  // Track keyboard visibility
+  // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      () => setKeyboardVisible(true)
+      () => {
+        setKeyboardVisible(true);
+        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      }
     );
     const hideSub = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
@@ -257,6 +260,13 @@ export default function CoachScreen() {
     }
   }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore]);
 
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
+    }
+  }, [messages.length]);
+
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
 
@@ -267,7 +277,7 @@ export default function CoachScreen() {
       <View style={[styles.messageRow, isUser && styles.messageRowUser]}>
         {!isUser && (
           <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-            <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
+            <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
           </View>
         )}
         <View style={[
@@ -297,7 +307,7 @@ export default function CoachScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.headerGradient}
           >
-            <Ionicons name={activeCharacter.icon as any} size={32} color="#fff" />
+            <Ionicons name={activeCharacter.icon as any} size={26} color="#fff" />
             <View style={styles.headerTextContainer}>
               <Text style={styles.headerTitle}>{activeCharacter.name}</Text>
               <Text style={styles.headerSubtitle}>{activeCharacter.subtitle[locale]}</Text>
@@ -399,7 +409,7 @@ export default function CoachScreen() {
             isLoading ? (
               <View style={styles.messageRow}>
                 <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-                  <Ionicons name={activeCharacter.icon as any} size={18} color={activeCharacter.color} />
+                  <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
                 </View>
                 <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
                   <Text style={styles.loadingText}>{t('coach.sending')}</Text>
@@ -574,14 +584,14 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+  header: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 },
   headerGradient: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    padding: 16, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16,
   },
   headerTextContainer: { flex: 1 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
-  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#fff', letterSpacing: -0.3 },
+  headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   voiceCallBtn: {
     width: 32, height: 32, borderRadius: 16,
@@ -600,20 +610,20 @@ const styles = StyleSheet.create({
   },
   limitText: { fontSize: 12, fontWeight: '700', color: '#fff' },
   upgradeBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 20, marginBottom: 8,
-    paddingHorizontal: 14, paddingVertical: 10,
-    backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginHorizontal: 16, marginBottom: 6,
+    paddingHorizontal: 12, paddingVertical: 8,
+    backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 10,
   },
-  upgradeBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#E8435A' },
-  messageList: { paddingHorizontal: 20, paddingBottom: 80 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12 },
+  upgradeBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#E8435A' },
+  messageList: { paddingHorizontal: 14, paddingTop: 4, paddingBottom: 8 },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 6 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
-    width: 28, height: 28, borderRadius: 14,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+    width: 22, height: 22, borderRadius: 11,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 2,
   },
-  messageBubble: { maxWidth: '75%', padding: 14, borderRadius: 20 },
+  messageBubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18 },
   aiBubble: {
     backgroundColor: 'rgba(255,255,255,0.8)',
     borderWidth: StyleSheet.hairlineWidth,
@@ -625,35 +635,35 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.06)',
   },
   userBubble: { backgroundColor: '#E8435A', borderBottomRightRadius: 4 },
-  messageText: { fontSize: 16, lineHeight: 22, color: '#171717' },
+  messageText: { fontSize: 15, lineHeight: 21, color: '#171717' },
   messageTextDark: { color: '#F5F5F5' },
   userText: { color: '#fff' },
-  loadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
+  loadingText: { fontSize: 13, color: '#A3A3A3', fontStyle: 'italic' },
 
   // Welcome card
   welcomeCard: {
-    alignItems: 'center', paddingVertical: 20, paddingHorizontal: 24,
-    marginBottom: 12, borderRadius: 16,
+    alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20,
+    marginBottom: 8, borderRadius: 14,
     backgroundColor: 'rgba(0,0,0,0.02)',
   },
   welcomeCardDark: { backgroundColor: 'rgba(255,255,255,0.03)' },
   welcomeTitle: {
-    fontSize: 16, fontWeight: '700', color: '#171717',
-    letterSpacing: -0.2, marginTop: 8,
+    fontSize: 15, fontWeight: '700', color: '#171717',
+    letterSpacing: -0.2, marginTop: 6,
   },
   welcomeTitleDark: { color: '#F5F5F5' },
   welcomeDesc: {
-    fontSize: 14, color: '#737373', textAlign: 'center',
-    lineHeight: 20, marginTop: 4,
+    fontSize: 13, color: '#737373', textAlign: 'center',
+    lineHeight: 18, marginTop: 3,
   },
   welcomeDescDark: { color: '#A3A3A3' },
 
   // Floating glass input bar
   floatingInputWrapper: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   floatingInputOuter: {
-    borderRadius: 24,
+    borderRadius: 22,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0,0,0,0.1)',
@@ -666,31 +676,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
   },
   floatingInputContent: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    paddingHorizontal: 10, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'flex-end', gap: 6,
+    paddingHorizontal: 8, paddingVertical: 6,
   },
   exerciseModeBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 32, height: 32, borderRadius: 16,
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   exerciseModeBtnDark: {
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
   input: {
-    flex: 1, minHeight: 36, maxHeight: 100,
-    paddingHorizontal: 6, paddingVertical: 8,
-    fontSize: 16, color: '#171717',
+    flex: 1, minHeight: 32, maxHeight: 100,
+    paddingHorizontal: 6, paddingVertical: 6,
+    fontSize: 15, color: '#171717',
     backgroundColor: 'transparent',
   },
   inputDark: {
     color: '#F5F5F5',
   },
   sendButton: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 32, height: 32, borderRadius: 16,
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   sendButtonDisabled: { opacity: 0.4 },
 
