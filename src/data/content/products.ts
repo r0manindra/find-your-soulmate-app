@@ -1,7 +1,7 @@
 import type { Product } from '@/src/core/entities/types';
 
 export const products: Product[] = [
-  // Fragrances — linked to ch 21 "The Foundation"
+  // Fragrances - linked to ch 21 "The Foundation"
   {
     id: 1,
     name: 'Santal 33',
@@ -12,8 +12,8 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.lelabofragrances.com/santal-33.html',
     chapterIds: [21],
     description: {
-      en: 'The "you smell amazing, what is that?" fragrance. Woody, warm, unisex — instant conversation starter.',
-      de: 'Der "du riechst unglaublich, was ist das?" Duft. Holzig, warm, unisex — sofortiger Gesprächseröffner.',
+      en: 'The "you smell amazing, what is that?" fragrance. Woody, warm, unisex - instant conversation starter.',
+      de: 'Der "du riechst unglaublich, was ist das?" Duft. Holzig, warm, unisex - sofortiger Gesprächseröffner.',
     },
     whyItWorks: {
       en: 'Scent is the most powerful trigger of memory and attraction. This one gets compliments without trying.',
@@ -56,7 +56,7 @@ export const products: Product[] = [
       de: 'Strahlt Reife und Geschmack aus, ohne aufdringlich zu sein. Perfekt für Dates und berufliche Situationen.',
     },
   },
-  // Grooming/Skincare — linked to ch 21
+  // Grooming/Skincare - linked to ch 21
   {
     id: 4,
     name: 'Foaming Cleanser',
@@ -111,7 +111,7 @@ export const products: Product[] = [
       de: 'Pflege sollte einfach sein. Dieses Gerät handhabt alles von Stoppeln bis glatt rasiert.',
     },
   },
-  // Style — linked to ch 24 "Presence & Manners"
+  // Style - linked to ch 24 "Presence & Manners"
   {
     id: 7,
     name: 'Classic White Tee',
@@ -140,8 +140,8 @@ export const products: Product[] = [
     affiliateUrl: 'https://www.levi.com/US/en_US/clothing/men/jeans/511-slim-fit-jeans/',
     chapterIds: [24],
     description: {
-      en: 'Dark, slim, timeless. The jeans that work with everything — sneakers, boots, date night, casual Friday.',
-      de: 'Dunkel, slim, zeitlos. Die Jeans, die zu allem passt — Sneaker, Stiefel, Date-Night, Casual Friday.',
+      en: 'Dark, slim, timeless. The jeans that work with everything - sneakers, boots, date night, casual Friday.',
+      de: 'Dunkel, slim, zeitlos. Die Jeans, die zu allem passt - Sneaker, Stiefel, Date-Night, Casual Friday.',
     },
     whyItWorks: {
       en: 'Dark jeans are the Swiss Army knife of style. They dress up or down and always look intentional.',
@@ -166,7 +166,7 @@ export const products: Product[] = [
       de: 'Schuhe sind das Erste, was Menschen bemerken. Weiße Sneaker sagen "Ich hab mein Leben im Griff" ohne es zu versuchen.',
     },
   },
-  // Fitness — linked to ch 23 "Discipline & Habits"
+  // Fitness - linked to ch 23 "Discipline & Habits"
   {
     id: 10,
     name: 'Resistance Bands Set',

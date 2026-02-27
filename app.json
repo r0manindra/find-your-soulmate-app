@@ -16,10 +16,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flirtiq.app",
-      "buildNumber": "16",
+      "buildNumber": "18",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCalendarsUsageDescription": "Charismo uses your calendar to schedule habit reminders.",
+        "NSCalendarsFullAccessUsageDescription": "Charismo uses your calendar to create recurring habit events."
       }
     },
     "android": {
@@ -39,7 +41,8 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-calendar"
     ],
     "experiments": {
       "typedRoutes": true

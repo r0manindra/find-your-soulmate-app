@@ -23,6 +23,7 @@ export interface Book {
   emoji: string;
   amazonUrl: string;
   ionicon: string;
+  chapterIds: number[];
 }
 
 export interface Product {
@@ -53,6 +54,13 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
 export interface ProgressState {
   completedChapters: number[];
   completedBooks: number[];
@@ -60,4 +68,5 @@ export interface ProgressState {
   streak: number;
   lastActiveDate: string;
   graduated: boolean;
+  quizScores: Record<number, number>;
 }

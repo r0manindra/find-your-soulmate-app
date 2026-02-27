@@ -8,6 +8,7 @@ import progressRoutes from './routes/progress';
 import coachRoutes from './routes/coach';
 import subscriptionRoutes from './routes/subscription';
 import pdfRoutes from './routes/pdf';
+import quizRoutes from './routes/quiz';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/coach', coachRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/pdf', pdfRoutes);
+app.use('/api/quiz', quizRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {

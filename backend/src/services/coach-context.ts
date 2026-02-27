@@ -1,6 +1,7 @@
 import { chaptersMeta, phasesMeta } from '../content/chapters-meta';
 import { chapterLessons } from '../content/chapter-lessons';
 import { getCharacterPrompt } from './characters';
+import { getExercisePromptBlock, type ExerciseModeId } from './exercise-modes';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -185,13 +186,15 @@ const COACHING_GUIDELINES = `=== COACHING GUIDELINES ===
 - After helping with a topic, suggest the next exercise to try
 - Do NOT recite chapter content verbatim, weave it naturally into conversation
 - If the user has graduated, focus on real-world application and reinforcement
-- Match the language/locale preference when possible`;
+- Match the language/locale preference when possible
+- The app has a Phrasebook feature with curated opening lines, compliments, conversation deepeners, witty responses, smart vocabulary, and closing lines — mention it naturally when giving advice about what to say`;
 
 // ── Main prompt builder ──────────────────────────────────────────────
 
 export function buildContextAwarePrompt(
   characterId: string,
-  ctx: UserJourneyContext
+  ctx: UserJourneyContext,
+  exerciseMode?: ExerciseModeId
 ): string {
   const characterPrompt = getCharacterPrompt(characterId);
   const userBlock = buildUserContextBlock(ctx);
@@ -200,6 +203,13 @@ export function buildContextAwarePrompt(
   const parts = [characterPrompt, '', userBlock];
   if (chapterBlock) parts.push('', chapterBlock);
   parts.push('', COACHING_GUIDELINES);
+
+  if (exerciseMode) {
+    const exerciseBlock = getExercisePromptBlock(exerciseMode);
+    if (exerciseBlock) {
+      parts.push('', exerciseBlock);
+    }
+  }
 
   return parts.join('\n');
 }

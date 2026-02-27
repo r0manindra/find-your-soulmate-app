@@ -16,6 +16,7 @@ interface ProgressStore extends ProgressState {
   enqueueAchievement: (id: string) => void;
   dequeueAchievement: () => void;
   clearAchievementQueue: () => void;
+  saveQuizScore: (chapterId: number, score: number) => void;
 }
 
 const initialState: ProgressState = {
@@ -25,6 +26,7 @@ const initialState: ProgressState = {
   streak: 0,
   lastActiveDate: '',
   graduated: false,
+  quizScores: {},
 };
 
 export const useProgressStore = create<ProgressStore>()(
@@ -94,6 +96,14 @@ export const useProgressStore = create<ProgressStore>()(
         })),
 
       clearAchievementQueue: () => set({ achievementQueue: [] }),
+
+      saveQuizScore: (chapterId, score) =>
+        set((state) => ({
+          quizScores: {
+            ...state.quizScores,
+            [chapterId]: Math.max(state.quizScores[chapterId] ?? 0, score),
+          },
+        })),
     }),
     {
       name: 'progress-storage',
@@ -105,6 +115,7 @@ export const useProgressStore = create<ProgressStore>()(
         streak: state.streak,
         lastActiveDate: state.lastActiveDate,
         graduated: state.graduated,
+        quizScores: state.quizScores,
       }),
     }
   )

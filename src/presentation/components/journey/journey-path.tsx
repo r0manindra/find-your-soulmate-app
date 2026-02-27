@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Svg, { Line } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
@@ -36,7 +36,7 @@ function getChapterStatus(
 
 const NODE_PADDING = 32;
 const NODE_COLUMN_WIDTH = 100;
-const CONNECTOR_HEIGHT = 24;
+const CONNECTOR_HEIGHT = 50;
 
 function DiagonalConnector({
   fromPosition,
@@ -61,30 +61,29 @@ function DiagonalConnector({
 
   const x1 = getX(fromPosition);
   const x2 = getX(toPosition);
+  const midY = CONNECTOR_HEIGHT / 2;
+  // S-curve: start horizontal from x1, end horizontal into x2
+  const d = `M ${x1} 0 C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${CONNECTOR_HEIGHT}`;
 
   return (
     <View style={styles.connectorWrapper}>
       <Svg width={screenWidth} height={CONNECTOR_HEIGHT} style={StyleSheet.absoluteFill}>
-        {/* Background line */}
-        <Line
-          x1={x1}
-          y1={0}
-          x2={x2}
-          y2={CONNECTOR_HEIGHT}
+        {/* Background curve */}
+        <Path
+          d={d}
           stroke={isDark ? '#404040' : '#E5E5E5'}
           strokeWidth={2.5}
           strokeLinecap="round"
+          fill="none"
         />
         {/* Completed overlay */}
         {isCompleted && (
-          <Line
-            x1={x1}
-            y1={0}
-            x2={x2}
-            y2={CONNECTOR_HEIGHT}
+          <Path
+            d={d}
             stroke="#E8435A"
             strokeWidth={2.5}
             strokeLinecap="round"
+            fill="none"
           />
         )}
       </Svg>

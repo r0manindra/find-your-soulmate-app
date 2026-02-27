@@ -5,6 +5,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { getCoachResponse } from '../services/coach';
 import { getCharacterPrompt } from '../services/characters';
 import { buildContextAwarePrompt, type UserJourneyContext } from '../services/coach-context';
+import { isPremiumExerciseMode, type ExerciseModeId } from '../services/exercise-modes';
 import { env } from '../config/env';
 
 const router = Router();
@@ -40,12 +41,19 @@ const messageSchema = z.object({
   message: z.string().min(1).max(2000),
   characterId: z.string().optional().default('charismo'),
   context: contextSchema,
+  exerciseMode: z.enum([
+    'opening_line_lab',
+    'conversation_ping_pong',
+    'rejection_gym',
+    'date_simulator',
+    'flirty_banter',
+  ]).optional(),
 });
 
 // POST /api/coach/message
 router.post('/message', async (req: AuthRequest, res: Response) => {
   try {
-    const { message, characterId, context } = messageSchema.parse(req.body);
+    const { message, characterId, context, exerciseMode } = messageSchema.parse(req.body);
 
     // Premium characters require premium subscription
     if (characterId !== 'charismo') {
@@ -55,6 +63,18 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       });
       if (userForSub?.subscriptionStatus !== 'PREMIUM') {
         res.status(403).json({ error: 'Premium subscription required for this character', upgrade: true });
+        return;
+      }
+    }
+
+    // Premium exercise modes require premium subscription
+    if (exerciseMode && isPremiumExerciseMode(exerciseMode as ExerciseModeId)) {
+      const userForSub = await prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { subscriptionStatus: true },
+      });
+      if (userForSub?.subscriptionStatus !== 'PREMIUM') {
+        res.status(403).json({ error: 'Premium subscription required for this exercise mode', upgrade: true });
         return;
       }
     }
@@ -106,7 +126,7 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
 
     // Build system prompt — enriched with context if available, otherwise plain character prompt
     const systemPrompt = context
-      ? buildContextAwarePrompt(characterId, context as UserJourneyContext)
+      ? buildContextAwarePrompt(characterId, context as UserJourneyContext, exerciseMode as ExerciseModeId | undefined)
       : getCharacterPrompt(characterId);
 
     // Get AI response

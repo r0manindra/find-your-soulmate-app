@@ -117,7 +117,7 @@ export default function OnboardingScreen() {
             { emoji: '🛋️', label: t('onboarding.socialEnergy.introvert'), value: 'introvert' as const },
             { emoji: '⚖️', label: t('onboarding.socialEnergy.ambivert'), value: 'ambivert' as const },
             { emoji: '🎉', label: t('onboarding.socialEnergy.extrovert'), value: 'extrovert' as const },
-            { emoji: '📡', label: t('onboarding.socialEnergy.deepIntrovert'), value: 'deep_introvert' as const },
+            { emoji: '🏠', label: t('onboarding.socialEnergy.deepIntrovert'), value: 'deep_introvert' as const },
           ]}
           selected={socialEnergy}
           onSelect={(value) => {

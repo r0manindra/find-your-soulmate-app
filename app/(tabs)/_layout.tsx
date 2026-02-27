@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GLASS, BORDER_RADIUS, SHADOWS, withOpacity, supportsLiquidGlass } from '@/src/theme/glass';
 import { useUIStore } from '@/src/store/ui-store';
-import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import '@/src/i18n/config';
 
 const hasLiquidGlass = supportsLiquidGlass();
@@ -45,23 +44,19 @@ type TabConfig = {
   ioniconFocused: keyof typeof Ionicons.glyphMap;
   sfSymbol?: string;
   sfSymbolFocused?: string;
-  useCharismoIcon?: boolean;
 };
 
 const TAB_CONFIG: TabConfig[] = [
   { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home', sfSymbol: 'house', sfSymbolFocused: 'house.fill' },
   { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book', sfSymbol: 'book', sfSymbolFocused: 'book.fill' },
   { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle', sfSymbol: 'checkmark.circle', sfSymbolFocused: 'checkmark.circle.fill' },
-  { name: 'coach', ionicon: 'chatbubbles-outline', ioniconFocused: 'chatbubbles', sfSymbol: 'bubble.left.and.bubble.right', sfSymbolFocused: 'bubble.left.and.bubble.right.fill', useCharismoIcon: true },
+  { name: 'coach', ionicon: 'flame-outline', ioniconFocused: 'flame', sfSymbol: 'flame', sfSymbolFocused: 'flame.fill' },
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person', sfSymbol: 'person', sfSymbolFocused: 'person.fill' },
 ];
 
 // ---------------------------------------------------------------------------
 // Path A: iOS 26+ — Native liquid glass tab bar
 // ---------------------------------------------------------------------------
-
-// Template PNG of the Charismo icon for native tab bar (rendered as template image)
-const charismoTabIcon = require('@/assets/images/charismo-tab-icon.png');
 
 function NativeLiquidGlassLayout() {
   const { t } = useTranslation();
@@ -86,16 +81,12 @@ function NativeLiquidGlassLayout() {
           href={tab.name === 'index' ? '/' : `/${tab.name}`}
         >
           <NativeLabel hidden />
-          {tab.useCharismoIcon ? (
-            <NativeIcon src={charismoTabIcon} />
-          ) : (
-            <NativeIcon
-              sf={{
-                default: tab.sfSymbol as any,
-                selected: tab.sfSymbolFocused as any,
-              }}
-            />
-          )}
+          <NativeIcon
+            sf={{
+              default: tab.sfSymbol as any,
+              selected: tab.sfSymbolFocused as any,
+            }}
+          />
         </NativeTabs.Trigger>
       ))}
     </NativeTabs>
@@ -149,18 +140,16 @@ function BubbleTabButton({
   return (
     <Pressable onPress={handlePress} style={s.tab}>
       {focused && (
-        <View style={[s.activeIndicator, { backgroundColor: config.useCharismoIcon ? withOpacity('#E8435A', 0.15) : withOpacity(activeColor, 0.15) }]} />
+        <View style={[s.activeIndicator, {
+          backgroundColor: withOpacity(activeColor, 0.15),
+        }]} />
       )}
       <Animated.View style={animatedStyle}>
-        {config.useCharismoIcon ? (
-          <CharismoIcon size={22} color={focused ? '#E8435A' : inactiveColor} />
-        ) : (
-          <Ionicons
-            name={focused ? config.ioniconFocused : config.ionicon}
-            size={23}
-            color={color}
-          />
-        )}
+        <Ionicons
+          name={focused ? config.ioniconFocused : config.ionicon}
+          size={23}
+          color={color}
+        />
       </Animated.View>
     </Pressable>
   );

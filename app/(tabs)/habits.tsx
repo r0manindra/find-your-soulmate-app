@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
@@ -12,6 +13,7 @@ import { HabitCalendar } from '@/src/presentation/components/habits/habit-calend
 import { WeeklyReview } from '@/src/presentation/components/habits/weekly-review';
 import { useHabitStore } from '@/src/store/habit-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { createHabitEvent } from '@/src/services/calendar';
 import { getTopNudge } from '@/src/core/habit-nudges';
 import type { Habit } from '@/src/core/entities/habit-types';
 
@@ -22,19 +24,24 @@ const HabitRow = React.memo(function HabitRow({
   locale,
   isCompleted,
   streak,
+  specificTime,
   onToggle,
   onArchive,
+  onAddToCalendar,
   isDark,
 }: {
   habit: { id: string; emoji: string; title: { en: string; de: string } };
   locale: 'en' | 'de';
   isCompleted: boolean;
   streak: number;
+  specificTime?: string;
   onToggle: () => void;
   onArchive: () => void;
+  onAddToCalendar: () => void;
   isDark: boolean;
 }) {
   const scale = useSharedValue(1);
+  const swipeableRef = useRef<Swipeable>(null);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
@@ -48,34 +55,75 @@ const HabitRow = React.memo(function HabitRow({
     onToggle();
   };
 
-  const handleLongPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onArchive();
-  };
+  const renderRightActions = () => (
+    <View style={styles.swipeActions}>
+      <Pressable
+        onPress={() => {
+          swipeableRef.current?.close();
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onAddToCalendar();
+        }}
+        style={[styles.swipeAction, styles.calendarAction]}
+      >
+        <Ionicons name="calendar-outline" size={18} color="#fff" />
+      </Pressable>
+      <Pressable
+        onPress={() => {
+          swipeableRef.current?.close();
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          onArchive();
+        }}
+        style={[styles.swipeAction, styles.archiveAction]}
+      >
+        <Ionicons name="trash-outline" size={18} color="#fff" />
+      </Pressable>
+    </View>
+  );
 
   return (
-    <AnimatedPressable onPress={handlePress} onLongPress={handleLongPress} style={animatedStyle}>
-      <GlassCard style={styles.habitRow}>
-        <View style={styles.habitContent}>
-          <View style={[styles.checkbox, isDark && styles.checkboxDark, isCompleted && styles.checkboxChecked]}>
-            {isCompleted && <Ionicons name="checkmark" size={16} color="#fff" />}
-          </View>
-          <Text style={styles.habitEmoji}>{habit.emoji}</Text>
-          <Text
-            style={[styles.habitTitle, isDark && styles.habitTitleDark, isCompleted && styles.habitTitleCompleted]}
-            numberOfLines={1}
-          >
-            {habit.title[locale]}
-          </Text>
-          {streak > 0 && (
-            <View style={styles.streakBadge}>
-              <Text style={styles.streakIcon}>🔥</Text>
-              <Text style={styles.streakText}>{streak}</Text>
+    <View style={styles.swipeContainer}>
+      <Swipeable
+        ref={swipeableRef}
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        friction={2}
+      >
+        <AnimatedPressable onPress={handlePress} style={animatedStyle}>
+          <GlassCard style={styles.habitRow}>
+            <View style={styles.habitContent}>
+              <View style={[styles.checkbox, isDark && styles.checkboxDark, isCompleted && styles.checkboxChecked]}>
+                {isCompleted && <Ionicons name="checkmark" size={16} color="#fff" />}
+              </View>
+              <Text style={styles.habitEmoji}>{habit.emoji}</Text>
+              <Text
+                style={[styles.habitTitle, isDark && styles.habitTitleDark, isCompleted && styles.habitTitleCompleted]}
+                numberOfLines={1}
+              >
+                {habit.title[locale]}
+              </Text>
+              {specificTime && (
+                <View style={styles.timeBadge}>
+                  <Text style={styles.timeBadgeText}>
+                    {(() => {
+                      const [h, m] = specificTime.split(':').map(Number);
+                      const ampm = h >= 12 ? 'PM' : 'AM';
+                      const h12 = h % 12 || 12;
+                      return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+                    })()}
+                  </Text>
+                </View>
+              )}
+              {streak > 0 && (
+                <View style={styles.streakBadge}>
+                  <Text style={styles.streakIcon}>🔥</Text>
+                  <Text style={styles.streakText}>{streak}</Text>
+                </View>
+              )}
             </View>
-          )}
-        </View>
-      </GlassCard>
-    </AnimatedPressable>
+          </GlassCard>
+        </AnimatedPressable>
+      </Swipeable>
+    </View>
   );
 });
 
@@ -183,22 +231,43 @@ export default function HabitsScreen() {
     [toggleCompletion, dateStr]
   );
 
-  const handleArchive = useCallback(
+  const handleArchiveHabit = useCallback(
     (habitId: string) => {
-      Alert.alert(
-        locale === 'de' ? 'Optionen' : 'Options',
-        '',
-        [
-          { text: locale === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
-          {
-            text: locale === 'de' ? 'Archivieren' : 'Archive',
-            style: 'destructive',
-            onPress: () => archiveHabit(habitId),
-          },
-        ]
-      );
+      archiveHabit(habitId);
     },
-    [locale, archiveHabit, setHabitSchedule]
+    [archiveHabit]
+  );
+
+  const handleAddToCalendar = useCallback(
+    async (habitId: string) => {
+      const habit = habits.find((h) => h.id === habitId);
+      if (!habit) return;
+      let startHour = 9;
+      if (habit.specificTime) {
+        const [h] = habit.specificTime.split(':').map(Number);
+        startHour = h;
+      } else if (habit.scheduledTime === 'morning') {
+        startHour = 8;
+      } else if (habit.scheduledTime === 'afternoon') {
+        startHour = 14;
+      } else if (habit.scheduledTime === 'evening') {
+        startHour = 19;
+      }
+      const startMinute = habit.specificTime
+        ? parseInt(habit.specificTime.split(':')[1], 10)
+        : 0;
+      const success = await createHabitEvent({
+        title: `${habit.emoji} ${habit.title[locale]}`,
+        startHour,
+        startMinute,
+        scheduledDays: habit.scheduledDays,
+        locale,
+      });
+      if (success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    },
+    [habits, locale]
   );
 
   const openModal = useCallback(() => setShowModal(true), []);
@@ -322,8 +391,10 @@ export default function HabitsScreen() {
                       locale={locale}
                       isCompleted={completed}
                       streak={current}
+                      specificTime={habit.specificTime}
                       onToggle={() => handleToggle(habit.id)}
-                      onArchive={() => handleArchive(habit.id)}
+                      onArchive={() => handleArchiveHabit(habit.id)}
+                      onAddToCalendar={() => handleAddToCalendar(habit.id)}
                       isDark={isDark}
                     />
                   );
@@ -400,6 +471,15 @@ const styles = StyleSheet.create({
 
   // Habits list
   habitsList: { gap: 8, marginBottom: 8 },
+  swipeContainer: { borderRadius: 20, overflow: 'hidden' },
+  swipeActions: { flexDirection: 'row', alignItems: 'stretch' },
+  swipeAction: {
+    width: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarAction: { backgroundColor: '#0EA5E9' },
+  archiveAction: { backgroundColor: '#EF4444' },
   habitRow: { marginBottom: 0 },
   habitContent: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   checkbox: {
@@ -415,6 +495,11 @@ const styles = StyleSheet.create({
   habitTitle: { flex: 1, fontSize: 16, fontWeight: '600', color: '#171717' },
   habitTitleDark: { color: '#F5F5F5' },
   habitTitleCompleted: { color: '#A3A3A3', textDecorationLine: 'line-through' },
+  timeBadge: {
+    backgroundColor: 'rgba(232,67,90,0.08)', borderRadius: 8,
+    paddingHorizontal: 6, paddingVertical: 2,
+  },
+  timeBadgeText: { fontSize: 11, fontWeight: '600', color: '#E8435A' },
   streakBadge: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   streakIcon: { fontSize: 14 },
   streakText: { fontSize: 13, fontWeight: '700', color: '#FF7854' },

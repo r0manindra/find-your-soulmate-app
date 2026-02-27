@@ -86,7 +86,7 @@
       "introvert": "My couch, my cat, my Netflix. People are... a lot.",
       "ambivert": "I'm okay in groups but I need alone time to recover.",
       "extrovert": "If there's no party, I AM the party. I collect humans.",
-      "deepIntrovert": "I go outside sometimes. When my WiFi is down.",
+      "deepIntrovert": "I ghost plans, avoid calls, and need a week to recover from a coffee date.",
       "footnote": "No judgment. Okay, a little judgment."
     },
     "ageGroup": {
@@ -107,12 +107,12 @@
         "mastered": "I AM the routine. She asks ME for product recs."
       },
       "female": {
-        "title": "Real talk: how's your confidence routine?",
-        "subtitle": "Self-care, style, the energy you bring into a room.",
-        "none": "I roll out of bed and hope for the best.",
-        "some": "I try, but my confidence is... inconsistent.",
-        "solid": "I feel good most days. My vibe is pretty put-together.",
-        "mastered": "I walk in and the room adjusts."
+        "title": "Real talk: how's your style game?",
+        "subtitle": "Skincare, outfits, hair: the stuff he notices first.",
+        "none": "Messy bun, no makeup, hope nobody looks too close.",
+        "some": "I have my go-to looks but I wouldn't call it a 'routine'.",
+        "solid": "Skincare on lock, outfits curated, I get compliments.",
+        "mastered": "I AM the Pinterest board. People screenshot my outfits."
       }
     },
     "skillLevel": {
@@ -254,6 +254,54 @@
   },
   "phases": {
     "theBasics": "The Basics"
+  },
+  "exercises": {
+    "title": "Practice Modes",
+    "subtitle": "Sharpen your skills with AI exercises",
+    "openingLineLab": "Opening Line Lab",
+    "conversationPingPong": "Conversation Ping-Pong",
+    "rejectionGym": "Rejection Gym",
+    "dateSimulator": "Date Simulator",
+    "flirtyBanter": "Flirty Banter",
+    "endExercise": "End Exercise",
+    "exerciseStarted": "Exercise mode started. Let's practice!",
+    "exerciseEnded": "Exercise ended. Great practice!"
+  },
+  "phrasebook": {
+    "title": "Flirting Phrasebook",
+    "subtitle": "Curated lines, compliments & conversation starters",
+    "phrases": "phrases",
+    "saved": "Saved",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "whyItWorks": "Why it works",
+    "noSavedPhrases": "No saved phrases",
+    "categories": {
+      "openingLines": "Opening Lines",
+      "compliments": "Genuine Compliments",
+      "conversationDeepeners": "Conversation Deepeners",
+      "wittyResponses": "Witty Responses",
+      "smartVocabulary": "Smart Vocabulary",
+      "closingLines": "Closing Lines"
+    }
+  },
+  "quiz": {
+    "title": "Chapter Quiz",
+    "generating": "Generating your quiz...",
+    "question": "Question {{current}} of {{total}}",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "next": "Next",
+    "seeResults": "See Results",
+    "results": "Your Score",
+    "complete": "Complete Chapter",
+    "retake": "Retake Quiz",
+    "error": "Couldn't generate quiz. Try again.",
+    "grade5": "Perfect score! You nailed this chapter.",
+    "grade4": "Great job! You really understand the material.",
+    "grade3": "Solid! You got the key concepts.",
+    "grade2": "Good start — revisiting the lessons might help.",
+    "grade1": "No worries — review the chapter and try again!"
   },
   "graduate": {
     "title": "Congratulations!",

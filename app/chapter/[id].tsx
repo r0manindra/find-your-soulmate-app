@@ -15,6 +15,7 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
+import { QuizModal } from '@/src/presentation/components/quiz/quiz-modal';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -24,10 +25,21 @@ import { chapters } from '@/src/data/content/chapters';
 import { chapterLessons } from '@/src/data/content/chapter-lessons';
 import { chapterLessonsDe } from '@/src/data/content/chapter-lessons-de';
 import { getCharacter } from '@/src/data/content/coach-characters';
+import { getBooksForChapter } from '@/src/data/content/books';
 import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function formatParagraphs(text: string): string[] {
+  // Split on ". " followed by a capital letter — groups ~2-3 sentences per paragraph
+  const sentences = text.split(/(?<=\.)\s+(?=[A-ZÄÖÜ"])/);
+  const paragraphs: string[] = [];
+  for (let i = 0; i < sentences.length; i += 3) {
+    paragraphs.push(sentences.slice(i, i + 3).join(' '));
+  }
+  return paragraphs;
+}
 
 interface CoachMessage {
   id: string;
@@ -60,10 +72,13 @@ export default function ChapterDetailScreen() {
   const insets = useSafeAreaInsets();
 
   const [coachVisible, setCoachVisible] = useState(false);
+  const [quizVisible, setQuizVisible] = useState(false);
+  const quizScore = progressStore.quizScores[chapterId];
   const [coachMessages, setCoachMessages] = useState<CoachMessage[]>([]);
   const [coachInput, setCoachInput] = useState('');
   const [coachLoading, setCoachLoading] = useState(false);
   const coachListRef = useRef<FlatList>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const activeCharacter = getCharacter(selectedCharacterId);
 
   const chapter = useMemo(() => chapters.find((c) => c.id === chapterId), [chapterId]);
@@ -82,6 +97,8 @@ export default function ChapterDetailScreen() {
     return base;
   }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);
+  const prevChapter = useMemo(() => chapters.find((c) => c.id === chapterId - 1), [chapterId]);
+  const nextChapterNav = useMemo(() => chapters.find((c) => c.id === chapterId + 1), [chapterId]);
 
   // Generate suggestion chips from chapter exercises
   const suggestionChips = useMemo(() => {
@@ -175,11 +192,16 @@ export default function ChapterDetailScreen() {
           content: response,
         }]);
       }
-    } catch {
+    } catch (err: any) {
+      const errorMsg = err?.status === 429
+        ? (locale === 'de' ? 'Nachrichtenlimit erreicht. Upgrade auf Premium für unbegrenzte Nachrichten.' : 'Message limit reached. Upgrade to Premium for unlimited messages.')
+        : err?.status === 403
+          ? (locale === 'de' ? 'Premium erforderlich für diesen Charakter.' : 'Premium required for this character.')
+          : (locale === 'de' ? 'Verbindungsfehler. Tippe um es erneut zu versuchen.' : 'Connection error. Tap to retry.');
       setCoachMessages((prev) => [...prev, {
-        id: String(Date.now() + 1),
+        id: `error-${Date.now()}`,
         role: 'assistant',
-        content: locale === 'de' ? 'Etwas ist schiefgelaufen. Bitte versuche es erneut.' : 'Something went wrong. Please try again.',
+        content: errorMsg,
       }]);
     } finally {
       setCoachLoading(false);
@@ -204,45 +226,107 @@ export default function ChapterDetailScreen() {
     if (isCompleted) {
       uncompleteChapter(chapterId);
     } else {
+      setQuizVisible(true);
+    }
+  };
+
+  const handleQuizComplete = (score: number) => {
+    progressStore.saveQuizScore(chapterId, score);
+    if (!isCompleted) {
       completeChapter(chapterId);
     }
   };
 
   const showChips = coachMessages.length === 0 && !coachLoading;
 
+  const handleRetry = useCallback(() => {
+    // Find the last user message and resend
+    const lastUserMsg = [...coachMessages].reverse().find((m) => m.role === 'user');
+    if (!lastUserMsg) return;
+    // Remove error messages
+    setCoachMessages((prev) => prev.filter((m) => !m.id.startsWith('error-')));
+    sendCoachMsg(lastUserMsg.content);
+  }, [coachMessages, sendCoachMsg]);
+
   const renderCoachMessage = ({ item }: { item: CoachMessage }) => {
     const isUser = item.role === 'user';
+    const isError = item.id.startsWith('error-');
     return (
-      <View style={[styles.coachMsgRow, isUser && styles.coachMsgRowUser]}>
-        {!isUser && (
-          <View style={[styles.coachAvatar, { backgroundColor: `${activeCharacter.color}15` }]}>
-            <CharismoIcon size={16} color={activeCharacter.color} />
+      <Pressable
+        onPress={isError ? handleRetry : undefined}
+        disabled={!isError}
+      >
+        <View style={[styles.coachMsgRow, isUser && styles.coachMsgRowUser]}>
+          {!isUser && (
+            <View style={[styles.coachAvatar, { backgroundColor: `${activeCharacter.color}15` }]}>
+              <CharismoIcon size={16} color={activeCharacter.color} />
+            </View>
+          )}
+          <View style={[
+            styles.coachBubble,
+            isUser ? styles.coachBubbleUser : [styles.coachBubbleAI, isDark && styles.coachBubbleAIDark],
+            isError && styles.coachBubbleError,
+          ]}>
+            <Text style={[styles.coachMsgText, isDark && !isUser && styles.coachMsgTextDark, isUser && styles.coachMsgTextUser]}>
+              {item.content}
+            </Text>
+            {isError && (
+              <View style={styles.retryRow}>
+                <Ionicons name="refresh" size={14} color="#E8435A" />
+                <Text style={styles.retryText}>
+                  {locale === 'de' ? 'Erneut versuchen' : 'Tap to retry'}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-        <View style={[
-          styles.coachBubble,
-          isUser ? styles.coachBubbleUser : [styles.coachBubbleAI, isDark && styles.coachBubbleAIDark],
-        ]}>
-          <Text style={[styles.coachMsgText, isDark && !isUser && styles.coachMsgTextDark, isUser && styles.coachMsgTextUser]}>
-            {item.content}
-          </Text>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* Header with chapter nav */}
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={[styles.backButton, isDark && styles.backButtonDark]}>
             <Ionicons name="arrow-back" size={24} color={isDark ? '#F5F5F5' : '#171717'} />
           </Pressable>
+          <View style={styles.chapterNav}>
+            {prevChapter ? (
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.replace(`/chapter/${prevChapter.id}`);
+                }}
+                style={[styles.chapterNavBtn, isDark && styles.chapterNavBtnDark]}
+              >
+                <Ionicons name="chevron-back" size={16} color="#E8435A" />
+                <Text style={styles.chapterNavText} numberOfLines={1}>
+                  {prevChapter.id}
+                </Text>
+              </Pressable>
+            ) : null}
+            {nextChapterNav ? (
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.replace(`/chapter/${nextChapterNav.id}`);
+                }}
+                style={[styles.chapterNavBtn, isDark && styles.chapterNavBtnDark]}
+              >
+                <Text style={styles.chapterNavText} numberOfLines={1}>
+                  {nextChapterNav.id}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color="#E8435A" />
+              </Pressable>
+            ) : null}
+          </View>
         </View>
 
         {/* Chapter intro */}
@@ -279,7 +363,11 @@ export default function ChapterDetailScreen() {
               </View>
               <Text style={[styles.lessonTitle, isDark && styles.lessonTitleDark]}>{l.title}</Text>
             </View>
-            <Text style={[styles.lessonContent, isDark && styles.lessonContentDark]}>{l.content}</Text>
+            {formatParagraphs(l.content).map((para, pIdx) => (
+              <Text key={pIdx} style={[styles.lessonContent, isDark && styles.lessonContentDark, pIdx > 0 && { marginTop: 10 }]}>
+                {para}
+              </Text>
+            ))}
           </GlassCard>
         ))}
 
@@ -293,7 +381,11 @@ export default function ChapterDetailScreen() {
               <Ionicons name="flash" size={18} color="#E8435A" />
               <Text style={[styles.exerciseTitle, isDark && styles.exerciseTitleDark]}>{ex.title}</Text>
             </View>
-            <Text style={[styles.exerciseDescription, isDark && styles.exerciseDescriptionDark]}>{ex.description}</Text>
+            {formatParagraphs(ex.description).map((para, pIdx) => (
+              <Text key={pIdx} style={[styles.exerciseDescription, isDark && styles.exerciseDescriptionDark, pIdx > 0 && { marginTop: 10 }]}>
+                {para}
+              </Text>
+            ))}
           </GlassCard>
         ))}
 
@@ -305,11 +397,58 @@ export default function ChapterDetailScreen() {
           <Text style={[styles.takeawayText, isDark && styles.takeawayTextDark]}>"{lesson.keyTakeaway}"</Text>
         </GlassCard>
 
+        {/* Chapter-specific book recommendations */}
+        {(() => {
+          const chapterBooks = getBooksForChapter(chapterId);
+          if (chapterBooks.length === 0) return null;
+          return (
+            <>
+              <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                {locale === 'de' ? 'Passende Bücher' : 'Recommended Reading'}
+              </Text>
+              {chapterBooks.map((book) => (
+                <Pressable
+                  key={book.id}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/books');
+                  }}
+                  style={styles.booksLinkContainer}
+                >
+                  <GlassCard style={styles.booksLinkCard}>
+                    <View style={styles.booksLinkRow}>
+                      <View style={styles.booksLinkIcon}>
+                        <Text style={{ fontSize: 20 }}>{book.emoji}</Text>
+                      </View>
+                      <View style={styles.booksLinkInfo}>
+                        <Text style={[styles.booksLinkTitle, isDark && { color: '#F5F5F5' }]} numberOfLines={1}>
+                          {book.title}
+                        </Text>
+                        <Text style={styles.booksLinkSubtitle} numberOfLines={1}>
+                          {locale === 'de' ? 'von' : 'by'} {book.author}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />
+                    </View>
+                  </GlassCard>
+                </Pressable>
+              ))}
+            </>
+          );
+        })()}
+
         {/* Habit suggestions for this chapter */}
-        <ChapterHabitsSheet chapterId={chapterId} locale={locale} />
+        <ChapterHabitsSheet chapterId={chapterId} locale={locale} isDark={isDark} />
 
         {/* Action button */}
         <View style={styles.actionContainer}>
+          {isCompleted && quizScore != null && (
+            <View style={styles.quizScoreBadge}>
+              <Text style={styles.quizScoreText}>
+                {quizScore}/5 {quizScore === 5 ? '\uD83C\uDFC6' : quizScore >= 4 ? '\u2B50' : quizScore >= 3 ? '\uD83D\uDC4D' : '\uD83D\uDCAA'}
+              </Text>
+            </View>
+          )}
           <BrandButton
             title={
               isCompleted
@@ -319,6 +458,20 @@ export default function ChapterDetailScreen() {
             variant={isCompleted ? 'secondary' : 'primary'}
             onPress={handleToggleComplete}
           />
+          {isCompleted && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setQuizVisible(true);
+              }}
+              style={[styles.retakeButton, isDark && styles.retakeButtonDark]}
+            >
+              <Ionicons name="refresh" size={16} color="#E8435A" />
+              <Text style={styles.retakeButtonText}>
+                {locale === 'de' ? 'Quiz wiederholen' : 'Retake Quiz'}
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Next Chapter card */}
@@ -330,7 +483,7 @@ export default function ChapterDetailScreen() {
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                router.push(`/chapter/${nextChapter.id}`);
+                router.replace(`/chapter/${nextChapter.id}`);
               }}
               style={styles.nextChapterContainer}
             >
@@ -380,11 +533,19 @@ export default function ChapterDetailScreen() {
           style={styles.fabGradient}
         >
           <CharismoIcon size={22} color="#fff" />
-          <Text style={styles.fabText}>
-            {locale === 'de' ? 'Coach fragen' : 'Ask Coach'}
-          </Text>
         </LinearGradient>
       </Pressable>
+
+      {/* Quiz Modal */}
+      <QuizModal
+        visible={quizVisible}
+        onClose={() => setQuizVisible(false)}
+        chapterId={chapterId}
+        locale={locale}
+        gender={userGender}
+        isDark={isDark}
+        onComplete={handleQuizComplete}
+      />
 
       {/* Coach Panel Modal */}
       <Modal
@@ -397,6 +558,7 @@ export default function ChapterDetailScreen() {
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
           >
             {/* Coach panel header */}
             <View style={styles.coachHeader}>
@@ -470,7 +632,7 @@ export default function ChapterDetailScreen() {
             <BlurView
               intensity={isDark ? 40 : 80}
               tint={isDark ? 'dark' : 'light'}
-              style={styles.coachInputBlur}
+              style={[styles.coachInputBlur, { paddingBottom: insets.bottom + 8 }]}
             >
               <View style={styles.coachInputRow}>
                 <TextInput
@@ -509,6 +671,9 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 8,
@@ -523,6 +688,30 @@ const styles = StyleSheet.create({
   },
   backButtonDark: {
     backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+
+  // Chapter nav (inline in header)
+  chapterNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chapterNavBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+  },
+  chapterNavBtnDark: {
+    backgroundColor: 'rgba(232,67,90,0.15)',
+  },
+  chapterNavText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#E8435A',
   },
 
   // Intro card
@@ -675,10 +864,70 @@ const styles = StyleSheet.create({
     color: '#F5F5F5',
   },
 
+  // Books link
+  booksLinkContainer: { paddingHorizontal: 20, marginBottom: 16 },
+  booksLinkCard: { marginHorizontal: 0 },
+  booksLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  booksLinkIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(232,67,90,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  booksLinkInfo: { flex: 1 },
+  booksLinkTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+  },
+  booksLinkSubtitle: {
+    fontSize: 13,
+    color: '#737373',
+    marginTop: 2,
+  },
+
   // Action
   actionContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
+  },
+  quizScoreBadge: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  quizScoreText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#E8435A',
+  },
+  retakeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    marginTop: 8,
+    borderRadius: 14,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+  },
+  retakeButtonDark: {
+    backgroundColor: 'rgba(232,67,90,0.15)',
+  },
+  retakeButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#E8435A',
   },
 
   // Next Chapter
@@ -750,17 +999,11 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   fabGradient: {
-    flexDirection: 'row',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 50,
-  },
-  fabText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
+    justifyContent: 'center',
   },
 
   // Coach Panel
@@ -869,6 +1112,14 @@ const styles = StyleSheet.create({
   coachMsgTextDark: { color: '#F5F5F5' },
   coachMsgTextUser: { color: '#fff' },
   coachLoadingText: { fontSize: 14, color: '#A3A3A3', fontStyle: 'italic' },
+  coachBubbleError: {
+    borderColor: 'rgba(232,67,90,0.2)',
+    borderWidth: 1,
+  },
+  retryRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8,
+  },
+  retryText: { fontSize: 12, fontWeight: '600', color: '#E8435A' },
 
   // Input area
   coachInputBlur: {
@@ -878,7 +1129,7 @@ const styles = StyleSheet.create({
   },
   coachInputRow: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12,
+    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16,
   },
   coachInput: {
     flex: 1, minHeight: 40, maxHeight: 100,

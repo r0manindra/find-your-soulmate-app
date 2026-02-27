@@ -8,7 +8,7 @@ interface CharismoIconProps {
 
 export function CharismoIcon({ size = 24, color = '#E8435A' }: CharismoIconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 500.65 500.76">
+    <Svg width={size} height={size} viewBox="-130 -130 760 760">
       <G transform="translate(-53.23 -113.28)">
         <Path
           fill={color}

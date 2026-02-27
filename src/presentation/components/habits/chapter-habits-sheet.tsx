@@ -9,9 +9,10 @@ import { getPresetsForChapter } from '@/src/data/content/preset-habits';
 interface ChapterHabitsSheetProps {
   chapterId: number;
   locale: 'en' | 'de';
+  isDark?: boolean;
 }
 
-export function ChapterHabitsSheet({ chapterId, locale }: ChapterHabitsSheetProps) {
+export function ChapterHabitsSheet({ chapterId, locale, isDark = false }: ChapterHabitsSheetProps) {
   const { addHabitFromPreset, isPresetAlreadyAdded } = useHabitStore();
   const presets = getPresetsForChapter(chapterId);
 
@@ -27,7 +28,7 @@ export function ChapterHabitsSheet({ chapterId, locale }: ChapterHabitsSheetProp
     <GlassCard style={styles.card}>
       <View style={styles.header}>
         <Ionicons name="checkmark-circle" size={18} color="#E8435A" />
-        <Text style={styles.title}>
+        <Text style={[styles.title, isDark && { color: '#F5F5F5' }]}>
           {locale === 'de' ? 'Mach daraus eine Gewohnheit' : 'Build This Into a Habit'}
         </Text>
       </View>
@@ -37,11 +38,11 @@ export function ChapterHabitsSheet({ chapterId, locale }: ChapterHabitsSheetProp
           <Pressable
             key={preset.id}
             onPress={() => handleAdd(preset)}
-            style={styles.row}
+            style={[styles.row, isDark && { borderTopColor: 'rgba(255,255,255,0.08)' }]}
             disabled={added}
           >
             <Text style={styles.emoji}>{preset.emoji}</Text>
-            <Text style={[styles.presetTitle, added && styles.presetTitleAdded]} numberOfLines={1}>
+            <Text style={[styles.presetTitle, isDark && { color: '#F5F5F5' }, added && styles.presetTitleAdded]} numberOfLines={1}>
               {preset.title[locale]}
             </Text>
             {added ? (

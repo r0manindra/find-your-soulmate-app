@@ -23,6 +23,9 @@ import { getPersonalization } from '@/src/core/personalization';
 import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
+import { ExerciseModeSelector } from '@/src/presentation/components/coach/exercise-mode-selector';
+import { ExerciseBanner } from '@/src/presentation/components/coach/exercise-banner';
+import { getExerciseMode } from '@/src/data/content/exercise-modes';
 
 const FALLBACK_RESPONSES = [
   "Good question. Here's the thing: confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
@@ -90,6 +93,9 @@ export default function CoachScreen() {
     };
   }, [progressStore, habitStore, userProfile, locale, chapterOrder]);
 
+  const activeExerciseMode = useUIStore((s) => s.activeExerciseMode);
+  const setExerciseMode = useUIStore((s) => s.setExerciseMode);
+
   const [showCharacterPicker, setShowCharacterPicker] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -139,7 +145,7 @@ export default function CoachScreen() {
   }, [setChatInputFocused]);
 
   // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
-  const inputBottomPadding = (isInputFocused && keyboardVisible) ? 4 : tabBarHeight + 8;
+  const inputBottomPadding = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight + 8;
 
   // Load chat history from backend if logged in
   useEffect(() => {
@@ -194,7 +200,7 @@ export default function CoachScreen() {
     try {
       if (isLoggedIn) {
         const context = buildJourneyContext();
-        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId, context);
+        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId, context, activeExerciseMode ?? undefined);
         setMessagesUsed(data.messagesUsed);
         setMessagesLimit(data.messagesLimit);
 
@@ -232,7 +238,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode]);
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
@@ -261,7 +267,7 @@ export default function CoachScreen() {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={keyboardVisible ? 0 : 90}
+        keyboardVerticalOffset={0}
       >
         {/* Header with character selector */}
         <Pressable onPress={() => setShowCharacterPicker(true)} style={styles.header}>
@@ -301,6 +307,23 @@ export default function CoachScreen() {
             <Text style={styles.upgradeBannerText}>{t('coach.upgradeForUnlimited')}</Text>
             <Ionicons name="chevron-forward" size={14} color="#E8435A" />
           </Pressable>
+        )}
+
+        {/* Exercise mode selector */}
+        {isLoggedIn && <ExerciseModeSelector />}
+
+        {/* Active exercise banner */}
+        {activeExerciseMode && (
+          <ExerciseBanner
+            onEndExercise={() => {
+              const mode = getExerciseMode(activeExerciseMode);
+              const debriefMsg = locale === 'de'
+                ? 'Bitte gib mir ein abschließendes Feedback und eine Zusammenfassung der Übung.'
+                : 'Please give me a final debrief and summary of this exercise.';
+              sendMessage(debriefMsg);
+              setExerciseMode(null);
+            }}
+          />
         )}
 
         {/* Messages */}

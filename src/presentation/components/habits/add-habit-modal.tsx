@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, ScrollView, Pressable, Modal, Platform, Linking, Alert, StyleSheet,
+  View, Text, TextInput, ScrollView, Pressable, Modal, Alert, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { presetHabits } from '@/src/data/content/preset-habits';
 import { phases } from '@/src/data/content/chapters';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import type { HabitTimeSlot } from '@/src/core/entities/habit-types';
+import { createHabitEvent } from '@/src/services/calendar';
 
 const EMOJI_GRID = [
   '\u{1F525}', '\u{1F4AA}', '\u{1F9E0}', '\u{1F4DD}', '\u{1F3C3}', '\u{1F9D8}', '\u{1F4A7}', '\u{1F957}', '\u{1F60A}', '\u{1F3AF}',
@@ -91,6 +92,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
 
   const adjustHour = (delta: number) => {
     Haptics.selectionAsync();
+    setSelectedTime(null);
     if (specificHour === null) {
       setSpecificHour(9);
       return;
@@ -130,7 +132,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
     onClose();
   };
 
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = async () => {
     const title = selectedPreset ? selectedPreset.title[locale] : customName;
     const emoji = selectedPreset ? selectedPreset.emoji : customEmoji;
     const eventTitle = `${emoji} ${title}`;
@@ -148,26 +150,18 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
       startHour = 19;
     }
 
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, startMinute);
-    const end = new Date(start.getTime() + 30 * 60 * 1000);
-
-    if (Platform.OS === 'ios') {
-      const timestamp = start.getTime() / 1000;
-      Linking.openURL(`calshow:${timestamp}`).catch(() => {
-        Alert.alert(
-          locale === 'de' ? 'Kalender' : 'Calendar',
-          locale === 'de' ? 'Kalender-App konnte nicht geoffnet werden' : 'Could not open Calendar app'
-        );
-      });
-    } else {
-      const intentUrl = `content://com.android.calendar/events?title=${encodeURIComponent(eventTitle)}&beginTime=${start.getTime()}&endTime=${end.getTime()}`;
-      Linking.openURL(intentUrl).catch(() => {
-        Alert.alert(
-          locale === 'de' ? 'Kalender' : 'Calendar',
-          locale === 'de' ? 'Kalender-App konnte nicht geoffnet werden' : 'Could not open Calendar app'
-        );
-      });
+    const success = await createHabitEvent({
+      title: eventTitle,
+      startHour,
+      startMinute,
+      scheduledDays: selectedDays.length === 7 ? undefined : selectedDays,
+      locale,
+    });
+    if (success) {
+      Alert.alert(
+        locale === 'de' ? 'Kalender' : 'Calendar',
+        locale === 'de' ? 'Event wurde zum Kalender hinzugefügt' : 'Event added to calendar',
+      );
     }
   };
 
@@ -248,6 +242,8 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
                   onPress={() => {
                     Haptics.selectionAsync();
                     setSelectedTime((prev) => (prev === opt.key ? null : opt.key));
+                    setSpecificHour(null);
+                    setSpecificMinute(0);
                   }}
                   style={[
                     styles.timeButton,
@@ -280,6 +276,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
                   Haptics.selectionAsync();
                   setSpecificHour(9);
                   setSpecificMinute(0);
+                  setSelectedTime(null);
                 }}
                 style={[styles.specificTimeButton, { backgroundColor: surfaceBg }]}
               >

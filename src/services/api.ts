@@ -165,7 +165,8 @@ export interface JourneyContext {
 export async function sendCoachMessage(
   message: string,
   characterId: string = 'charismo',
-  context?: JourneyContext
+  context?: JourneyContext,
+  exerciseMode?: string
 ) {
   return request<{
     response: string;
@@ -173,7 +174,12 @@ export async function sendCoachMessage(
     messagesLimit: number | null;
   }>('/coach/message', {
     method: 'POST',
-    body: JSON.stringify({ message, characterId, ...(context ? { context } : {}) }),
+    body: JSON.stringify({
+      message,
+      characterId,
+      ...(context ? { context } : {}),
+      ...(exerciseMode ? { exerciseMode } : {}),
+    }),
   });
 }
 
@@ -181,6 +187,28 @@ export async function getCoachHistory() {
   return request<{
     messages: { id: string; role: string; content: string; createdAt: string }[];
   }>('/coach/history');
+}
+
+// Quiz
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export async function generateQuiz(chapterId: number, locale: string, gender: 'male' | 'female' | null) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    return await request<{ questions: QuizQuestion[] }>('/quiz/generate', {
+      method: 'POST',
+      body: JSON.stringify({ chapterId, locale, gender }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 // Subscription

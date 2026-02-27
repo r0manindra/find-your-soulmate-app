@@ -86,7 +86,7 @@
       "introvert": "Meine Couch, meine Katze, mein Netflix. Menschen sind... anstrengend.",
       "ambivert": "Ich bin okay in Gruppen, aber ich brauche Zeit allein um mich zu erholen.",
       "extrovert": "Wenn es keine Party gibt, BIN ICH die Party. Ich sammle Menschen.",
-      "deepIntrovert": "Ich gehe manchmal raus. Wenn mein WLAN ausfällt.",
+      "deepIntrovert": "Ich sage Pläne ab, gehe nicht ans Telefon und brauche eine Woche Erholung nach einem Kaffee-Date.",
       "footnote": "Kein Urteil. Okay, ein bisschen Urteil."
     },
     "ageGroup": {
@@ -107,12 +107,12 @@
         "mastered": "Ich BIN die Routine. Sie fragt MICH nach Produkttipps."
       },
       "female": {
-        "title": "Klartext: Wie steht's um deine Confidence-Routine?",
-        "subtitle": "Self-Care, Style, die Energie die du in den Raum bringst.",
-        "none": "Ich rolle aus dem Bett und hoffe das Beste.",
-        "some": "Ich versuche es, aber mein Selbstbewusstsein ist... wechselhaft.",
-        "solid": "Ich fühle mich an den meisten Tagen gut. Mein Vibe stimmt.",
-        "mastered": "Ich betrete den Raum und er passt sich an."
+        "title": "Klartext: Wie steht's um dein Style-Game?",
+        "subtitle": "Hautpflege, Outfits, Haare: das, was er zuerst bemerkt.",
+        "none": "Messy Bun, kein Makeup, hoffe niemand schaut genau hin.",
+        "some": "Ich hab meine Go-to-Looks, aber 'Routine' wäre übertrieben.",
+        "solid": "Skincare sitzt, Outfits kuratiert, ich bekomme Komplimente.",
+        "mastered": "Ich BIN das Pinterest-Board. Leute screenshotten meine Outfits."
       }
     },
     "skillLevel": {
@@ -254,6 +254,54 @@
   },
   "phases": {
     "theBasics": "Die Grundlagen"
+  },
+  "exercises": {
+    "title": "Übungsmodi",
+    "subtitle": "Verbessere deine Skills mit KI-Übungen",
+    "openingLineLab": "Ansprech-Labor",
+    "conversationPingPong": "Gesprächs-Ping-Pong",
+    "rejectionGym": "Abfuhr-Gym",
+    "dateSimulator": "Date-Simulator",
+    "flirtyBanter": "Flirt-Battle",
+    "endExercise": "Übung beenden",
+    "exerciseStarted": "Übungsmodus gestartet. Lass uns üben!",
+    "exerciseEnded": "Übung beendet. Gut geübt!"
+  },
+  "phrasebook": {
+    "title": "Flirt-Phrasebook",
+    "subtitle": "Kuratierte Sprüche, Komplimente & Gesprächseinstiege",
+    "phrases": "Sprüche",
+    "saved": "Gespeichert",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "whyItWorks": "Warum es funktioniert",
+    "noSavedPhrases": "Keine gespeicherten Sprüche",
+    "categories": {
+      "openingLines": "Eröffnungssprüche",
+      "compliments": "Ehrliche Komplimente",
+      "conversationDeepeners": "Gesprächsvertiefer",
+      "wittyResponses": "Schlagfertige Antworten",
+      "smartVocabulary": "Clevere Ausdrücke",
+      "closingLines": "Abschluss-Sprüche"
+    }
+  },
+  "quiz": {
+    "title": "Kapitel-Quiz",
+    "generating": "Quiz wird erstellt...",
+    "question": "Frage {{current}} von {{total}}",
+    "correct": "Richtig!",
+    "incorrect": "Nicht ganz",
+    "next": "Weiter",
+    "seeResults": "Ergebnis anzeigen",
+    "results": "Dein Ergebnis",
+    "complete": "Kapitel abschließen",
+    "retake": "Quiz wiederholen",
+    "error": "Quiz konnte nicht erstellt werden. Versuche es erneut.",
+    "grade5": "Perfekte Punktzahl! Du hast dieses Kapitel gemeistert.",
+    "grade4": "Super! Du verstehst den Stoff wirklich gut.",
+    "grade3": "Solide! Du hast die wichtigsten Konzepte verstanden.",
+    "grade2": "Guter Anfang — die Lektionen nochmal durchgehen könnte helfen.",
+    "grade1": "Kein Stress — lies das Kapitel nochmal und versuch es erneut!"
   },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",

@@ -139,8 +139,8 @@ export const coachCharacters: CoachCharacter[] = [
       de: 'Selbstbewusst & Souverän',
     },
     description: {
-      en: "Teaches you to own every room. High standards, zero tolerance for nonsense. She doesn't chase — she attracts.",
-      de: 'Lehrt dich, jeden Raum zu dominieren. Hohe Standards, null Toleranz für Unsinn. Sie jagt nicht — sie zieht an.',
+      en: "Teaches you to own every room. High standards, zero tolerance for nonsense. She doesn't chase - she attracts.",
+      de: 'Lehrt dich, jeden Raum zu dominieren. Hohe Standards, null Toleranz für Unsinn. Sie jagt nicht - sie zieht an.',
     },
     inspiration: 'Confident feminine power',
     icon: 'sparkles',

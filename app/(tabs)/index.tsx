@@ -256,6 +256,30 @@ export default function HomeScreen() {
           />
         </View>
 
+        {/* Phrasebook Link */}
+        <Animated.View entering={FadeInDown.delay(320).duration(400)}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/phrasebook' as any);
+            }}
+            style={[styles.phrasebookLink, isDark && styles.phrasebookLinkDark]}
+          >
+            <View style={styles.phrasebookIcon}>
+              <Ionicons name="chatbubble-ellipses" size={20} color="#8B5CF6" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
+                {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirting Phrasebook'}
+              </Text>
+              <Text style={[styles.phrasebookSubtitle, isDark && styles.phrasebookSubtitleDark]}>
+                {locale === 'de' ? 'Sprüche, Komplimente & mehr' : 'Lines, compliments & more'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />
+          </Pressable>
+        </Animated.View>
+
         <Animated.View entering={FadeInDown.delay(350).duration(400)}>
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
@@ -462,6 +486,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
+
+  // Phrasebook link
+  phrasebookLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    backgroundColor: 'rgba(139,92,246,0.06)',
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  phrasebookLinkDark: {
+    backgroundColor: 'rgba(139,92,246,0.12)',
+  },
+  phrasebookIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(139,92,246,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  phrasebookTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+  },
+  phrasebookTitleDark: { color: '#F5F5F5' },
+  phrasebookSubtitle: {
+    fontSize: 12,
+    color: '#737373',
+    marginTop: 2,
+  },
+  phrasebookSubtitleDark: { color: '#A3A3A3' },
 
   // Tip
   tipCard: { marginBottom: 16 },

@@ -305,10 +305,10 @@ export default function ProfileScreen() {
                 style={[styles.achievementCard, !unlocked && styles.achievementLocked]}
               >
                 <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                <Text style={[styles.achievementTitle, !unlocked && styles.lockedText]}>
+                <Text style={[styles.achievementTitle, isDark && styles.textDark, !unlocked && styles.lockedText]}>
                   {achievement.title[locale]}
                 </Text>
-                <Text style={[styles.achievementDesc, !unlocked && styles.lockedText]}>
+                <Text style={[styles.achievementDesc, isDark && { color: '#A3A3A3' }, !unlocked && styles.lockedText]}>
                   {achievement.description[locale]}
                 </Text>
                 <Text style={styles.achievementStatus}>
@@ -469,7 +469,7 @@ export default function ProfileScreen() {
 
         {/* Graduate button */}
         <GlassCard style={styles.graduateCard}>
-          <Ionicons name="school" size={48} color="#E8435A" />
+          <Ionicons name="school" size={48} color="#E8435A" style={{ textAlign: 'center', alignSelf: 'center' }} />
           <Text style={[styles.graduateTitle, isDark && styles.textDark]}>{t('profile.graduate')}</Text>
           <Text style={styles.graduateDesc}>{t('profile.graduateDesc')}</Text>
           <BrandButton
@@ -586,12 +586,12 @@ const styles = StyleSheet.create({
 
   // Achievements
   achievementsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
-  achievementCard: { width: '47%', alignItems: 'center', paddingVertical: 16 },
+  achievementCard: { width: '47%', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 8 },
   achievementLocked: { opacity: 0.4 },
-  achievementIcon: { fontSize: 32, marginBottom: 8 },
+  achievementIcon: { fontSize: 32, marginBottom: 8, textAlign: 'center' },
   achievementTitle: { fontSize: 14, fontWeight: '600', color: '#171717', textAlign: 'center' },
   achievementDesc: { fontSize: 12, color: '#737373', textAlign: 'center', marginTop: 4 },
-  achievementStatus: { fontSize: 11, fontWeight: '600', color: '#E8435A', marginTop: 8 },
+  achievementStatus: { fontSize: 11, fontWeight: '600', color: '#E8435A', marginTop: 8, textAlign: 'center' },
   lockedText: { color: '#A3A3A3' },
 
   // Settings
