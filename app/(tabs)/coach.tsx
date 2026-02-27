@@ -149,12 +149,13 @@ export default function CoachScreen() {
   // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
   const inputBottomPadding = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight;
 
-  // Ensure active conversation exists on mount
+  // Ensure active conversation always exists
+  const activeConvId = useChatHistoryStore((s) => s.activeConversationId);
   useEffect(() => {
-    if (!chatStore.activeConversationId || !chatStore.getActiveConversation()) {
+    if (!activeConvId || !chatStore.getActiveConversation()) {
       chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
     }
-  }, []);
+  }, [activeConvId]);
 
   // One-time migration: import from backend if logged in and store is empty
   useEffect(() => {

@@ -240,4 +240,27 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// POST /api/auth/dev-unlock — dev key to activate premium
+const DEV_KEY = 'charismo2026';
+
+router.post('/dev-unlock', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { key } = req.body;
+    if (key !== DEV_KEY) {
+      res.status(403).json({ error: 'Invalid key' });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { subscriptionStatus: 'PREMIUM' },
+    });
+
+    res.json({ success: true, subscriptionStatus: 'PREMIUM' });
+  } catch (err) {
+    console.error('Dev unlock error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

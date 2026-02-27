@@ -252,3 +252,10 @@ export async function getSubscriptionStatus() {
     freeCoachMessagesPerDay: number;
   }>('/subscription/status');
 }
+
+export async function devUnlock(key: string) {
+  return request<{ success: boolean; subscriptionStatus: string }>('/auth/dev-unlock', {
+    method: 'POST',
+    body: JSON.stringify({ key }),
+  });
+}

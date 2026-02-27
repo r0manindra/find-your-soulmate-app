@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, Linking, Modal, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TextInput, Pressable, Alert, Linking, Modal, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -30,6 +30,9 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const [devTapCount, setDevTapCount] = useState(0);
+  const [showDevUnlock, setShowDevUnlock] = useState(false);
+  const [devKey, setDevKey] = useState('');
 
   const unlockedAchievements = useMemo(
     () => achievements.filter((a) => a.condition(progress)),
@@ -485,6 +488,77 @@ export default function ProfileScreen() {
         <Pressable onPress={handleReset} style={styles.resetButton}>
           <Text style={styles.resetText}>{t('profile.resetProgress')}</Text>
         </Pressable>
+
+        {/* Version — tap 5x to reveal dev unlock */}
+        <Pressable
+          onPress={() => {
+            const next = devTapCount + 1;
+            if (next >= 5) {
+              setShowDevUnlock(true);
+              setDevTapCount(0);
+            } else {
+              setDevTapCount(next);
+            }
+          }}
+          style={styles.versionLabel}
+        >
+          <Text style={styles.versionText}>Charismo v1.0.0 (20)</Text>
+        </Pressable>
+
+        {/* Dev unlock modal */}
+        <Modal
+          visible={showDevUnlock}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => { setShowDevUnlock(false); setDevKey(''); }}
+        >
+          <View style={[styles.themeModalContainer, isDark && styles.themeModalContainerDark]}>
+            <View style={styles.themeModalHeader}>
+              <Text style={[styles.themeModalTitle, isDark && styles.textDark]}>
+                Dev Unlock
+              </Text>
+              <Pressable
+                onPress={() => { setShowDevUnlock(false); setDevKey(''); }}
+                style={[styles.themeModalClose, isDark && { backgroundColor: 'rgba(255,255,255,0.08)' }]}
+              >
+                <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
+              </Pressable>
+            </View>
+            <View style={{ paddingHorizontal: 20, gap: 16, marginTop: 20 }}>
+              <TextInput
+                style={[styles.devKeyInput, isDark && styles.devKeyInputDark]}
+                value={devKey}
+                onChangeText={setDevKey}
+                placeholder="Enter dev key..."
+                placeholderTextColor="#A3A3A3"
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+              <Pressable
+                onPress={async () => {
+                  if (devKey === 'charismo2026') {
+                    useAuthStore.getState().setSubscriptionStatus('PREMIUM');
+                    // Also update backend if logged in
+                    if (isLoggedIn) {
+                      api.devUnlock(devKey).catch(() => {});
+                    }
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    setShowDevUnlock(false);
+                    setDevKey('');
+                    Alert.alert('Premium Unlocked', 'All premium features are now active.');
+                  } else {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                    Alert.alert('Invalid Key', 'That key is not recognized.');
+                  }
+                }}
+                style={styles.devUnlockBtn}
+              >
+                <Text style={styles.devUnlockBtnText}>Unlock</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -689,4 +763,22 @@ const styles = StyleSheet.create({
   // Reset
   resetButton: { alignItems: 'center', paddingVertical: 16 },
   resetText: { fontSize: 15, color: '#A3A3A3', fontWeight: '500' },
+
+  // Version / dev unlock
+  versionLabel: { alignItems: 'center', paddingVertical: 12, marginBottom: 20 },
+  versionText: { fontSize: 12, color: '#D4D4D4' },
+  devKeyInput: {
+    backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 14,
+    paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: '#171717',
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  devKeyInputDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)', color: '#F5F5F5',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  devUnlockBtn: {
+    backgroundColor: '#E8435A', borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center',
+  },
+  devUnlockBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });

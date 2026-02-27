@@ -56,7 +56,8 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     const { message, characterId, context, exerciseMode } = messageSchema.parse(req.body);
 
     // Premium characters require premium subscription
-    if (characterId !== 'charismo') {
+    const FREE_CHARACTERS = ['charismo', 'bestfriend'];
+    if (!FREE_CHARACTERS.includes(characterId)) {
       const userForSub = await prisma.user.findUnique({
         where: { id: req.userId },
         select: { subscriptionStatus: true },
