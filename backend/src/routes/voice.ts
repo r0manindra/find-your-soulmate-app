@@ -164,6 +164,20 @@ router.post('/session', async (req: AuthRequest, res: Response) => {
 
     const systemPrompt = characterPrompt + voiceRules + contextNote;
 
+    // Map coach characters to distinct voices for personality
+    const characterVoiceMap: Record<string, string> = {
+      charismo: 'ash',        // warm, confident male
+      maverick: 'verse',      // bold, energetic male
+      gentleman: 'echo',      // smooth, refined male
+      playboy: 'ash',         // charismatic male
+      hypeman: 'verse',       // hype, energetic male
+      smooth: 'echo',         // suave male
+      bestfriend: 'shimmer',  // warm, supportive female
+      queen: 'coral',         // confident, regal female
+      enchantress: 'ballad',  // alluring, expressive female
+    };
+    const voice = characterVoiceMap[characterId] || 'ash';
+
     // Mint ephemeral token from OpenAI Realtime API
     const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
       method: 'POST',
@@ -172,8 +186,8 @@ router.post('/session', async (req: AuthRequest, res: Response) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini-realtime-preview',
-        voice: 'coral',
+        model: 'gpt-4o-realtime-preview',
+        voice,
         instructions: systemPrompt,
         input_audio_transcription: { model: 'whisper-1' },
         turn_detection: { type: 'server_vad' },

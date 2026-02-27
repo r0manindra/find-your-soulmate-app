@@ -4,7 +4,7 @@ import { createVoiceSession } from '@/src/services/api';
 export type VoiceSessionState = 'idle' | 'connecting' | 'connected' | 'error' | 'ended';
 
 const REALTIME_URL = 'https://api.openai.com/v1/realtime';
-const MODEL = 'gpt-4o-mini-realtime-preview';
+const MODEL = 'gpt-4o-realtime-preview';
 const MAX_SESSION_SECONDS = 600; // 10 minutes
 
 // Lazy-load react-native-webrtc to avoid crashing in Expo Go
