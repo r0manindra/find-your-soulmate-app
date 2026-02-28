@@ -3,14 +3,19 @@ import {
   View, Text, TextInput, ScrollView, Pressable, Modal, Alert, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useHabitStore } from '@/src/store/habit-store';
+import { useAuthStore } from '@/src/store/auth-store';
 import { presetHabits } from '@/src/data/content/preset-habits';
 import { phases } from '@/src/data/content/chapters';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
+import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import type { HabitTimeSlot } from '@/src/core/entities/habit-types';
 import { createHabitEvent } from '@/src/services/calendar';
+
+const FREE_HABIT_LIMIT = 5;
 
 const EMOJI_GRID = [
   '\u{1F525}', '\u{1F4AA}', '\u{1F9E0}', '\u{1F4DD}', '\u{1F3C3}', '\u{1F9D8}', '\u{1F4A7}', '\u{1F957}', '\u{1F60A}', '\u{1F3AF}',
@@ -35,7 +40,13 @@ interface AddHabitModalProps {
 }
 
 export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddHabitModalProps) {
-  const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded, setHabitSchedule } = useHabitStore();
+  const { addHabitFromPreset, addCustomHabit, isPresetAlreadyAdded, setHabitSchedule, getActiveHabits } = useHabitStore();
+  const isPro = useAuthStore((s) => s.isPro);
+  const router = useRouter();
+
+  const activeCount = getActiveHabits().length;
+  const isAtLimit = !isPro && activeCount >= FREE_HABIT_LIMIT;
+
   const [step, setStep] = useState<1 | 2>(1);
   const [customEmoji, setCustomEmoji] = useState('\u{1F525}');
   const [customName, setCustomName] = useState('');
@@ -60,6 +71,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
 
   const handleSelectPreset = (preset: typeof presetHabits[0]) => {
     if (isPresetAlreadyAdded(preset.id)) return;
+    if (isAtLimit) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedPreset(preset);
     setSelectedTime(null);
@@ -71,6 +83,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
 
   const handleCustomNext = () => {
     if (!customName.trim()) return;
+    if (isAtLimit) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedPreset(null);
     setSelectedTime(null);
@@ -218,6 +231,33 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
             <Ionicons name="close" size={24} color={textSecondary} />
           </Pressable>
         </View>
+
+        {isAtLimit && step === 1 && (
+          <View style={styles.limitBanner}>
+            <View style={styles.limitIcon}>
+              <Ionicons name="lock-closed" size={20} color="#E8435A" />
+            </View>
+            <Text style={[styles.limitTitle, isDark && { color: '#F5F5F5' }]}>
+              {locale === 'de'
+                ? `Du hast ${FREE_HABIT_LIMIT} von ${FREE_HABIT_LIMIT} Habits erreicht`
+                : `You've reached ${FREE_HABIT_LIMIT} of ${FREE_HABIT_LIMIT} habits`}
+            </Text>
+            <Text style={[styles.limitSubtitle, isDark && { color: '#A3A3A3' }]}>
+              {locale === 'de'
+                ? 'Werde Pro für unbegrenzte Habits'
+                : 'Upgrade to Pro for unlimited habits'}
+            </Text>
+            <BrandButton
+              title={locale === 'de' ? 'Pro freischalten' : 'Unlock Pro'}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                handleClose();
+                router.push('/paywall' as any);
+              }}
+              style={styles.limitButton}
+            />
+          </View>
+        )}
 
         {step === 2 ? (
           <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -656,4 +696,41 @@ const styles = StyleSheet.create({
   presetInfo: { flex: 1 },
   presetTitle: { fontSize: 15, fontWeight: '600' },
   presetTitleAdded: { color: '#A3A3A3' },
+
+  // Limit banner
+  limitBanner: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(232,67,90,0.06)',
+  },
+  limitIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(232,67,90,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  limitTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#171717',
+    textAlign: 'center',
+    letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  limitSubtitle: {
+    fontSize: 14,
+    color: '#737373',
+    textAlign: 'center',
+    marginBottom: 18,
+  },
+  limitButton: {
+    width: '100%',
+  },
 });

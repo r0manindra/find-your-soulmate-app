@@ -51,6 +51,7 @@ function AchievementListener() {
       streak: store.streak,
       lastActiveDate: store.lastActiveDate,
       graduated: store.graduated,
+      quizScores: store.quizScores,
     };
 
     const newlyUnlocked: Achievement[] = [];

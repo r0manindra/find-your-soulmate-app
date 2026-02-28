@@ -66,23 +66,23 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
           style={[
             styles.container,
             selected && styles.containerSelected,
-            isDark && styles.containerDark,
+            isDark && !selected && styles.containerDark,
           ]}
         >
           <View style={styles.content}>
             <Text style={styles.emoji}>{emoji}</Text>
             <View style={styles.textContainer}>
-              <Text style={[styles.label, isDark && styles.labelDark, selected && styles.labelSelected]}>
+              <Text style={[styles.label, isDark && !selected && styles.labelDark, selected && styles.labelSelectedWhite]}>
                 {label}
               </Text>
               {note && (
-                <Text style={[styles.note, selected && styles.noteSelected]}>
+                <Text style={[styles.note, selected && styles.noteSelectedWhite]}>
                   {note}
                 </Text>
               )}
             </View>
             {selected && (
-              <View style={styles.checkmark}>
+              <View style={styles.checkmarkSelected}>
                 <Text style={styles.checkmarkText}>✓</Text>
               </View>
             )}
@@ -97,35 +97,41 @@ export function OptionCard({ emoji, label, note, selected, onSelect }: OptionCar
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={handlePress}
-      style={[animatedStyle, styles.container, selected && styles.containerSelected, isDark && styles.containerDark]}
+      style={[animatedStyle, styles.container, selected && styles.containerSelected, isDark && !selected && styles.containerDark]}
     >
-      <BlurView
-        intensity={selected ? 40 : 50}
-        tint={isDark ? 'dark' : 'light'}
-        experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
-        style={StyleSheet.absoluteFill}
-      />
-      <View
-        style={[
-          styles.overlay,
-          isDark ? styles.overlayDark : styles.overlayLight,
-          selected && (isDark ? styles.overlaySelectedDark : styles.overlaySelectedLight),
-        ]}
-      />
+      {!selected && (
+        <>
+          <BlurView
+            intensity={50}
+            tint={isDark ? 'dark' : 'light'}
+            experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              styles.overlay,
+              isDark ? styles.overlayDark : styles.overlayLight,
+            ]}
+          />
+        </>
+      )}
+      {selected && (
+        <View style={[styles.overlay, styles.overlaySelectedSolid]} />
+      )}
       <View style={styles.content}>
         <Text style={styles.emoji}>{emoji}</Text>
         <View style={styles.textContainer}>
-          <Text style={[styles.label, isDark && styles.labelDark, selected && styles.labelSelected]}>
+          <Text style={[styles.label, isDark && !selected && styles.labelDark, selected && styles.labelSelectedWhite]}>
             {label}
           </Text>
           {note && (
-            <Text style={[styles.note, selected && styles.noteSelected]}>
+            <Text style={[styles.note, selected && styles.noteSelectedWhite]}>
               {note}
             </Text>
           )}
         </View>
         {selected && (
-          <View style={styles.checkmark}>
+          <View style={styles.checkmarkSelected}>
             <Text style={styles.checkmarkText}>✓</Text>
           </View>
         )}
@@ -149,7 +155,7 @@ const styles = StyleSheet.create({
   containerSelected: {
     borderColor: '#E8435A',
     shadowColor: '#E8435A',
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -165,11 +171,8 @@ const styles = StyleSheet.create({
   overlayDark: {
     backgroundColor: 'rgba(28,28,30,0.72)',
   },
-  overlaySelectedLight: {
-    backgroundColor: 'rgba(232,67,90,0.06)',
-  },
-  overlaySelectedDark: {
-    backgroundColor: 'rgba(232,67,90,0.12)',
+  overlaySelectedSolid: {
+    backgroundColor: '#E8435A',
   },
   content: {
     flexDirection: 'row',
@@ -195,8 +198,8 @@ const styles = StyleSheet.create({
   labelDark: {
     color: '#F5F5F5',
   },
-  labelSelected: {
-    color: '#E8435A',
+  labelSelectedWhite: {
+    color: '#fff',
   },
   note: {
     fontSize: 13,
@@ -205,14 +208,14 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontStyle: 'italic',
   },
-  noteSelected: {
-    color: 'rgba(232,67,90,0.6)',
+  noteSelectedWhite: {
+    color: 'rgba(255,255,255,0.8)',
   },
-  checkmark: {
+  checkmarkSelected: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#E8435A',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -14,9 +14,9 @@ import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
-import { useHabitStore } from '@/src/store/habit-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
+import { books } from '@/src/data/content/books';
 
 function getGreeting(locale: 'en' | 'de'): string {
   const hour = new Date().getHours();
@@ -192,10 +192,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  // Habits data
-  const habitsCompletedToday = useHabitStore((s) => s.getTodayCompletedCount());
-  const habitsTotalToday = useHabitStore((s) => s.getTodayTotalCount());
-
   useEffect(() => {
     updateStreak();
   }, []);
@@ -235,7 +231,6 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="book-outline"
             label={locale === 'de' ? 'Guide' : 'Guide'}
-            subtitle={`${completedChapters.length}/${chapters.length}`}
             onPress={() => router.push('/guide' as any)}
             isDark={isDark}
             delay={200}
@@ -243,7 +238,6 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="checkmark-circle-outline"
             label="Habits"
-            subtitle={habitsTotalToday > 0 ? `${habitsCompletedToday}/${habitsTotalToday}` : (locale === 'de' ? 'Gewohnheiten' : 'Daily')}
             onPress={() => router.push('/habits' as any)}
             isDark={isDark}
             delay={250}
@@ -251,7 +245,6 @@ export default function HomeScreen() {
           <QuickActionButton
             icon="chatbubbles-outline"
             label="Coach"
-            subtitle={locale === 'de' ? 'KI-Coach' : 'AI Coach'}
             customIcon={<CharismoIcon size={26} color="#E8435A" />}
             onPress={() => router.push('/coach' as any)}
             isDark={isDark}
@@ -298,7 +291,7 @@ export default function HomeScreen() {
                 <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.chapters')}</Text>
               </View>
               <View>
-                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedBooks.length}/10</Text>
+                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedBooks.length}/{books.length}</Text>
                 <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.books')}</Text>
               </View>
               <View style={styles.streakStatRow}>
@@ -314,8 +307,16 @@ export default function HomeScreen() {
 
         <Animated.View entering={FadeInDown.delay(550).duration(400)}>
         <GlassCard style={styles.tipCard}>
-          <Text style={styles.tipTitle}>{t('home.dailyTip')}</Text>
-          <Text style={[styles.tipText, isDark && styles.tipTextDark]}>{dailyTip}</Text>
+          <View style={styles.tipAccent} />
+          <View style={styles.tipBody}>
+            <View style={styles.tipHeader}>
+              <View style={styles.tipIconWrap}>
+                <Ionicons name="bulb" size={16} color="#FF7854" />
+              </View>
+              <Text style={styles.tipTitle}>{t('home.dailyTip')}</Text>
+            </View>
+            <Text style={[styles.tipText, isDark && styles.tipTextDark]}>{dailyTip}</Text>
+          </View>
         </GlassCard>
         </Animated.View>
       </ScrollView>
@@ -526,8 +527,24 @@ const styles = StyleSheet.create({
   phrasebookSubtitleDark: { color: '#A3A3A3' },
 
   // Tip
-  tipCard: { marginBottom: 16 },
-  tipTitle: { fontSize: 15, fontWeight: '600', color: '#E8435A', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-  tipText: { fontSize: 17, lineHeight: 24, color: '#404040' },
+  tipCard: { marginBottom: 16, flexDirection: 'row', overflow: 'hidden' },
+  tipAccent: {
+    width: 4,
+    borderRadius: 2,
+    marginRight: 0,
+    backgroundColor: '#FF7854',
+  },
+  tipBody: { flex: 1, paddingLeft: 14 },
+  tipHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  tipIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,120,84,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipTitle: { fontSize: 12, fontWeight: '700', color: '#FF7854', textTransform: 'uppercase', letterSpacing: 0.8 },
+  tipText: { fontSize: 16, lineHeight: 23, color: '#404040', fontStyle: 'italic' },
   tipTextDark: { color: '#D4D4D4' },
 });
