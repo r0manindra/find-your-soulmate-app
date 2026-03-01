@@ -123,6 +123,7 @@ export default function OnboardingScreen() {
           options={[
             { emoji: '🚀', label: t('onboarding.gender.male'), note: t('onboarding.gender.maleNote'), value: 'male' as const },
             { emoji: '✨', label: t('onboarding.gender.female'), note: t('onboarding.gender.femaleNote'), value: 'female' as const },
+            { emoji: '🌈', label: t('onboarding.gender.diverse'), note: t('onboarding.gender.diverseNote'), value: 'diverse' as const },
           ]}
           selected={userGender}
           onSelect={(value) => {

@@ -97,6 +97,8 @@
       "maleNote": "Lerne Ansprechen, Charme und nicht peinlich sein",
       "female": "Girl Mode",
       "femaleNote": "Lerne Anziehen, Signale senden und ihn zu dir kommen lassen",
+      "diverse": "Vibe Mode",
+      "diverseNote": "Gib mir das Beste aus beiden Welten",
       "footnote": "Anderes Spiel, anderes Playbook. Gleiches Selbstbewusstsein."
     },
     "socialEnergy": {
@@ -132,6 +134,14 @@
         "some": "Ich hab meine Go-to-Looks, aber 'Routine' wäre übertrieben.",
         "solid": "Skincare sitzt, Outfits kuratiert, ich bekomme Komplimente.",
         "mastered": "Ich BIN das Pinterest-Board. Leute screenshotten meine Outfits."
+      },
+      "diverse": {
+        "title": "Klartext: Wie steht's um dein Glow-up-Game?",
+        "subtitle": "Hautpflege, Style, Vibes: das, was Leute zuerst bemerken.",
+        "none": "Mein Look? Nennt sich 'Persönlichkeit.' Keine weiteren Fragen.",
+        "some": "Ich hab eine Routine. Sie ist... gelegentlich.",
+        "solid": "Skincare, Style, gut riechen — die Trifecta ist abgedeckt.",
+        "mastered": "Ich BIN die Ästhetik. Leute fragen MICH nach Tipps."
       }
     },
     "skillLevel": {
@@ -157,6 +167,16 @@
         "advancedNote": "Sieh dich an, Herzensbrecher",
         "expert": "Ich bin eine Gefahr. Ich will einfach mein Game aufleveln.",
         "expertNote": "Lass auch was für die anderen übrig, Queen"
+      },
+      "diverse": {
+        "beginner": "Was ist Flirten? Ich hatte mal Blickkontakt und es war ein Unfall.",
+        "beginnerNote": "Wir lieben eine leere Leinwand",
+        "intermediate": "Ich kann charmant sein, wenn ich's versuche. Das 'Versuchen' ist der Knackpunkt.",
+        "intermediateNote": "Du hast was. Lass es uns entfesseln.",
+        "advanced": "Läuft ganz okay. Leute mögen mich wohl. Glaub ich.",
+        "advancedNote": "Sieh dich an, Herzensbrecher",
+        "expert": "Ich bin gefährlich. Ich will nur mehr Werkzeuge im Arsenal.",
+        "expertNote": "Lass auch was für die anderen übrig"
       }
     },
     "goal": {
@@ -177,6 +197,14 @@
         "socialMagnetism": "Ich will das Mädchen sein, zu dem alle gravitieren.",
         "ambitious": "Ich will Männer um meinen Finger wickeln. Respektvoll.",
         "ambitiousNote": "Wir respektieren den Ehrgeiz, Queen."
+      },
+      "diverse": {
+        "socialConfidence": "Ich will einfach mit Leuten reden können, ohne dass mein Gehirn kurzschließt.",
+        "getDates": "Ich will Dates. Echte. Mit Leuten, die ich wirklich mag.",
+        "findPartner": "Ich will jemand Besonderen finden. Zu meinen Bedingungen.",
+        "socialMagnetism": "Ich will die Person sein, zu der alle auf jeder Party gravitieren.",
+        "ambitious": "Ich will alle um meinen Finger wickeln. Respektvoll.",
+        "ambitiousNote": "Wir respektieren den Ehrgeiz."
       }
     },
     "profileReveal": {
@@ -223,7 +251,8 @@
         "social_magnetism": "Soziale Anziehung",
         "ambitious": "Ambitioniert",
         "male": "Guy Mode",
-        "female": "Girl Mode"
+        "female": "Girl Mode",
+        "diverse": "Vibe Mode"
       }
     },
     "recommended": "Empfohlen für dich",

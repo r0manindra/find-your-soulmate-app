@@ -7,7 +7,7 @@ import { getExercisePromptBlock, type ExerciseModeId } from './exercise-modes';
 
 export interface UserJourneyContext {
   profile: {
-    gender: 'male' | 'female' | null;
+    gender: 'male' | 'female' | 'diverse' | null;
     ageGroup: string | null;
     skillLevel: string | null;
     socialEnergy: string | null;
@@ -153,10 +153,10 @@ export function buildChapterContextBlock(ctx: UserJourneyContext): string | null
   const chapter = chapterLessons.find((c) => c.chapterId === progress.currentChapterId);
   if (!chapter) return null;
 
-  const isFemale = profile.gender === 'female';
-  const lessons = isFemale && chapter.femaleVariant ? chapter.femaleVariant.lessons : chapter.lessons;
-  const exercises = isFemale && chapter.femaleVariant ? chapter.femaleVariant.exercises : chapter.exercises;
-  const takeaway = isFemale && chapter.femaleVariant ? chapter.femaleVariant.keyTakeaway : chapter.keyTakeaway;
+  const useFemaleVariant = profile.gender === 'female';
+  const lessons = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.lessons : chapter.lessons;
+  const exercises = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.exercises : chapter.exercises;
+  const takeaway = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.keyTakeaway : chapter.keyTakeaway;
 
   const title = getChapterTitle(progress.currentChapterId);
 

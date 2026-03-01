@@ -16,7 +16,7 @@ const anthropic = new Anthropic({
 const quizRequestSchema = z.object({
   chapterId: z.number().int().min(1).max(25),
   locale: z.enum(['en', 'de']),
-  gender: z.enum(['male', 'female']).nullable().optional(),
+  gender: z.enum(['male', 'female', 'diverse']).nullable().optional(),
 });
 
 router.post('/generate', async (req: AuthRequest, res: Response) => {
@@ -32,10 +32,10 @@ router.post('/generate', async (req: AuthRequest, res: Response) => {
     const meta = chaptersMeta.find((c) => c.id === chapterId);
     const title = meta?.title ?? `Chapter ${chapterId}`;
 
-    const isFemale = gender === 'female';
-    const lessons = isFemale && chapter.femaleVariant ? chapter.femaleVariant.lessons : chapter.lessons;
-    const exercises = isFemale && chapter.femaleVariant ? chapter.femaleVariant.exercises : chapter.exercises;
-    const takeaway = isFemale && chapter.femaleVariant ? chapter.femaleVariant.keyTakeaway : chapter.keyTakeaway;
+    const useFemaleVariant = gender === 'female';
+    const lessons = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.lessons : chapter.lessons;
+    const exercises = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.exercises : chapter.exercises;
+    const takeaway = useFemaleVariant && chapter.femaleVariant ? chapter.femaleVariant.keyTakeaway : chapter.keyTakeaway;
 
     const chapterContent = [
       `Chapter: "${title}"`,

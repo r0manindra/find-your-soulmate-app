@@ -138,7 +138,7 @@ export async function syncProgress(progress: {
 // Coach
 export interface JourneyContext {
   profile: {
-    gender: 'male' | 'female' | null;
+    gender: 'male' | 'female' | 'diverse' | null;
     ageGroup: string | null;
     skillLevel: string | null;
     socialEnergy: string | null;

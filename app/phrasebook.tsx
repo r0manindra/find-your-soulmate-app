@@ -41,9 +41,11 @@ export default function PhrasebookScreen() {
       ? getPhrasesForCategory(selectedCategory)
       : phrases;
 
-    // Filter by gender
+    // Filter by gender (diverse sees all phrases)
     const gender = userGender ?? 'male';
-    result = result.filter((p) => p.forGender === 'all' || p.forGender === gender);
+    if (gender !== 'diverse') {
+      result = result.filter((p) => p.forGender === 'all' || p.forGender === gender);
+    }
 
     // Filter by saved
     if (showSavedOnly) {

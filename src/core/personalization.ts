@@ -51,6 +51,12 @@ function getProductCategories(basicsLevel: BasicsLevel | null, userGender: UserG
     }
     return ['fragrance', 'style', 'accessories', 'skincare', 'fitness'];
   }
+  if (userGender === 'diverse') {
+    if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
+      return ['skincare', 'style', 'fragrance', 'fitness', 'accessories'];
+    }
+    return ['style', 'fragrance', 'skincare', 'fitness', 'accessories'];
+  }
   if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
     return ['grooming', 'skincare', 'fitness', 'fragrance', 'style'];
   }
@@ -71,6 +77,14 @@ function getRecommendedCharacter(
     if (isExtrovert && (goal === 'social_magnetism' || goal === 'ambitious')) return 'queen';
     if (isAmbivert && goal === 'find_partner') return 'enchantress';
     return 'bestfriend';
+  }
+
+  // Diverse users get a balanced recommendation from all coaches
+  if (userGender === 'diverse') {
+    if (isIntrovert) return 'gentleman';
+    if (isExtrovert && (goal === 'social_magnetism' || goal === 'ambitious')) return 'queen';
+    if (isAmbivert && goal === 'find_partner') return 'charismo';
+    return 'charismo';
   }
 
   if (isIntrovert && goal === 'social_confidence') return 'gentleman';

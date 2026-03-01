@@ -15,7 +15,7 @@ import { VALID_CHARACTER_IDS } from '../services/characters';
 
 const contextSchema = z.object({
   profile: z.object({
-    gender: z.enum(['male', 'female']).nullable(),
+    gender: z.enum(['male', 'female', 'diverse']).nullable(),
     ageGroup: z.string().nullable(),
     skillLevel: z.string().nullable(),
     socialEnergy: z.string().nullable(),

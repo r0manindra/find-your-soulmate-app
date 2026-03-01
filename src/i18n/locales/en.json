@@ -97,6 +97,8 @@
       "maleNote": "Teach me to approach, charm, and not be awkward",
       "female": "Girl Mode",
       "femaleNote": "Teach me to attract, signal, and make him come to me",
+      "diverse": "Vibe Mode",
+      "diverseNote": "Give me the best of both worlds",
       "footnote": "Different game, different playbook. Same confidence."
     },
     "socialEnergy": {
@@ -132,6 +134,14 @@
         "some": "I have my go-to looks but I wouldn't call it a 'routine'.",
         "solid": "Skincare on lock, outfits curated, I get compliments.",
         "mastered": "I AM the Pinterest board. People screenshot my outfits."
+      },
+      "diverse": {
+        "title": "Real talk: how's your glow-up game?",
+        "subtitle": "Skincare, style, vibes: the stuff people notice first.",
+        "none": "My look? It's called 'personality.' No further questions.",
+        "some": "I have a routine. It's... occasional.",
+        "solid": "Skincare, style, smelling good — the trifecta is covered.",
+        "mastered": "I AM the aesthetic. People ask ME for recs."
       }
     },
     "skillLevel": {
@@ -157,6 +167,16 @@
         "advancedNote": "Look at you, heartbreaker",
         "expert": "I'm a menace. I just want to level up my game.",
         "expertNote": "Save some for the rest of us, queen"
+      },
+      "diverse": {
+        "beginner": "What is flirting? I made eye contact once and it was an accident.",
+        "beginnerNote": "We love a blank canvas",
+        "intermediate": "I can be charming when I try. The 'try' part is key.",
+        "intermediateNote": "You've got something. Let's unlock it.",
+        "advanced": "I do alright. People seem to like me. I think.",
+        "advancedNote": "Look at you, heartbreaker",
+        "expert": "I'm dangerous. I just want more tools in my arsenal.",
+        "expertNote": "Save some for the rest of us"
       }
     },
     "goal": {
@@ -177,6 +197,14 @@
         "socialMagnetism": "I want to be the girl everyone gravitates toward.",
         "ambitious": "I want to have men wrapped around my finger. Respectfully.",
         "ambitiousNote": "We respect the ambition, queen."
+      },
+      "diverse": {
+        "socialConfidence": "I just want to talk to people without my brain short-circuiting.",
+        "getDates": "I want dates. Real ones. With people I actually like.",
+        "findPartner": "I want to find someone special. On my own terms.",
+        "socialMagnetism": "I want to be the person everyone gravitates toward at every party.",
+        "ambitious": "I want everyone wrapped around my finger. Respectfully.",
+        "ambitiousNote": "We respect the ambition."
       }
     },
     "profileReveal": {
@@ -223,7 +251,8 @@
         "social_magnetism": "Social Magnetism",
         "ambitious": "Ambitious",
         "male": "Guy Mode",
-        "female": "Girl Mode"
+        "female": "Girl Mode",
+        "diverse": "Vibe Mode"
       }
     },
     "recommended": "Recommended for you",

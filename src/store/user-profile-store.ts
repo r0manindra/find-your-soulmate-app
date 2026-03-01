@@ -7,7 +7,7 @@ export type AgeGroup = 'age_18_24' | 'age_25_34' | 'age_35_44' | 'age_45_plus';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type Goal = 'social_confidence' | 'get_dates' | 'find_partner' | 'social_magnetism' | 'ambitious';
 export type BasicsLevel = 'basics_none' | 'basics_some' | 'basics_solid' | 'basics_mastered';
-export type UserGender = 'male' | 'female';
+export type UserGender = 'male' | 'female' | 'diverse';
 
 interface UserProfileState {
   userGender: UserGender | null;

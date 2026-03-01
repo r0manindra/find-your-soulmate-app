@@ -95,10 +95,11 @@ export default function ChapterDetailScreen() {
       base = chapterLessons.find((l) => l.chapterId === chapterId);
     }
     if (!base) return base;
-    // Use female variant if available and user is female
+    // Use female variant if available and user is female (diverse gets default)
     if (userGender === 'female' && base.femaleVariant) {
       return { ...base, ...base.femaleVariant };
     }
+    // Diverse users get the default content (gender-neutral approach)
     return base;
   }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);

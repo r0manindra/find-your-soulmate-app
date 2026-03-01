@@ -520,6 +520,7 @@ export default function CoachScreen() {
             <ScrollView contentContainerStyle={styles.characterList} showsVerticalScrollIndicator={false}>
               {coachCharacters.filter((c) => {
                 const gender = userProfile.userGender ?? 'male';
+                if (gender === 'diverse') return true;
                 return c.forGender === gender || c.forGender === 'all';
               }).map((char) => {
                 const isSelected = char.id === selectedCharacterId;
