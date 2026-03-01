@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useMemo } from 'react';
 import {
-  View, Text, FlatList, StyleSheet, useWindowDimensions, ScrollView,
+  View, Text, FlatList, Pressable, StyleSheet, useWindowDimensions, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -57,6 +57,12 @@ export default function OnboardingScreen() {
   const advance = useCallback(() => {
     if (currentPage < TOTAL_PAGES - 1) {
       goToPage(currentPage + 1);
+    }
+  }, [currentPage, goToPage]);
+
+  const goBack = useCallback(() => {
+    if (currentPage > 0) {
+      goToPage(currentPage - 1);
     }
   }, [currentPage, goToPage]);
 
@@ -257,8 +263,25 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.screen, isDark && styles.screenDark, { paddingTop: insets.top }]}>
-      <View style={styles.dotsContainer}>
-        <ProgressDots total={TOTAL_PAGES} current={currentPage} />
+      <View style={styles.navRow}>
+        {currentPage > 0 ? (
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              goBack();
+            }}
+            style={[styles.backButton, isDark && styles.backButtonDark]}
+            hitSlop={8}
+          >
+            <Ionicons name="chevron-back" size={20} color={isDark ? '#A3A3A3' : '#737373'} />
+          </Pressable>
+        ) : (
+          <View style={styles.backButtonPlaceholder} />
+        )}
+        <View style={styles.dotsContainer}>
+          <ProgressDots total={TOTAL_PAGES} current={currentPage} />
+        </View>
+        <View style={styles.backButtonPlaceholder} />
       </View>
 
       <FlatList
@@ -583,9 +606,32 @@ const styles = StyleSheet.create({
   screenDark: {
     backgroundColor: '#171717',
   },
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButtonDark: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  backButtonPlaceholder: {
+    width: 36,
+    height: 36,
+  },
   dotsContainer: {
-    paddingTop: 12,
-    paddingBottom: 8,
+    flex: 1,
+    paddingTop: 4,
+    paddingBottom: 4,
   },
 
   /* Dark mode text helpers */

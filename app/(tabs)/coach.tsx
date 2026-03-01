@@ -159,7 +159,7 @@ export default function CoachScreen() {
     if (!activeConvId || !chatStore.getActiveConversation()) {
       chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
     }
-  }, [activeConvId]);
+  }, [activeConvId, selectedCharacterId, locale]);
 
   // One-time migration: import from backend if logged in and store is empty
   useEffect(() => {
@@ -413,7 +413,7 @@ export default function CoachScreen() {
                   <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
                 </View>
                 <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
-                  <Text style={styles.loadingText}>{t('coach.sending')}</Text>
+                  <Text style={styles.loadingText}>{t('coach.sending', { name: activeCharacter.name })}</Text>
                 </View>
               </View>
             ) : null
@@ -455,7 +455,7 @@ export default function CoachScreen() {
                 style={[styles.input, isDark && styles.inputDark]}
                 value={input}
                 onChangeText={setInput}
-                placeholder={t('coach.placeholder')}
+                placeholder={t('coach.placeholder', { name: activeCharacter.name })}
                 placeholderTextColor="#A3A3A3"
                 multiline
                 maxLength={500}

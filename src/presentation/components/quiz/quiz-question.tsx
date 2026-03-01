@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,7 @@ export function QuizQuestionView({ question, questionNumber, totalQuestions, onA
   const { t } = useTranslation();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const answered = selectedIndex !== null;
+  const scrollRef = useRef<ScrollView>(null);
 
   const handleSelect = (index: number) => {
     if (answered) return;
@@ -31,6 +32,13 @@ export function QuizQuestionView({ question, questionNumber, totalQuestions, onA
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
+
+  // Auto-scroll to bottom when feedback appears so the Next button is visible
+  useEffect(() => {
+    if (answered) {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 250);
+    }
+  }, [answered]);
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -45,57 +53,65 @@ export function QuizQuestionView({ question, questionNumber, totalQuestions, onA
       <View style={[styles.progressBarBg, isDark && styles.progressBarBgDark]}>
         <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
       </View>
-      <Text style={[styles.progressText, isDark && styles.progressTextDark]}>
-        {t('quiz.question', { current: questionNumber, total: totalQuestions })}
-      </Text>
 
-      {/* Question */}
-      <Text style={[styles.questionText, isDark && styles.questionTextDark]}>
-        {question.question}
-      </Text>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.progressText, isDark && styles.progressTextDark]}>
+          {t('quiz.question', { current: questionNumber, total: totalQuestions })}
+        </Text>
 
-      {/* Options */}
-      <View style={styles.optionsContainer}>
-        {question.options.map((option, index) => {
-          const isSelected = selectedIndex === index;
-          const isCorrect = index === question.correctIndex;
-          const showCorrect = answered && isCorrect;
-          const showWrong = answered && isSelected && !isCorrect;
+        {/* Question */}
+        <Text style={[styles.questionText, isDark && styles.questionTextDark]}>
+          {question.question}
+        </Text>
 
-          return (
-            <OptionButton
-              key={index}
-              label={OPTION_LABELS[index]}
-              text={option}
-              onPress={() => handleSelect(index)}
-              disabled={answered}
-              showCorrect={showCorrect}
-              showWrong={showWrong}
-              isDark={isDark}
-            />
-          );
-        })}
-      </View>
+        {/* Options */}
+        <View style={styles.optionsContainer}>
+          {question.options.map((option, index) => {
+            const isSelected = selectedIndex === index;
+            const isCorrect = index === question.correctIndex;
+            const showCorrect = answered && isCorrect;
+            const showWrong = answered && isSelected && !isCorrect;
 
-      {/* Feedback */}
-      {answered && (
-        <Animated.View entering={FadeIn.duration(200)} style={styles.feedbackContainer}>
-          <Text style={[
-            styles.feedbackLabel,
-            selectedIndex === question.correctIndex ? styles.feedbackCorrect : styles.feedbackIncorrect,
-          ]}>
-            {selectedIndex === question.correctIndex ? t('quiz.correct') : t('quiz.incorrect')}
-          </Text>
-          <Text style={[styles.explanationText, isDark && styles.explanationTextDark]}>
-            {question.explanation}
-          </Text>
-          <Pressable onPress={handleNext} style={styles.nextButton}>
-            <Text style={styles.nextButtonText}>
-              {questionNumber === totalQuestions ? t('quiz.seeResults') : t('quiz.next')}
+            return (
+              <OptionButton
+                key={index}
+                label={OPTION_LABELS[index]}
+                text={option}
+                onPress={() => handleSelect(index)}
+                disabled={answered}
+                showCorrect={showCorrect}
+                showWrong={showWrong}
+                isDark={isDark}
+              />
+            );
+          })}
+        </View>
+
+        {/* Feedback */}
+        {answered && (
+          <Animated.View entering={FadeIn.duration(200)} style={styles.feedbackContainer}>
+            <Text style={[
+              styles.feedbackLabel,
+              selectedIndex === question.correctIndex ? styles.feedbackCorrect : styles.feedbackIncorrect,
+            ]}>
+              {selectedIndex === question.correctIndex ? t('quiz.correct') : t('quiz.incorrect')}
             </Text>
-          </Pressable>
-        </Animated.View>
-      )}
+            <Text style={[styles.explanationText, isDark && styles.explanationTextDark]}>
+              {question.explanation}
+            </Text>
+            <Pressable onPress={handleNext} style={styles.nextButton}>
+              <Text style={styles.nextButtonText}>
+                {questionNumber === totalQuestions ? t('quiz.seeResults') : t('quiz.next')}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        )}
+      </ScrollView>
     </Animated.View>
   );
 }
@@ -164,6 +180,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 8,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   progressBarBg: {
     height: 6,

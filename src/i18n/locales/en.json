@@ -35,11 +35,11 @@
     "chapter": "Chapter"
   },
   "coach": {
-    "title": "Coach Hank",
+    "title": "Coach {{name}}",
     "subtitle": "Your AI dating coach",
-    "placeholder": "Ask Hank anything...",
-    "greeting": "Hey! I'm Hank, your dating coach. Think of me as that friend who's brutally honest but always has your back. What's on your mind?",
-    "sending": "Hank is thinking...",
+    "placeholder": "Ask {{name}} anything...",
+    "greeting": "Hey! I'm {{name}}, your dating coach. Think of me as that friend who's brutally honest but always has your back. What's on your mind?",
+    "sending": "{{name}} is thinking...",
     "limitReached": "You've used all your free messages for today. Upgrade to Pro for unlimited coaching!",
     "errorMessage": "Sorry, I'm having trouble right now. Try again in a moment.",
     "signInForAI": "Sign in for AI-powered coaching",
