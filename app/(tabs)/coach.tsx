@@ -29,13 +29,10 @@ import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
 
-const FALLBACK_RESPONSES = [
-  "Good question. Here's the thing: confidence isn't about knowing all the answers. It's about being comfortable not knowing. That's what makes someone magnetic.",
-  "Listen, I get it. Approaching someone feels like defusing a bomb. But here's the secret: they're probably just as nervous. Start with something genuine, comment on something real in the moment.",
-  "The biggest mistake I see? Trying to be someone you're not. The right person will love the real you, weird quirks, awkward pauses, and all. Authenticity is the ultimate cheat code.",
-  "Let me be real with you: rejection isn't about you. It's about timing, circumstances, chemistry. Don't take it personally. The best players in the game have the most strikeouts. Keep swinging.",
-  "Here's what separates the amateurs from the naturals: listening. Most people are just waiting for their turn to talk. Actually listen. Ask follow-up questions. Make them feel seen.",
-];
+const FALLBACK_RESPONSE = {
+  en: "Hey! I'd love to chat with you properly, but I need you to create a free account first so I can remember our conversations and give you personalized advice. Sign up above — it only takes a few seconds!",
+  de: "Hey! Ich würde mich gerne richtig mit dir unterhalten, aber dafür brauchst du einen kostenlosen Account, damit ich mir unsere Gespräche merken und dir persönliche Tipps geben kann. Melde dich oben an — dauert nur ein paar Sekunden!",
+};
 
 export default function CoachScreen() {
   const { t } = useTranslation();
@@ -233,8 +230,8 @@ export default function CoachScreen() {
         };
         chatStore.addMessage(convId, aiMessage);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-        const response = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        const response = locale === 'de' ? FALLBACK_RESPONSE.de : FALLBACK_RESPONSE.en;
         const aiMessage: ChatMessage = {
           id: String(Date.now() + 1),
           role: 'assistant',

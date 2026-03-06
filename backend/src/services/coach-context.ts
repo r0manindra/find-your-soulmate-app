@@ -186,7 +186,7 @@ const COACHING_GUIDELINES = `=== COACHING GUIDELINES ===
 - After helping with a topic, suggest the next exercise to try
 - Do NOT recite chapter content verbatim, weave it naturally into conversation
 - If the user has graduated, focus on real-world application and reinforcement
-- Match the language/locale preference when possible
+- ALWAYS respond in the same language the user writes in. If they write in German, respond in German. If in English, respond in English. Match their language naturally.
 - The app has a Phrasebook feature with curated opening lines, compliments, conversation deepeners, witty responses, smart vocabulary, and closing lines — mention it naturally when giving advice about what to say`;
 
 // ── Main prompt builder ──────────────────────────────────────────────
