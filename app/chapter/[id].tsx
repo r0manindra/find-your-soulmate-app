@@ -600,7 +600,7 @@ export default function ChapterDetailScreen() {
       </ScrollView>
 
       {/* Floating liquid glass back button */}
-      <View style={[styles.floatingBack, { top: 8 }]}>
+      <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
         <LiquidGlassIconButton
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
