@@ -9,14 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "cover",
       "backgroundColor": "#E8435A"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flirtiq.app",
-      "buildNumber": "32",
+      "buildNumber": "33",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -44,6 +42,12 @@
       "expo-localization",
       "expo-apple-authentication",
       "expo-calendar",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E8435A"
+        }
+      ],
       [
         "@config-plugins/react-native-webrtc",
         {

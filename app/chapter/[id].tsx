@@ -322,9 +322,8 @@ export default function ChapterDetailScreen() {
       >
         {/* Header with chapter nav */}
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={[styles.backButton, isDark && styles.backButtonDark]}>
-            <Ionicons name="arrow-back" size={24} color={isDark ? '#F5F5F5' : '#171717'} />
-          </Pressable>
+          {/* Spacer where back button used to be — now floating */}
+          <View style={{ width: 40 }} />
           <View style={styles.chapterNav}>
             {prevChapter ? (
               <Pressable
@@ -599,6 +598,23 @@ export default function ChapterDetailScreen() {
         })()}
       </ScrollView>
 
+      {/* Floating glass back button */}
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.back();
+        }}
+        style={[styles.floatingBack, { top: 8 }]}
+      >
+        <BlurView
+          intensity={isDark ? 40 : 60}
+          tint={isDark ? 'dark' : 'light'}
+          style={styles.floatingBackBlur}
+        >
+          <Ionicons name="arrow-back" size={22} color={isDark ? '#F5F5F5' : '#171717'} />
+        </BlurView>
+      </Pressable>
+
       {/* Floating "Ask Coach" button */}
       <Pressable
         onPress={() => {
@@ -769,16 +785,27 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+  // Floating glass back button
+  floatingBack: {
+    position: 'absolute',
+    left: 20,
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  floatingBackBlur: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backButtonDark: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
 
   // Chapter nav (inline in header)

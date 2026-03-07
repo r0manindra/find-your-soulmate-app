@@ -29,6 +29,7 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ duration: 400, fade: true });
 
 function AchievementListener() {
   const store = useProgressStore();
@@ -168,17 +169,17 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
     onReady();
 
     // 0-500ms: Icon fades in with bouncy spring
-    iconOpacity.value = withTiming(1, { duration: 400 });
-    iconScale.value = withSpring(1, { damping: 10, stiffness: 150 });
+    iconOpacity.value = withTiming(1, { duration: 500 });
+    iconScale.value = withSpring(1, { damping: 12, stiffness: 120 });
 
-    // 300-700ms: "Charismo" text fades in
-    textOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    // 400-900ms: "Charismo" text fades in
+    textOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
 
-    // 1500ms: Hold for a moment, then scale up + fade out
-    iconScale.value = withDelay(1500, withTiming(1.2, { duration: 500, easing: Easing.out(Easing.quad) }));
-    iconOpacity.value = withDelay(1600, withTiming(0, { duration: 400 }));
-    textOpacity.value = withDelay(1500, withTiming(0, { duration: 300 }));
-    overlayOpacity.value = withDelay(1700, withTiming(0, { duration: 400 }, () => {
+    // Hold until 2500ms, then scale up + fade out
+    iconScale.value = withDelay(2500, withTiming(1.15, { duration: 400, easing: Easing.out(Easing.quad) }));
+    iconOpacity.value = withDelay(2600, withTiming(0, { duration: 400 }));
+    textOpacity.value = withDelay(2500, withTiming(0, { duration: 350 }));
+    overlayOpacity.value = withDelay(2800, withTiming(0, { duration: 400 }, () => {
       runOnJS(onFinish)();
     }));
   }, []);
