@@ -13,8 +13,6 @@ import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
-import { useUserProfileStore } from '@/src/store/user-profile-store';
-import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { books } from '@/src/data/content/books';
 import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
@@ -47,19 +45,20 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   const { completedChapters } = useProgressStore();
-  const profile = useUserProfileStore();
   const router = useRouter();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const scale = useSharedValue(1);
 
+  // Chapter order: Phase 0 (21-25), then Phase 1-5 (1-20)
+  const chapterOrder = useMemo(
+    () => [21, 22, 23, 24, 25, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    [],
+  );
+
   const nextChapter = useMemo(() => {
-    // If user has no progress yet, use personalized start chapter
-    if (completedChapters.length === 0 && profile.hasCompletedOnboarding && profile.skillLevel) {
-      const personalization = getPersonalization(profile);
-      return chapters.find((c) => c.id === personalization.suggestedStartChapter) ?? chapters[0];
-    }
-    return chapters.find((c) => !completedChapters.includes(c.id));
-  }, [completedChapters, profile]);
+    const nextId = chapterOrder.find((id) => !completedChapters.includes(id));
+    return chapters.find((c) => c.id === nextId) ?? chapters[0];
+  }, [completedChapters, chapterOrder]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

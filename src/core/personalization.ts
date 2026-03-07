@@ -17,31 +17,9 @@ interface ProfileInput {
   goal: Goal | null;
 }
 
-function getSuggestedStartChapter(basicsLevel: BasicsLevel | null, skillLevel: SkillLevel | null): number {
-  // basics_none or basics_some → start at Phase 0
-  if (basicsLevel === 'basics_none' || basicsLevel === 'basics_some') {
-    return 21;
-  }
-
-  // basics_solid → skip basics, use skill level for Phase 1+
-  if (basicsLevel === 'basics_solid') {
-    switch (skillLevel) {
-      case 'beginner': return 1;
-      case 'intermediate': return 3;
-      case 'advanced':
-      case 'expert': return 5;
-      default: return 1;
-    }
-  }
-
-  // basics_mastered → same as original logic (skip basics entirely)
-  switch (skillLevel) {
-    case 'beginner': return 1;
-    case 'intermediate': return 3;
-    case 'advanced': return 5;
-    case 'expert': return 9;
-    default: return 1;
-  }
+function getSuggestedStartChapter(): number {
+  // Everyone starts at the fundamentals (Phase 0)
+  return 21;
 }
 
 function getProductCategories(basicsLevel: BasicsLevel | null, userGender: UserGender | null): string[] {
@@ -158,7 +136,7 @@ function getContentTone(ageGroup: AgeGroup | null): PersonalizationResult['conte
 
 export function getPersonalization(profile: ProfileInput): PersonalizationResult {
   return {
-    suggestedStartChapter: getSuggestedStartChapter(profile.basicsLevel, profile.skillLevel),
+    suggestedStartChapter: getSuggestedStartChapter(),
     recommendedCharacterId: getRecommendedCharacter(profile.socialEnergy, profile.goal, profile.userGender),
     bookPriority: getBookPriority(profile.skillLevel, profile.goal),
     contentTone: getContentTone(profile.ageGroup),

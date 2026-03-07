@@ -8,8 +8,6 @@ import Svg, { Path } from 'react-native-svg';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
-import { useUserProfileStore } from '@/src/store/user-profile-store';
-import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -98,7 +96,6 @@ export function JourneyPath() {
   const { t } = useTranslation();
   const { completedChapters } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
-  const userProfile = useUserProfileStore();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -106,11 +103,6 @@ export function JourneyPath() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
-
-  const suggestedStart = useMemo(() => {
-    if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return 1;
-    return getPersonalization(userProfile).suggestedStartChapter;
-  }, [userProfile]);
 
   const toggleExpand = useCallback((id: number) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -161,8 +153,6 @@ export function JourneyPath() {
                 {phaseChapters.map((chapter, idx) => {
                   const status = getChapterStatus(chapter.id, completedChapters);
                   const position = getNodePosition(idx);
-                  const isStartHere = chapter.id === suggestedStart && completedChapters.length === 0;
-                  const isSkippable = chapter.id < suggestedStart && completedChapters.length === 0 && suggestedStart > 1;
 
                   // Diagonal connector before this node (from previous node)
                   const showConnector = idx > 0;
@@ -184,26 +174,17 @@ export function JourneyPath() {
                         />
                       )}
                       <View style={styles.nodeWrapper}>
-                        {isStartHere && (
-                          <View style={styles.startHereBadge}>
-                            <Text style={styles.startHereText}>
-                              {locale === 'de' ? 'Starte hier' : 'Start here'} →
-                            </Text>
-                          </View>
-                        )}
-                        <View style={isSkippable ? styles.skippableContainer : undefined}>
-                          <ChapterNode
-                            chapter={chapter}
-                            status={status}
-                            locale={locale}
-                            position={position}
-                            isExpanded={expandedId === chapter.id}
-                            isDark={isDark}
-                            heartCost={chapter.phase !== 0 ? HEART_COSTS.CHAPTER : undefined}
-                            onPress={() => toggleExpand(chapter.id)}
-                            onAction={() => handleAction(chapter.id)}
-                          />
-                        </View>
+                        <ChapterNode
+                          chapter={chapter}
+                          status={status}
+                          locale={locale}
+                          position={position}
+                          isExpanded={expandedId === chapter.id}
+                          isDark={isDark}
+                          heartCost={chapter.phase !== 0 ? HEART_COSTS.CHAPTER : undefined}
+                          onPress={() => toggleExpand(chapter.id)}
+                          onAction={() => handleAction(chapter.id)}
+                        />
                       </View>
                     </React.Fragment>
                   );
@@ -271,23 +252,5 @@ const styles = StyleSheet.create({
   connectorWrapper: {
     height: CONNECTOR_HEIGHT,
     zIndex: 0,
-  },
-  startHereBadge: {
-    alignSelf: 'center',
-    backgroundColor: '#E8435A',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginBottom: 6,
-    zIndex: 2,
-  },
-  startHereText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#fff',
-    letterSpacing: 0.3,
-  },
-  skippableContainer: {
-    opacity: 0.45,
   },
 });

@@ -6,7 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withSpring, withRepeat, withSequence, runOnJS, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, runOnJS, Easing } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
@@ -29,7 +29,7 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({ duration: 600, fade: true });
+SplashScreen.setOptions({ duration: 250, fade: true });
 
 function AchievementListener() {
   const store = useProgressStore();
@@ -169,51 +169,48 @@ function ProgressSync() {
   return null;
 }
 
+/**
+ * Seamless animated splash screen.
+ *
+ * Key insight: the animated overlay starts IDENTICAL to the native splash
+ * (solid #E8435A + white icon at full opacity/scale) so the handoff is invisible.
+ * Then it subtly enhances (gradient, glow, text) and exits cleanly.
+ */
 function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: () => void }) {
-  const iconScale = useSharedValue(0.7);
-  const iconOpacity = useSharedValue(0);
+  // Start matching native splash exactly: icon visible, solid background
+  const gradientProgress = useSharedValue(0);   // 0 = solid red, 1 = gradient visible
   const glowOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
-  const textTranslateY = useSharedValue(8);
+  const textTranslateY = useSharedValue(10);
+  const iconScale = useSharedValue(1);           // Start at 1 — matches native splash
   const overlayOpacity = useSharedValue(1);
 
   useEffect(() => {
-    // Signal that overlay is mounted — safe to hide native splash
+    // Signal ready immediately — native splash fades fast (250ms) into this identical view
     onReady();
 
-    // Phase 1: Icon appears (0–700ms) — smooth ease-out, no bounce
-    iconOpacity.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) });
-    iconScale.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
+    // Phase 1 (0–400ms): Morph solid red → gradient. Barely noticeable.
+    gradientProgress.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
 
-    // Phase 2: Subtle glow pulse behind icon (600ms–3400ms)
-    glowOpacity.value = withDelay(600, withTiming(1, { duration: 500 }, () => {
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.5, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
-          withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.sin) })
-        ),
-        -1,
-        true
-      );
-    }));
+    // Phase 2 (300–800ms): Subtle glow ring appears behind icon
+    glowOpacity.value = withDelay(300, withTiming(0.8, { duration: 500, easing: Easing.out(Easing.cubic) }));
 
-    // Phase 3: Brand text slides up + fades in (600–1200ms)
-    textOpacity.value = withDelay(600, withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) }));
-    textTranslateY.value = withDelay(600, withTiming(0, { duration: 600, easing: Easing.out(Easing.cubic) }));
+    // Phase 3 (400–900ms): Brand text slides up
+    textOpacity.value = withDelay(400, withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }));
+    textTranslateY.value = withDelay(400, withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
 
-    // Phase 4: Hold for 3.5s total, then elegant exit
-    iconScale.value = withDelay(3400, withTiming(1.08, { duration: 500, easing: Easing.out(Easing.quad) }));
-    iconOpacity.value = withDelay(3600, withTiming(0, { duration: 450, easing: Easing.in(Easing.cubic) }));
-    glowOpacity.value = withDelay(3400, withTiming(0, { duration: 400 }));
-    textOpacity.value = withDelay(3400, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }));
-    textTranslateY.value = withDelay(3400, withTiming(-4, { duration: 400, easing: Easing.in(Easing.cubic) }));
-    overlayOpacity.value = withDelay(3800, withTiming(0, { duration: 500, easing: Easing.in(Easing.cubic) }, () => {
+    // Phase 4 (1800ms): Everything exits together — unified, not staggered
+    const exitStart = 1800;
+    iconScale.value = withDelay(exitStart, withTiming(1.06, { duration: 300, easing: Easing.out(Easing.quad) }));
+    glowOpacity.value = withDelay(exitStart, withTiming(0, { duration: 350 }));
+    textOpacity.value = withDelay(exitStart, withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) }));
+    textTranslateY.value = withDelay(exitStart, withTiming(-3, { duration: 300, easing: Easing.in(Easing.cubic) }));
+    overlayOpacity.value = withDelay(exitStart + 200, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, () => {
       runOnJS(onFinish)();
     }));
   }, []);
 
   const iconStyle = useAnimatedStyle(() => ({
-    opacity: iconOpacity.value,
     transform: [{ scale: iconScale.value }],
   }));
 
@@ -230,25 +227,37 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
     opacity: overlayOpacity.value,
   }));
 
+  // Gradient overlays a solid red base. gradientProgress controls gradient opacity.
+  const gradientOverlayStyle = useAnimatedStyle(() => ({
+    opacity: gradientProgress.value,
+  }));
+
   return (
     <Animated.View style={[splashStyles.overlay, overlayStyle]} pointerEvents="none">
-      <LinearGradient
-        colors={['#E8435A', '#FF7854']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={splashStyles.gradient}
-      >
-        <View style={splashStyles.iconWrapper}>
-          {/* Subtle glow ring behind icon */}
-          <Animated.View style={[splashStyles.glowRing, glowStyle]} />
-          <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-            <CharismoIcon size={100} color="#fff" />
-          </Animated.View>
+      {/* Solid red base — identical to native splash */}
+      <View style={splashStyles.solidBase}>
+        {/* Gradient fades in on top */}
+        <Animated.View style={[StyleSheet.absoluteFill, gradientOverlayStyle]}>
+          <LinearGradient
+            colors={['#E8435A', '#FF7854']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        </Animated.View>
+
+        <View style={splashStyles.centerContent}>
+          <View style={splashStyles.iconWrapper}>
+            <Animated.View style={[splashStyles.glowRing, glowStyle]} />
+            <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
+              <CharismoIcon size={100} color="#fff" />
+            </Animated.View>
+          </View>
+          <Animated.Text style={[splashStyles.brandText, textStyle]}>
+            Charismo
+          </Animated.Text>
         </View>
-        <Animated.Text style={[splashStyles.brandText, textStyle]}>
-          Charismo
-        </Animated.Text>
-      </LinearGradient>
+      </View>
     </Animated.View>
   );
 }
@@ -258,7 +267,11 @@ const splashStyles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 999,
   },
-  gradient: {
+  solidBase: {
+    flex: 1,
+    backgroundColor: '#E8435A', // Exactly matches native splash
+  },
+  centerContent: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -269,25 +282,21 @@ const splashStyles = StyleSheet.create({
   },
   glowRing: {
     position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   iconContainer: {
-    width: 130,
-    height: 130,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   brandText: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 2,
-    marginTop: 20,
+    marginTop: 18,
   },
 });
 

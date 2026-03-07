@@ -21,14 +21,14 @@ const PRO_MONTHLY_FEATURES = {
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
-    { icon: 'cart' as const, text: 'Buy heart packs' },
+    { icon: 'document-text' as const, text: 'PDF guide included', highlight: true },
   ],
   de: [
     { icon: 'heart' as const, text: '50 Herzen/Tag', highlight: true },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
-    { icon: 'cart' as const, text: 'Herz-Pakete kaufen' },
+    { icon: 'document-text' as const, text: 'PDF-Guide inklusive', highlight: true },
   ],
 };
 
@@ -38,7 +38,6 @@ const PRO_PLUS_ANNUAL_FEATURES = {
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
-    { icon: 'mic' as const, text: 'Voice coaching (3/day)', highlight: true },
     { icon: 'document-text' as const, text: 'PDF guide included', highlight: true },
   ],
   de: [
@@ -46,7 +45,6 @@ const PRO_PLUS_ANNUAL_FEATURES = {
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
-    { icon: 'mic' as const, text: 'Sprach-Coaching (3/Tag)', highlight: true },
     { icon: 'document-text' as const, text: 'PDF-Guide inklusive', highlight: true },
   ],
 };
@@ -173,10 +171,10 @@ export default function PaywallScreen() {
   };
 
   const proMonthlyPrice = offerings?.proMonthly?.product.priceString ?? '$5.99';
-  const proPlusAnnualPrice = offerings?.proPlusAnnual?.product.priceString ?? '$69.99';
+  const proPlusAnnualPrice = offerings?.proPlusAnnual?.product.priceString ?? '$59.99';
   const proPlusMonthlyEquiv = offerings?.proPlusAnnual
     ? `${(offerings.proPlusAnnual.product.price / 12).toFixed(2)} ${offerings.proPlusAnnual.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
-    : `$5.83/${locale === 'de' ? 'Monat' : 'mo'}`;
+    : `$5.00/${locale === 'de' ? 'Monat' : 'mo'}`;
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
@@ -232,12 +230,6 @@ export default function PaywallScreen() {
                     ]}>{f.text}</Text>
                   </View>
                 ))}
-                <View style={styles.featureRow}>
-                  <Ionicons name="close-circle" size={18} color="#D4D4D4" />
-                  <Text style={[styles.featureTextDisabled, isDark && styles.featureTextDisabledDark]}>
-                    {locale === 'de' ? 'Kein Sprach-Coaching' : 'No voice coaching'}
-                  </Text>
-                </View>
               </View>
             </View>
           </Pressable>

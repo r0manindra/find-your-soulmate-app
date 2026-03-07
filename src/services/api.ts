@@ -221,85 +221,6 @@ export async function getCoachHistory() {
   }>('/coach/history');
 }
 
-// Voice Analysis
-export interface VoiceAnalysis {
-  wordCount: number;
-  wordsPerMinute: number;
-  paceRating: 'too_slow' | 'good' | 'too_fast';
-  fillerWords: { word: string; count: number }[];
-  totalFillerCount: number;
-  overallScore: number;
-  tips: string[];
-}
-
-export async function analyzeVoice(audioUri: string, locale: string): Promise<{
-  transcript: string;
-  duration: number;
-  analysis: VoiceAnalysis;
-}> {
-  const token = await getToken();
-  const formData = new FormData();
-  formData.append('audio', {
-    uri: audioUri,
-    type: 'audio/m4a',
-    name: 'recording.m4a',
-  } as any);
-  formData.append('locale', locale);
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for audio upload
-
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE}/voice/analyze`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: formData,
-      signal: controller.signal,
-    });
-  } catch (err: any) {
-    clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
-      throw new ApiError('Voice analysis timed out', 0, null);
-    }
-    throw new ApiError('Network error', 0, null);
-  } finally {
-    clearTimeout(timeoutId);
-  }
-
-  let data: any;
-  try {
-    data = await res.json();
-  } catch {
-    throw new ApiError(`Server error (${res.status})`, res.status, null);
-  }
-  if (!res.ok) {
-    if (res.status === 401) await clearToken();
-    throw new ApiError(data.error || 'Voice analysis failed', res.status, data);
-  }
-  return data;
-}
-
-// Voice Coach (Realtime)
-export async function createVoiceSession(params: {
-  characterId: string;
-  locale: string;
-  chapterContext?: string;
-}) {
-  return request<{
-    clientSecret: string;
-    expiresAt: number;
-    sessionId: string;
-    voiceSessionsUsed: number;
-    voiceSessionsLimit: number;
-  }>('/voice/session', {
-    method: 'POST',
-    body: JSON.stringify(params),
-  });
-}
-
 // Subscription
 export async function getSubscriptionStatus() {
   return request<{
@@ -310,7 +231,6 @@ export async function getSubscriptionStatus() {
     isProPlus: boolean;
     freeChapters: number;
     freeCoachMessagesPerDay: number;
-    voiceSessionsPerDay: number;
   }>('/subscription/status');
 }
 

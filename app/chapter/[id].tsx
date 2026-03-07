@@ -16,8 +16,6 @@ import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter-habits-sheet';
 import { QuizModal } from '@/src/presentation/components/quiz/quiz-modal';
-import { VoiceTrainer } from '@/src/presentation/components/voice/voice-trainer';
-import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach-modal';
 import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
@@ -79,12 +77,10 @@ export default function ChapterDetailScreen() {
 
   const [coachVisible, setCoachVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
-  const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
   const [showOutOfHearts, setShowOutOfHearts] = useState(false);
   const [heartsCharged, setHeartsCharged] = useState(false);
   const [accessGranted, setAccessGranted] = useState(false);
   const isPremium = useAuthStore((s) => s.isPremium);
-  const isProPlus = useAuthStore((s) => s.isProPlus);
   const hasChapterUnlock = useAuthStore((s) => (s as any).hasChapterUnlock ?? false);
   const quizScore = progressStore.quizScores[chapterId];
   const [coachMessages, setCoachMessages] = useState<CoachMessage[]>([]);
@@ -469,55 +465,6 @@ export default function ChapterDetailScreen() {
           </GlassCard>
         ))}
 
-        {/* Voice Trainer — voice-related chapters */}
-        {(chapterId === 22 || chapterId === 25 || chapterId === 2) && (
-          <>
-            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-              {locale === 'de' ? 'Stimmtrainer' : 'Voice Trainer'}
-            </Text>
-            <View style={styles.voiceTrainerContainer}>
-              <VoiceTrainer />
-            </View>
-
-            {/* Practice with Voice Coach (Pro+) */}
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                if (!isProPlus) {
-                  router.push('/paywall');
-                } else {
-                  setVoiceCoachVisible(true);
-                }
-              }}
-              style={styles.voiceCoachContainer}
-            >
-              <GlassCard style={styles.voiceCoachCard}>
-                <View style={styles.voiceCoachRow}>
-                  <View style={styles.voiceCoachIcon}>
-                    <Ionicons name="mic" size={22} color="#E8435A" />
-                  </View>
-                  <View style={styles.voiceCoachInfo}>
-                    <Text style={[styles.voiceCoachTitle, isDark && { color: '#F5F5F5' }]}>
-                      {locale === 'de' ? 'Mit Sprach-Coach üben' : 'Practice with Voice Coach'}
-                    </Text>
-                    <Text style={styles.voiceCoachDesc}>
-                      {locale === 'de' ? 'Echtzeit-Sprachgespräch mit deinem KI-Coach' : 'Real-time voice conversation with your AI coach'}
-                    </Text>
-                  </View>
-                  {!isProPlus ? (
-                    <View style={styles.voiceCoachLock}>
-                      <Ionicons name="lock-closed" size={14} color="#E8435A" />
-                      <Text style={styles.voiceCoachLockText}>PRO+</Text>
-                    </View>
-                  ) : (
-                    <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />
-                  )}
-                </View>
-              </GlassCard>
-            </Pressable>
-          </>
-        )}
-
         {/* Key Takeaway */}
         <GlassCard style={styles.takeawayCard}>
           <Text style={styles.takeawayLabel}>
@@ -727,15 +674,6 @@ export default function ChapterDetailScreen() {
             router.back();
           }
         }}
-      />
-
-      {/* Voice Coach Modal */}
-      <VoiceCoachModal
-        visible={voiceCoachVisible}
-        onClose={() => setVoiceCoachVisible(false)}
-        characterId={selectedCharacterId}
-        locale={locale}
-        chapterContext={chapter.title[locale]}
       />
 
       {/* Coach Panel Modal */}
@@ -1025,26 +963,6 @@ const styles = StyleSheet.create({
   exerciseDescriptionDark: {
     color: '#D4D4D4',
   },
-
-  // Voice Trainer
-  voiceTrainerContainer: { marginHorizontal: 20, marginBottom: 12 },
-  voiceCoachContainer: { paddingHorizontal: 20, marginBottom: 12 },
-  voiceCoachCard: { marginHorizontal: 0 },
-  voiceCoachRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  voiceCoachIcon: {
-    width: 44, height: 44, borderRadius: 14,
-    backgroundColor: 'rgba(232,67,90,0.1)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  voiceCoachInfo: { flex: 1 },
-  voiceCoachTitle: { fontSize: 16, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
-  voiceCoachDesc: { fontSize: 13, color: '#737373', marginTop: 2 },
-  voiceCoachLock: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    backgroundColor: 'rgba(232,67,90,0.08)',
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-  },
-  voiceCoachLockText: { fontSize: 10, fontWeight: '800', color: '#E8435A' },
 
   // Takeaway
   takeawayCard: {

@@ -26,10 +26,8 @@ import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 import { ExerciseBanner } from '@/src/presentation/components/coach/exercise-banner';
 import { getExerciseMode } from '@/src/data/content/exercise-modes';
-import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach-modal';
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
-import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
 import { useHeartsStore } from '@/src/store/hearts-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
@@ -59,7 +57,6 @@ export default function CoachScreen() {
   const incrementChatCount = useProgressStore((s) => s.incrementChatCount);
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const isPremium = useAuthStore((s) => s.isPremium);
-  const isProPlus = useAuthStore((s) => s.isProPlus);
   const locale = useSettingsStore((s) => s.locale);
   const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
@@ -126,13 +123,13 @@ export default function CoachScreen() {
   const [showCharacterPicker, setShowCharacterPicker] = useState(false);
   const [showExerciseModeModal, setShowExerciseModeModal] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
-  const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
   const [showOutOfHearts, setShowOutOfHearts] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const canSpend = useHeartsStore((s) => s.canSpend);
   const spendHearts = useHeartsStore((s) => s.spendHearts);
+  const totalHearts = useHeartsStore((s) => s.dailyHearts + s.bonusHearts);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -447,29 +444,6 @@ export default function CoachScreen() {
               <Text style={styles.headerSubtitle}>{activeCharacter.subtitle[locale]}</Text>
             </View>
             <View style={styles.headerRight}>
-              {isLoggedIn && (
-                <HeartCounter compact />
-              )}
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  if (!isProPlus) {
-                    router.push('/paywall');
-                  } else {
-                    setVoiceCoachVisible(true);
-                  }
-                }}
-                style={styles.voiceCallBtn}
-                hitSlop={8}
-              >
-                <Ionicons name="mic" size={18} color="#fff" />
-                {!isProPlus && (
-                  <View style={styles.voiceCallLockBadge}>
-                    <Ionicons name="lock-closed" size={7} color="#fff" />
-                  </View>
-                )}
-              </Pressable>
               <Pressable
                 onPress={(e) => {
                   e.stopPropagation();
@@ -605,6 +579,21 @@ export default function CoachScreen() {
                   )}
                 </View>
               )}
+              {isLoggedIn && (
+                <Pressable
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/paywall');
+                  }}
+                  style={styles.inputHeartBadge}
+                  hitSlop={6}
+                >
+                  <Ionicons name="heart" size={12} color="#E8435A" />
+                  <Text style={styles.inputHeartText}>
+                    {totalHearts}
+                  </Text>
+                </Pressable>
+              )}
               <TextInput
                 style={[styles.input, isDark && styles.inputDark]}
                 value={input}
@@ -628,14 +617,6 @@ export default function CoachScreen() {
             </View>
           </View>
         </Animated.View>
-
-        {/* Voice Coach Modal */}
-        <VoiceCoachModal
-          visible={voiceCoachVisible}
-          onClose={() => setVoiceCoachVisible(false)}
-          characterId={activeConvCharacterId}
-          locale={locale}
-        />
 
         {/* Exercise Mode Modal */}
         <ExerciseModeModal
@@ -761,12 +742,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
-  voiceCallLockBadge: {
-    position: 'absolute', top: -2, right: -2,
-    width: 14, height: 14, borderRadius: 7,
-    backgroundColor: '#E8435A',
-    alignItems: 'center', justifyContent: 'center',
-  },
   limitBadge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10,
@@ -878,6 +853,16 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     backgroundColor: '#E8435A',
+  },
+  inputHeartBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    paddingHorizontal: 6, paddingVertical: 4,
+    borderRadius: 10,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    marginBottom: 4,
+  },
+  inputHeartText: {
+    fontSize: 12, fontWeight: '700', color: '#E8435A',
   },
   input: {
     flex: 1, minHeight: 32, maxHeight: 100,

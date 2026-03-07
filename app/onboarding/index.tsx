@@ -17,14 +17,13 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { OptionCard } from '@/src/presentation/components/onboarding/option-card';
 import { ProgressDots } from '@/src/presentation/components/onboarding/progress-dots';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
-import { useSettingsStore, type ThemeMode } from '@/src/store/settings-store';
-import { useProgressStore } from '@/src/store/progress-store';
+import { useSettingsStore } from '@/src/store/settings-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { getCharacter } from '@/src/data/content/coach-characters';
-import { chapters } from '@/src/data/content/chapters';
-import type { SocialEnergy, AgeGroup, BasicsLevel, SkillLevel, Goal, UserGender } from '@/src/store/user-profile-store';
+import { chapters, phases } from '@/src/data/content/chapters';
+import type { SkillLevel, Goal, UserGender } from '@/src/store/user-profile-store';
 
-const TOTAL_PAGES = 9;
+const TOTAL_PAGES = 5;
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
@@ -37,13 +36,11 @@ export default function OnboardingScreen() {
   const isDark = colorScheme === 'dark';
 
   const locale = useSettingsStore((s) => s.locale);
-  const themeMode = useSettingsStore((s) => s.themeMode);
-  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const {
-    userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
-    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal,
+    userGender, skillLevel, goal,
+    setUserGender, setSkillLevel, setGoal,
     completeOnboarding, skipOnboarding,
   } = useUserProfileStore();
 
@@ -74,18 +71,18 @@ export default function OnboardingScreen() {
 
   const handleComplete = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const personalization = getPersonalization({ userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal });
+    const personalization = getPersonalization({ userGender, socialEnergy: null, ageGroup: null, basicsLevel: null, skillLevel, goal });
     const currentCharacterId = useSettingsStore.getState().selectedCharacterId;
     if (currentCharacterId === 'charismo' || currentCharacterId === 'bestfriend') {
       setCharacterId(personalization.recommendedCharacterId);
     }
     completeOnboarding();
     router.replace('/(tabs)');
-  }, [userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal, completeOnboarding, setCharacterId, router]);
+  }, [userGender, skillLevel, goal, completeOnboarding, setCharacterId, router]);
 
   const personalization = useMemo(
-    () => getPersonalization({ userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal }),
-    [userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal],
+    () => getPersonalization({ userGender, socialEnergy: null, ageGroup: null, basicsLevel: null, skillLevel, goal }),
+    [userGender, skillLevel, goal],
   );
 
   const recommendedCharacter = useMemo(
@@ -93,27 +90,16 @@ export default function OnboardingScreen() {
     [personalization.recommendedCharacterId],
   );
 
-  const suggestedChapter = useMemo(
-    () => chapters.find((c) => c.id === personalization.suggestedStartChapter),
-    [personalization.suggestedStartChapter],
-  );
+  // Key chapters to highlight on summary page
+  const highlightChapters = useMemo(() => {
+    const ids = [21, 1, 5, 10]; // Foundation, Mirror, The Approach, Digital Game
+    return ids.map((id) => chapters.find((c) => c.id === id)).filter((c): c is typeof chapters[number] => !!c);
+  }, []);
 
   const renderPage = useCallback(({ item }: { item: number }) => {
     switch (item) {
       case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} isDark={isDark} />;
       case 1: return (
-        <AppearancePage
-          isDark={isDark}
-          t={t}
-          themeMode={themeMode}
-          onSelect={(mode) => {
-            setThemeMode(mode);
-            setTimeout(advance, 400);
-          }}
-          width={width}
-        />
-      );
-      case 2: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -133,74 +119,12 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 3: return (
-        <QuestionPage
-          locale={locale}
-          isDark={isDark}
-          title={t('onboarding.socialEnergy.title')}
-          subtitle={t('onboarding.socialEnergy.subtitle')}
-          footnote={t('onboarding.socialEnergy.footnote')}
-          options={[
-            { emoji: '🛋️', label: t('onboarding.socialEnergy.introvert'), value: 'introvert' as const },
-            { emoji: '⚖️', label: t('onboarding.socialEnergy.ambivert'), value: 'ambivert' as const },
-            { emoji: '🎉', label: t('onboarding.socialEnergy.extrovert'), value: 'extrovert' as const },
-            { emoji: '🏠', label: t('onboarding.socialEnergy.deepIntrovert'), value: 'deep_introvert' as const },
-          ]}
-          selected={socialEnergy}
-          onSelect={(value) => {
-            setSocialEnergy(value as SocialEnergy);
-            setTimeout(advance, 400);
-          }}
-          width={width}
-        />
-      );
-      case 4: return (
-        <QuestionPage
-          locale={locale}
-          isDark={isDark}
-          title={t('onboarding.ageGroup.title')}
-          subtitle={t('onboarding.ageGroup.subtitle')}
-          options={[
-            { emoji: '📱', label: t('onboarding.ageGroup.age_18_24'), value: 'age_18_24' as const },
-            { emoji: '💔', label: t('onboarding.ageGroup.age_25_34'), value: 'age_25_34' as const },
-            { emoji: '💼', label: t('onboarding.ageGroup.age_35_44'), value: 'age_35_44' as const },
-            { emoji: '🎩', label: t('onboarding.ageGroup.age_45_plus'), value: 'age_45_plus' as const },
-          ]}
-          selected={ageGroup}
-          onSelect={(value) => {
-            setAgeGroup(value as AgeGroup);
-            setTimeout(advance, 400);
-          }}
-          width={width}
-        />
-      );
-      case 5: return (
-        <QuestionPage
-          locale={locale}
-          isDark={isDark}
-          title={t(`onboarding.basics.${g}.title`)}
-          subtitle={t(`onboarding.basics.${g}.subtitle`)}
-          options={[
-            { emoji: '🧼', label: t(`onboarding.basics.${g}.none`), value: 'basics_none' as const },
-            { emoji: '🚿', label: t(`onboarding.basics.${g}.some`), value: 'basics_some' as const },
-            { emoji: '💅', label: t(`onboarding.basics.${g}.solid`), value: 'basics_solid' as const },
-            { emoji: '👑', label: t(`onboarding.basics.${g}.mastered`), value: 'basics_mastered' as const },
-          ]}
-          selected={basicsLevel}
-          onSelect={(value) => {
-            setBasicsLevel(value as BasicsLevel);
-            setTimeout(advance, 400);
-          }}
-          width={width}
-        />
-      );
-      case 6: return (
+      case 2: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
           title={t('onboarding.skillLevel.title')}
           subtitle={t('onboarding.skillLevel.subtitle')}
-          question={t('onboarding.skillLevel.question')}
           options={[
             { emoji: '🐣', label: t(`onboarding.skillLevel.${g}.beginner`), note: t(`onboarding.skillLevel.${g}.beginnerNote`), value: 'beginner' as const },
             { emoji: '📈', label: t(`onboarding.skillLevel.${g}.intermediate`), note: t(`onboarding.skillLevel.${g}.intermediateNote`), value: 'intermediate' as const },
@@ -215,7 +139,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 7: return (
+      case 3: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -236,16 +160,13 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 8: return (
-        <ProfileRevealPage
+      case 4: return (
+        <SummaryPage
           locale={locale}
           isDark={isDark}
           t={t}
-          personalization={personalization}
           recommendedCharacter={recommendedCharacter}
-          suggestedChapter={suggestedChapter}
-          socialEnergy={socialEnergy}
-          basicsLevel={basicsLevel}
+          highlightChapters={highlightChapters}
           skillLevel={skillLevel}
           goal={goal}
           onComplete={handleComplete}
@@ -254,13 +175,13 @@ export default function OnboardingScreen() {
       default: return null;
     }
   }, [
-    locale, t, width, g, isDark, themeMode, userGender, socialEnergy, ageGroup, basicsLevel, skillLevel, goal,
-    personalization, recommendedCharacter, suggestedChapter,
+    locale, t, width, g, isDark, userGender, skillLevel, goal,
+    recommendedCharacter, highlightChapters,
     advance, handleSkip, handleComplete,
-    setUserGender, setSocialEnergy, setAgeGroup, setBasicsLevel, setSkillLevel, setGoal, setThemeMode,
+    setUserGender, setSkillLevel, setGoal,
   ]);
 
-  const pages = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7, 8], []);
+  const pages = useMemo(() => [0, 1, 2, 3, 4], []);
 
   return (
     <View style={[styles.screen, isDark && styles.screenDark, { paddingTop: insets.top }]}>
@@ -351,55 +272,6 @@ function WelcomePage({
   );
 }
 
-/* ---------- Appearance Page ---------- */
-
-const APPEARANCE_OPTIONS: { mode: ThemeMode; icon: string; emoji: string }[] = [
-  { mode: 'light', icon: 'sunny', emoji: '☀️' },
-  { mode: 'dark', icon: 'moon', emoji: '🌙' },
-  { mode: 'system', icon: 'phone-portrait', emoji: '📱' },
-];
-
-function AppearancePage({
-  isDark,
-  t,
-  themeMode,
-  onSelect,
-  width,
-}: {
-  isDark: boolean;
-  t: any;
-  themeMode: ThemeMode;
-  onSelect: (mode: ThemeMode) => void;
-  width: number;
-}) {
-  return (
-    <View style={[styles.page, { width }]}>
-      <ScrollView
-        contentContainerStyle={styles.pageContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View entering={FadeInDown.duration(500)} style={styles.questionHeader}>
-          <Text style={[styles.questionTitle, isDark && styles.textLight]}>{t('onboarding.appearance.title')}</Text>
-          <Text style={[styles.questionSubtitle, isDark && styles.textMutedDark]}>{t('onboarding.appearance.subtitle')}</Text>
-        </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.optionsList}>
-          {APPEARANCE_OPTIONS.map((opt) => (
-            <OptionCard
-              key={opt.mode}
-              emoji={opt.emoji}
-              label={t(`onboarding.appearance.${opt.mode}`)}
-              note={t(`onboarding.appearance.${opt.mode}Note`)}
-              selected={themeMode === opt.mode}
-              onSelect={() => onSelect(opt.mode)}
-            />
-          ))}
-        </Animated.View>
-      </ScrollView>
-    </View>
-  );
-}
-
 /* ---------- Question Page ---------- */
 
 interface QuestionOption {
@@ -445,7 +317,7 @@ function QuestionPage({
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.optionsList}>
-          {options.map((opt, i) => (
+          {options.map((opt) => (
             <OptionCard
               key={opt.value}
               emoji={opt.emoji}
@@ -465,17 +337,14 @@ function QuestionPage({
   );
 }
 
-/* ---------- Profile Reveal Page ---------- */
+/* ---------- Summary Page ---------- */
 
-function ProfileRevealPage({
+function SummaryPage({
   locale,
   isDark,
   t,
-  personalization,
   recommendedCharacter,
-  suggestedChapter,
-  socialEnergy,
-  basicsLevel,
+  highlightChapters,
   skillLevel,
   goal,
   onComplete,
@@ -483,25 +352,14 @@ function ProfileRevealPage({
   locale: string;
   isDark: boolean;
   t: any;
-  personalization: ReturnType<typeof getPersonalization>;
   recommendedCharacter: ReturnType<typeof getCharacter>;
-  suggestedChapter: typeof chapters[number] | undefined;
-  socialEnergy: string | null;
-  basicsLevel: string | null;
+  highlightChapters: (typeof chapters[number])[];
   skillLevel: string | null;
   goal: string | null;
   onComplete: () => void;
 }) {
   const { width } = useWindowDimensions();
-  const showSkipNote = skillLevel === 'advanced' || skillLevel === 'expert';
-  const startsAtBasics = personalization.suggestedStartChapter === 21;
 
-  const socialLabel = socialEnergy
-    ? t(`onboarding.profile.labels.${socialEnergy}`)
-    : '—';
-  const basicsLabel = basicsLevel
-    ? t(`onboarding.profile.labels.${basicsLevel}`)
-    : '—';
   const skillLabel = skillLevel
     ? t(`onboarding.profile.labels.${skillLevel}`)
     : '—';
@@ -520,70 +378,55 @@ function ProfileRevealPage({
           <Text style={[styles.revealSubtitle, isDark && styles.textMutedDark]}>{t('onboarding.profileReveal.subtitle')}</Text>
         </Animated.View>
 
-        {/* Profile Summary Card */}
+        {/* Your Coach */}
         <Animated.View entering={FadeInUp.delay(200).duration(500)}>
           <GlassCard style={styles.revealCard}>
-            <Text style={styles.revealCardTitle}>{t('onboarding.profileReveal.profileTitle')}</Text>
-            <View style={styles.revealGrid}>
-              <View style={styles.revealStat}>
-                <Text style={styles.revealStatEmoji}>⚡</Text>
-                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{socialLabel}</Text>
+            <Text style={styles.revealCardTitle}>
+              {locale === 'de' ? 'DEIN COACH' : 'YOUR COACH'}
+            </Text>
+            <View style={styles.coachRow}>
+              <View style={[styles.coachIcon, { backgroundColor: `${recommendedCharacter.color}15` }]}>
+                <Ionicons name={recommendedCharacter.icon as any} size={28} color={recommendedCharacter.color} />
               </View>
-              <View style={styles.revealStat}>
-                <Text style={styles.revealStatEmoji}>🧼</Text>
-                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{basicsLabel}</Text>
-              </View>
-              <View style={styles.revealStat}>
-                <Text style={styles.revealStatEmoji}>📊</Text>
-                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{skillLabel}</Text>
-              </View>
-              <View style={styles.revealStat}>
-                <Text style={styles.revealStatEmoji}>🎯</Text>
-                <Text style={[styles.revealStatValue, isDark && styles.textLight]}>{goalLabel}</Text>
+              <View style={styles.coachInfo}>
+                <Text style={[styles.coachName, isDark && styles.textLight]}>{recommendedCharacter.name}</Text>
+                <Text style={[styles.coachSub, isDark && styles.textMutedDark]}>{recommendedCharacter.subtitle[locale as 'en' | 'de']}</Text>
               </View>
             </View>
           </GlassCard>
         </Animated.View>
 
-        {/* Plan Card */}
+        {/* Your Journey */}
         <Animated.View entering={FadeInUp.delay(400).duration(500)}>
           <GlassCard style={styles.revealCard}>
-            <Text style={styles.revealCardTitle}>{t('onboarding.profileReveal.planTitle')}</Text>
-
-            {/* Coach */}
-            <View style={[styles.planRow, isDark && styles.planRowDark]}>
-              <View style={[styles.planIcon, { backgroundColor: `${recommendedCharacter.color}15` }]}>
-                <Ionicons name={recommendedCharacter.icon as any} size={22} color={recommendedCharacter.color} />
-              </View>
-              <View style={styles.planInfo}>
-                <Text style={styles.planLabel}>{t('onboarding.profileReveal.coach')}</Text>
-                <Text style={[styles.planValue, isDark && styles.textLight]}>{recommendedCharacter.name}</Text>
-                <Text style={[styles.planSub, isDark && styles.textMutedDark]}>{recommendedCharacter.subtitle[locale as 'en' | 'de']}</Text>
-              </View>
-            </View>
-
-            {/* Starting Chapter */}
-            {suggestedChapter && (
-              <View style={[styles.planRow, isDark && styles.planRowDark]}>
-                <View style={styles.planIcon}>
-                  <Ionicons name={suggestedChapter.ionicon as any} size={22} color="#E8435A" />
-                </View>
-                <View style={styles.planInfo}>
-                  <Text style={styles.planLabel}>{t('onboarding.profileReveal.startingChapter')}</Text>
-                  <Text style={[styles.planValue, isDark && styles.textLight]}>
-                    {suggestedChapter.phase === 0
-                      ? suggestedChapter.title[locale as 'en' | 'de']
-                      : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${suggestedChapter.id}: ${suggestedChapter.title[locale as 'en' | 'de']}`}
+            <Text style={styles.revealCardTitle}>
+              {locale === 'de' ? 'DEINE REISE' : 'YOUR JOURNEY'}
+            </Text>
+            {highlightChapters.map((ch, idx) => (
+              <View key={ch!.id} style={[styles.chapterRow, isDark && styles.chapterRowDark, idx === 0 && { borderTopWidth: 0 }]}>
+                <View style={[styles.chapterNumBadge, idx === 0 && { backgroundColor: '#E8435A' }]}>
+                  <Text style={[styles.chapterNum, idx === 0 && { color: '#fff' }]}>
+                    {ch!.phase === 0 ? '0' : ch!.id}
                   </Text>
-                  {showSkipNote && (
-                    <Text style={styles.planSkipNote}>{t('onboarding.profileReveal.skipNote')}</Text>
-                  )}
-                  {startsAtBasics && (
-                    <Text style={styles.planSkipNote}>{t('onboarding.profileReveal.basicsNote')}</Text>
-                  )}
                 </View>
+                <View style={styles.chapterInfo}>
+                  <Text style={[styles.chapterTitle, isDark && styles.textLight]}>{ch!.title[locale as 'en' | 'de']}</Text>
+                  <Text style={styles.chapterPhase}>
+                    {phases.find((p) => p.id === ch!.phase)?.title[locale as 'en' | 'de']}
+                  </Text>
+                </View>
+                {idx === 0 && (
+                  <View style={styles.startBadge}>
+                    <Text style={styles.startBadgeText}>{locale === 'de' ? 'START' : 'START'}</Text>
+                  </View>
+                )}
               </View>
-            )}
+            ))}
+            <Text style={[styles.journeyNote, isDark && styles.textMutedDark]}>
+              {locale === 'de'
+                ? '20 Kapitel, 5 Phasen — von den Basics bis zur Meisterschaft'
+                : '20 chapters, 5 phases — from the basics to mastery'}
+            </Text>
           </GlassCard>
         </Animated.View>
 
@@ -748,7 +591,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  /* Profile Reveal */
+  /* Summary / Reveal */
   revealHeader: {
     marginBottom: 20,
   },
@@ -776,72 +619,94 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 14,
   },
-  revealGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  revealStat: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  revealStatEmoji: {
-    fontSize: 24,
-  },
-  revealStatValue: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#171717',
-    textAlign: 'center',
-  },
 
-  /* Plan rows */
-  planRow: {
+  /* Coach row */
+  coachRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+  },
+  coachIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachInfo: {
+    flex: 1,
+  },
+  coachName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+  },
+  coachSub: {
+    fontSize: 13,
+    color: '#737373',
+    marginTop: 2,
+  },
+
+  /* Chapter rows */
+  chapterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.06)',
   },
-  planRowDark: {
+  chapterRowDark: {
     borderTopColor: 'rgba(255,255,255,0.08)',
   },
-  planIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+  chapterNumBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: 'rgba(232,67,90,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  planInfo: {
+  chapterNum: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#E8435A',
+  },
+  chapterInfo: {
     flex: 1,
   },
-  planLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#A3A3A3',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  planValue: {
-    fontSize: 16,
-    fontWeight: '700',
+  chapterTitle: {
+    fontSize: 15,
+    fontWeight: '600',
     color: '#171717',
     letterSpacing: -0.2,
-    marginTop: 2,
   },
-  planSub: {
-    fontSize: 13,
-    color: '#737373',
+  chapterPhase: {
+    fontSize: 12,
+    color: '#A3A3A3',
     marginTop: 1,
   },
-  planSkipNote: {
-    fontSize: 12,
-    color: '#E8435A',
-    fontWeight: '600',
-    marginTop: 3,
+  startBadge: {
+    backgroundColor: '#E8435A',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
+  startBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  journeyNote: {
+    fontSize: 13,
+    color: '#737373',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
+  },
+
   settingsNote: {
     fontSize: 12,
     color: '#A3A3A3',

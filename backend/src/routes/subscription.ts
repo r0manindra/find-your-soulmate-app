@@ -49,7 +49,6 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
       isProPlus,
       freeChapters: env.freeChaptersCount,
       freeCoachMessagesPerDay: env.freeCoachMessagesPerDay,
-      voiceSessionsPerDay: env.proVoiceSessionsPerDay,
       // Hearts economy
       hearts: {
         dailyRemaining,
