@@ -22,12 +22,14 @@ const PRO_FEATURES = {
     { icon: 'chatbubbles' as const, text: 'Unlimited AI coach' },
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes' },
+    { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
   ],
   de: [
     { icon: 'book' as const, text: 'Alle 20 Kapitel' },
     { icon: 'chatbubbles' as const, text: 'Unbegrenzter KI-Coach' },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi' },
+    { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
   ],
 };
 
@@ -344,7 +346,7 @@ export default function PaywallScreen() {
           </Text>
         </Pressable>
       </ScrollView>
-      <View style={[styles.floatingClose, { top: insets.top + 8 }]}>
+      <View style={styles.floatingClose}>
         <LiquidGlassIconButton
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 40 },
-  floatingClose: { position: 'absolute', right: 20, zIndex: 10 },
+  floatingClose: { position: 'absolute', top: 8, right: 20, zIndex: 10 },
   hero: {
     borderRadius: 24, padding: 28,
     alignItems: 'center', marginBottom: 20,

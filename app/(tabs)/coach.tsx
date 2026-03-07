@@ -30,6 +30,19 @@ import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
 
+function formatMessageTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isToday) return time;
+  if (isYesterday) return `Yesterday ${time}`;
+  return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${time}`;
+}
+
 const FALLBACK_RESPONSE = {
   en: "Hey! I'd love to chat with you properly, but I need you to create a free account first so I can remember our conversations and give you personalized advice. Sign up above — it only takes a few seconds!",
   de: "Hey! Ich würde mich gerne richtig mit dir unterhalten, aber dafür brauchst du einen kostenlosen Account, damit ich mir unsere Gespräche merken und dir persönliche Tipps geben kann. Melde dich oben an — dauert nur ein paar Sekunden!",
@@ -289,25 +302,72 @@ export default function CoachScreen() {
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
 
-  const renderMessage = ({ item }: { item: ChatMessage }) => {
+  // Scroll-to-bottom FAB
+  const [showScrollFab, setShowScrollFab] = useState(false);
+  const handleScroll = useCallback((event: any) => {
+    setShowScrollFab(event.nativeEvent.contentOffset.y > 200);
+  }, []);
+  const scrollToBottom = useCallback(() => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
+
+  const renderMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
     const isUser = item.role === 'user';
+    const prevMsg = invertedMessages[index + 1]; // above on screen (older)
+    const nextMsg = invertedMessages[index - 1]; // below on screen (newer)
+    const isFirstInGroup = !prevMsg || prevMsg.role !== item.role;
+    const isLastInGroup = !nextMsg || nextMsg.role !== item.role;
+
+    // Tighter spacing for grouped messages
+    const spacing = isLastInGroup ? 8 : 2;
+
+    // Timestamp separator: show when 5+ minute gap with message above
+    const showTimestamp = prevMsg && prevMsg.timestamp && item.timestamp &&
+      (item.timestamp - prevMsg.timestamp > 5 * 60 * 1000);
+
+    // Grouped bubble radii
+    const bubbleStyle: any = {};
+    if (isUser) {
+      if (!isFirstInGroup) bubbleStyle.borderTopRightRadius = 4;
+      if (!isLastInGroup) bubbleStyle.borderBottomRightRadius = 4;
+    } else {
+      if (!isFirstInGroup) bubbleStyle.borderTopLeftRadius = 4;
+      if (!isLastInGroup) bubbleStyle.borderBottomLeftRadius = 4;
+    }
+
+    // Show avatar only on last message in AI group
+    const showAvatar = !isUser && isLastInGroup;
 
     return (
-      <View style={[styles.messageRow, isUser && styles.messageRowUser]}>
-        {!isUser && (
-          <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-            <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
+      <>
+        {showTimestamp && (
+          <View style={styles.timestampContainer}>
+            <Text style={[styles.timestampText, isDark && styles.timestampTextDark]}>
+              {formatMessageTime(item.timestamp)}
+            </Text>
           </View>
         )}
-        <View style={[
-          styles.messageBubble,
-          isUser ? styles.userBubble : [styles.aiBubble, isDark && styles.aiBubbleDark],
-        ]}>
-          <Text style={[styles.messageText, isDark && !isUser && styles.messageTextDark, isUser && styles.userText]}>
-            {item.content}
-          </Text>
+        <View style={[styles.messageRow, isUser && styles.messageRowUser, { marginBottom: spacing }]}>
+          {!isUser && (
+            showAvatar ? (
+              <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
+                <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
+              </View>
+            ) : (
+              <View style={styles.avatarSpacer} />
+            )
+          )}
+          <View style={[
+            styles.messageBubble,
+            isUser ? styles.userBubble : [styles.aiBubble, isDark && styles.aiBubbleDark],
+            bubbleStyle,
+          ]}>
+            <Text style={[styles.messageText, isDark && !isUser && styles.messageTextDark, isUser && styles.userText]}>
+              {item.content}
+            </Text>
+          </View>
         </View>
-      </View>
+      </>
     );
   };
 
@@ -413,9 +473,11 @@ export default function CoachScreen() {
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="handled"
+          onScroll={handleScroll}
+          scrollEventThrottle={100}
           ListHeaderComponent={
             isLoading ? (
-              <View style={[styles.messageRow, { transform: [{ scaleY: -1 }] }]}>
+              <View style={styles.messageRow}>
                 <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
                   <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
                 </View>
@@ -427,7 +489,7 @@ export default function CoachScreen() {
           }
           ListFooterComponent={
             messages.length <= 1 ? (
-              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark, { transform: [{ scaleY: -1 }] }]}>
+              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
                 <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
                 <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
                   {t('coach.welcomeTitle')}
@@ -439,6 +501,17 @@ export default function CoachScreen() {
             ) : null
           }
         />
+
+        {/* Scroll-to-bottom FAB */}
+        {showScrollFab && (
+          <Pressable
+            onPress={scrollToBottom}
+            style={[styles.scrollFab, isDark && styles.scrollFabDark]}
+            hitSlop={8}
+          >
+            <Ionicons name="chevron-down" size={20} color={isDark ? '#F5F5F5' : '#525252'} />
+          </Pressable>
+        )}
 
         {/* Floating Glass Input */}
         <Animated.View style={[styles.floatingInputWrapper, animatedInputWrapperStyle]}>
@@ -639,7 +712,7 @@ const styles = StyleSheet.create({
   },
   upgradeBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#E8435A' },
   messageList: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4, flexGrow: 1 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 6 },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 8 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
     width: 22, height: 22, borderRadius: 11,
@@ -661,6 +734,25 @@ const styles = StyleSheet.create({
   messageTextDark: { color: '#F5F5F5' },
   userText: { color: '#fff' },
   loadingText: { fontSize: 13, color: '#A3A3A3', fontStyle: 'italic' },
+  avatarSpacer: { width: 22 },
+  timestampContainer: {
+    alignItems: 'center', paddingVertical: 10,
+  },
+  timestampText: { fontSize: 11, color: '#A3A3A3', fontWeight: '500' },
+  timestampTextDark: { color: '#737373' },
+  scrollFab: {
+    position: 'absolute', bottom: 80, right: 20, zIndex: 10,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: '#fff',
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12, shadowRadius: 6, elevation: 4,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  scrollFabDark: {
+    backgroundColor: '#333',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
 
   // Welcome card
   welcomeCard: {

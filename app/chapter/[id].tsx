@@ -254,12 +254,16 @@ export default function ChapterDetailScreen() {
     if (!isCompleted) {
       completeChapter(chapterId);
     }
+    // Auto-scroll to bottom so user sees the "Next Chapter" button
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
   };
 
   const handleQuizSkip = () => {
     if (!isCompleted) {
       completeChapter(chapterId);
     }
+    // Auto-scroll to bottom so user sees the "Next Chapter" button
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
   };
 
   const handleNavigateToNextChapter = nextChapterId ? () => {
