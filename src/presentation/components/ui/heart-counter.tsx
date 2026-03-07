@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,7 +11,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useHeartsStore } from '@/src/store/hearts-store';
-import { useAuthStore } from '@/src/store/auth-store';
 
 interface HeartCounterProps {
   compact?: boolean;
@@ -28,6 +29,7 @@ function getTimeUntilMidnight(): string {
 export function HeartCounter({ compact }: HeartCounterProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const router = useRouter();
   const dailyHearts = useHeartsStore((s) => s.dailyHearts);
   const bonusHearts = useHeartsStore((s) => s.bonusHearts);
   const getMaxDailyHearts = useHeartsStore((s) => s.getMaxDailyHearts);
@@ -71,30 +73,39 @@ export function HeartCounter({ compact }: HeartCounterProps) {
     transform: [{ scale: scale.value }],
   }));
 
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/paywall');
+  };
+
   if (compact) {
     return (
-      <Animated.View style={[styles.compactContainer, animatedStyle]}>
-        <Ionicons name="heart" size={14} color="#E8435A" />
-        <Text style={[styles.compactText, isDark && styles.compactTextDark]}>
-          {total}
-          {showRefill ? ` · ${refillTime}` : ''}
-        </Text>
-      </Animated.View>
+      <Pressable onPress={handlePress} hitSlop={8}>
+        <Animated.View style={[styles.compactContainer, animatedStyle]}>
+          <Ionicons name="heart" size={14} color="#E8435A" />
+          <Text style={[styles.compactText, isDark && styles.compactTextDark]}>
+            {total}
+            {showRefill ? ` · ${refillTime}` : ''}
+          </Text>
+        </Animated.View>
+      </Pressable>
     );
   }
 
   return (
-    <Animated.View style={[styles.container, isDark && styles.containerDark, animatedStyle]}>
-      <Ionicons name="heart" size={16} color="#E8435A" />
-      <Text style={[styles.text, isDark && styles.textDark]}>
-        {total}
-      </Text>
-      {showRefill && (
-        <Text style={[styles.refillText, isDark && styles.refillTextDark]}>
-          · {refillTime}
+    <Pressable onPress={handlePress} hitSlop={6}>
+      <Animated.View style={[styles.container, isDark && styles.containerDark, animatedStyle]}>
+        <Ionicons name="heart" size={16} color="#E8435A" />
+        <Text style={[styles.text, isDark && styles.textDark]}>
+          {total}
         </Text>
-      )}
-    </Animated.View>
+        {showRefill && (
+          <Text style={[styles.refillText, isDark && styles.refillTextDark]}>
+            · {refillTime}
+          </Text>
+        )}
+      </Animated.View>
+    </Pressable>
   );
 }
 

@@ -6,7 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withSpring, runOnJS, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withSpring, withRepeat, withSequence, runOnJS, Easing } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
@@ -29,7 +29,7 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({ duration: 400, fade: true });
+SplashScreen.setOptions({ duration: 600, fade: true });
 
 function AchievementListener() {
   const store = useProgressStore();
@@ -170,27 +170,44 @@ function ProgressSync() {
 }
 
 function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: () => void }) {
-  const iconScale = useSharedValue(0.6);
+  const iconScale = useSharedValue(0.7);
   const iconOpacity = useSharedValue(0);
-  const overlayOpacity = useSharedValue(1);
+  const glowOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
+  const textTranslateY = useSharedValue(8);
+  const overlayOpacity = useSharedValue(1);
 
   useEffect(() => {
     // Signal that overlay is mounted — safe to hide native splash
     onReady();
 
-    // 0-500ms: Icon fades in with bouncy spring
-    iconOpacity.value = withTiming(1, { duration: 500 });
-    iconScale.value = withSpring(1, { damping: 12, stiffness: 120 });
+    // Phase 1: Icon appears (0–700ms) — smooth ease-out, no bounce
+    iconOpacity.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) });
+    iconScale.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
 
-    // 400-900ms: "Charismo" text fades in
-    textOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
+    // Phase 2: Subtle glow pulse behind icon (600ms–3400ms)
+    glowOpacity.value = withDelay(600, withTiming(1, { duration: 500 }, () => {
+      glowOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.5, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
+          withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      );
+    }));
 
-    // Hold until 2500ms, then scale up + fade out
-    iconScale.value = withDelay(2500, withTiming(1.15, { duration: 400, easing: Easing.out(Easing.quad) }));
-    iconOpacity.value = withDelay(2600, withTiming(0, { duration: 400 }));
-    textOpacity.value = withDelay(2500, withTiming(0, { duration: 350 }));
-    overlayOpacity.value = withDelay(2800, withTiming(0, { duration: 400 }, () => {
+    // Phase 3: Brand text slides up + fades in (600–1200ms)
+    textOpacity.value = withDelay(600, withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) }));
+    textTranslateY.value = withDelay(600, withTiming(0, { duration: 600, easing: Easing.out(Easing.cubic) }));
+
+    // Phase 4: Hold for 3.5s total, then elegant exit
+    iconScale.value = withDelay(3400, withTiming(1.08, { duration: 500, easing: Easing.out(Easing.quad) }));
+    iconOpacity.value = withDelay(3600, withTiming(0, { duration: 450, easing: Easing.in(Easing.cubic) }));
+    glowOpacity.value = withDelay(3400, withTiming(0, { duration: 400 }));
+    textOpacity.value = withDelay(3400, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }));
+    textTranslateY.value = withDelay(3400, withTiming(-4, { duration: 400, easing: Easing.in(Easing.cubic) }));
+    overlayOpacity.value = withDelay(3800, withTiming(0, { duration: 500, easing: Easing.in(Easing.cubic) }, () => {
       runOnJS(onFinish)();
     }));
   }, []);
@@ -200,8 +217,13 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
     transform: [{ scale: iconScale.value }],
   }));
 
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
   const textStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
+    transform: [{ translateY: textTranslateY.value }],
   }));
 
   const overlayStyle = useAnimatedStyle(() => ({
@@ -216,9 +238,13 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
         end={{ x: 1, y: 1 }}
         style={splashStyles.gradient}
       >
-        <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-          <CharismoIcon size={100} color="#fff" />
-        </Animated.View>
+        <View style={splashStyles.iconWrapper}>
+          {/* Subtle glow ring behind icon */}
+          <Animated.View style={[splashStyles.glowRing, glowStyle]} />
+          <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
+            <CharismoIcon size={100} color="#fff" />
+          </Animated.View>
+        </View>
         <Animated.Text style={[splashStyles.brandText, textStyle]}>
           Charismo
         </Animated.Text>
@@ -237,20 +263,31 @@ const splashStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowRing: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
   iconContainer: {
     width: 130,
     height: 130,
     borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   brandText: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '700',
     color: '#fff',
-    letterSpacing: 1,
-    marginTop: 16,
+    letterSpacing: 2,
+    marginTop: 20,
   },
 });
 
