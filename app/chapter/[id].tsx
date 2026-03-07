@@ -82,6 +82,7 @@ export default function ChapterDetailScreen() {
   const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
   const [showOutOfHearts, setShowOutOfHearts] = useState(false);
   const [heartsCharged, setHeartsCharged] = useState(false);
+  const [accessGranted, setAccessGranted] = useState(false);
   const isPremium = useAuthStore((s) => s.isPremium);
   const isProPlus = useAuthStore((s) => s.isProPlus);
   const hasChapterUnlock = useAuthStore((s) => (s as any).hasChapterUnlock ?? false);
@@ -111,9 +112,19 @@ export default function ChapterDetailScreen() {
   }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);
 
+  // Phase 0 (fundamentals, chapters 21-25) are free; other chapters cost hearts
+  const isFreeChapter = chapter?.phase === 0;
+
   // Hearts gating: charge 2 hearts to open a new (not already completed) chapter
   useEffect(() => {
-    if (isCompleted || heartsCharged || hasChapterUnlock) return;
+    if (isCompleted || hasChapterUnlock || isFreeChapter) {
+      setAccessGranted(true);
+      return;
+    }
+    if (heartsCharged) {
+      setAccessGranted(true);
+      return;
+    }
     const heartsStore = useHeartsStore.getState();
     if (!heartsStore.canSpend(HEART_COSTS.CHAPTER)) {
       setShowOutOfHearts(true);
@@ -121,7 +132,8 @@ export default function ChapterDetailScreen() {
     }
     heartsStore.spendHearts(HEART_COSTS.CHAPTER);
     setHeartsCharged(true);
-  }, [isCompleted, heartsCharged, hasChapterUnlock]);
+    setAccessGranted(true);
+  }, [isCompleted, heartsCharged, hasChapterUnlock, isFreeChapter]);
 
   const prevChapter = useMemo(() => chapters.find((c) => c.id === chapterId - 1), [chapterId]);
   const nextChapterNav = useMemo(() => chapters.find((c) => c.id === chapterId + 1), [chapterId]);
@@ -335,6 +347,57 @@ export default function ChapterDetailScreen() {
       </Pressable>
     );
   };
+
+  // Gate screen: show before access is granted
+  if (!accessGranted) {
+    return (
+      <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
+        <View style={styles.gateContainer}>
+          <LinearGradient
+            colors={['#E8435A', '#FF7854']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gateIconCircle}
+          >
+            <Ionicons name="heart" size={40} color="#fff" />
+          </LinearGradient>
+          <Text style={[styles.gateTitle, isDark && styles.gateTitleDark]}>
+            {locale === 'de'
+              ? `${HEART_COSTS.CHAPTER} Herzen zum Öffnen`
+              : `${HEART_COSTS.CHAPTER} hearts to open`}
+          </Text>
+          <Text style={[styles.gateSubtitle, isDark && styles.gateSubtitleDark]}>
+            {chapter?.title[locale] ?? ''}
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={[styles.gateBackBtn, isDark && styles.gateBackBtnDark]}
+          >
+            <Text style={styles.gateBackText}>
+              {locale === 'de' ? 'Zurück' : 'Go Back'}
+            </Text>
+          </Pressable>
+        </View>
+
+        <OutOfHeartsModal
+          visible={showOutOfHearts}
+          onClose={() => {
+            setShowOutOfHearts(false);
+            router.back();
+          }}
+        />
+
+        <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+          <LiquidGlassIconButton
+            onPress={() => router.back()}
+            icon="close"
+            size={42}
+            iconSize={22}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
@@ -796,6 +859,34 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   content: { paddingBottom: 120 },
   errorText: { fontSize: 16, color: '#737373', textAlign: 'center', marginTop: 40 },
+
+  // Gate screen (hearts check)
+  gateContainer: {
+    flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32,
+  },
+  gateIconCircle: {
+    width: 88, height: 88, borderRadius: 44,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 24,
+  },
+  gateTitle: {
+    fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3,
+    textAlign: 'center', marginBottom: 8,
+  },
+  gateTitleDark: { color: '#F5F5F5' },
+  gateSubtitle: {
+    fontSize: 15, color: '#737373', textAlign: 'center', marginBottom: 32,
+  },
+  gateSubtitleDark: { color: '#A3A3A3' },
+  gateBackBtn: {
+    paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+  },
+  gateBackBtnDark: {
+    backgroundColor: 'rgba(232,67,90,0.15)',
+  },
+  gateBackText: {
+    fontSize: 16, fontWeight: '600', color: '#E8435A',
+  },
 
   // Floating liquid glass back button
   floatingBack: {

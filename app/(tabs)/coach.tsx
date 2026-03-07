@@ -234,12 +234,10 @@ export default function CoachScreen() {
     setShowCharacterPicker(false);
   };
 
-  const handleNewChat = useCallback((charId?: string) => {
-    const id = charId ?? activeConvCharacterId;
-    const char = getCharacter(id);
-    chatStore.createConversation(id, char.greeting[locale]);
-    if (charId) setCharacterId(charId);
-  }, [activeConvCharacterId, locale, setCharacterId]);
+  const handleNewChat = useCallback(() => {
+    const char = getCharacter(activeConvCharacterId);
+    chatStore.createConversation(activeConvCharacterId, char.greeting[locale]);
+  }, [activeConvCharacterId, locale]);
 
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;

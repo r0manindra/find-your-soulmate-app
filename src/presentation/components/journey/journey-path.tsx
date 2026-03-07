@@ -11,6 +11,7 @@ import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
+import { HEART_COSTS } from '@/src/config/heart-costs';
 import { PhaseHeader } from './phase-header';
 import { ChapterNode } from './chapter-node';
 
@@ -192,6 +193,7 @@ export function JourneyPath() {
                             position={position}
                             isExpanded={expandedId === chapter.id}
                             isDark={isDark}
+                            heartCost={chapter.phase !== 0 ? HEART_COSTS.CHAPTER : undefined}
                             onPress={() => toggleExpand(chapter.id)}
                             onAction={() => handleAction(chapter.id)}
                           />

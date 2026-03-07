@@ -101,13 +101,16 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Hearts-based rate limiting
+    // Hearts-based rate limiting (all tiers now go through hearts check)
     const today = new Date().toISOString().split('T')[0];
     const heartCost = env.heartCostMessage;
 
-    // PRO+ users skip heart checks
-    if (!isSubscribed(user.subscriptionStatus) || user.subscriptionStatus === 'PRO') {
-      const maxDaily = user.subscriptionStatus === 'PRO' ? env.proHeartsPerDay : env.freeHeartsPerDay;
+    {
+      const maxDaily = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM'
+        ? env.proPlusHeartsPerDay
+        : user.subscriptionStatus === 'PRO'
+          ? env.proHeartsPerDay
+          : env.freeHeartsPerDay;
       let dailyUsed = user.dailyHeartsUsed;
 
       if (user.lastHeartsResetDate !== today) {
@@ -197,11 +200,13 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     ]);
 
     // Calculate remaining hearts for response
-    const maxDaily = isSubscribed(user.subscriptionStatus)
-      ? (user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM' ? Infinity : env.proHeartsPerDay)
-      : env.freeHeartsPerDay;
+    const maxDaily = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM'
+      ? env.proPlusHeartsPerDay
+      : user.subscriptionStatus === 'PRO'
+        ? env.proHeartsPerDay
+        : env.freeHeartsPerDay;
     const heartsUsed = user.lastHeartsResetDate === today ? user.dailyHeartsUsed + heartCost : heartCost;
-    const heartsRemaining = maxDaily === Infinity ? null : Math.max(0, maxDaily - heartsUsed) + Math.max(0, user.bonusHearts - Math.max(0, heartCost - Math.max(0, maxDaily - (user.lastHeartsResetDate === today ? user.dailyHeartsUsed : 0))));
+    const heartsRemaining = Math.max(0, maxDaily - heartsUsed) + Math.max(0, user.bonusHearts - Math.max(0, heartCost - Math.max(0, maxDaily - (user.lastHeartsResetDate === today ? user.dailyHeartsUsed : 0))));
 
     res.json({
       response: aiResponse,

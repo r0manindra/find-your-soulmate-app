@@ -414,7 +414,9 @@
     "buyPack": "Herz-Paket kaufen",
     "resetAt": "Reset in {{time}}",
     "bonusHearts": "Bonus-Herzen",
-    "upgradeForMore": "Upgrade für mehr Herzen"
+    "upgradeForMore": "Upgrade für mehr Herzen",
+    "heartCost": "{{count}} Herzen zum Öffnen",
+    "heartsRefillIn": "Reset in {{time}}"
   },
   "paywall": {
     "heartsPerDay": "{{count}} Herzen/Tag",

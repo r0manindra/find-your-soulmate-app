@@ -8,7 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 function getMaxDailyHearts(status: string): number {
-  if (status === 'PRO_PLUS' || status === 'PREMIUM') return Infinity;
+  if (status === 'PRO_PLUS' || status === 'PREMIUM') return env.proPlusHeartsPerDay;
   if (status === 'PRO') return env.proHeartsPerDay;
   return env.freeHeartsPerDay;
 }
@@ -48,14 +48,13 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
     }
 
     const maxDaily = getMaxDailyHearts(user.subscriptionStatus);
-    const dailyRemaining = maxDaily === Infinity ? Infinity : Math.max(0, maxDaily - dailyUsed);
+    const dailyRemaining = Math.max(0, maxDaily - dailyUsed);
 
     res.json({
-      dailyRemaining: dailyRemaining === Infinity ? null : dailyRemaining,
-      maxDaily: maxDaily === Infinity ? null : maxDaily,
+      dailyRemaining,
+      maxDaily,
       bonus: user.bonusHearts,
       lastReset: today,
-      unlimited: maxDaily === Infinity,
     });
   } catch (err) {
     console.error('Hearts status error:', err);
@@ -88,17 +87,7 @@ router.post('/spend', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // PRO+ users have unlimited hearts
     const maxDaily = getMaxDailyHearts(user.subscriptionStatus);
-    if (maxDaily === Infinity) {
-      res.json({
-        success: true,
-        dailyRemaining: null,
-        bonus: user.bonusHearts,
-        unlimited: true,
-      });
-      return;
-    }
 
     const today = getTodayString();
     let dailyUsed = user.dailyHeartsUsed;

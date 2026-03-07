@@ -33,15 +33,12 @@ export const useHeartsStore = create<HeartsStore>()(
 
       getMaxDailyHearts: () => {
         const tier = useAuthStore.getState().subscriptionTier;
-        if (tier === 'pro_plus') return Infinity;
+        if (tier === 'pro_plus') return 100;
         if (tier === 'pro') return 50;
         return 5;
       },
 
       canSpend: (amount) => {
-        const tier = useAuthStore.getState().subscriptionTier;
-        if (tier === 'pro_plus') return true;
-
         // Auto-reset if new day
         get().resetIfNewDay();
 
@@ -50,9 +47,6 @@ export const useHeartsStore = create<HeartsStore>()(
       },
 
       spendHearts: (amount) => {
-        const tier = useAuthStore.getState().subscriptionTier;
-        if (tier === 'pro_plus') return true;
-
         // Auto-reset if new day
         get().resetIfNewDay();
 
@@ -83,7 +77,7 @@ export const useHeartsStore = create<HeartsStore>()(
         if (lastResetDate !== today) {
           const maxDaily = get().getMaxDailyHearts();
           set({
-            dailyHearts: maxDaily === Infinity ? Infinity : maxDaily,
+            dailyHearts: maxDaily,
             lastResetDate: today,
           });
         }
@@ -94,8 +88,6 @@ export const useHeartsStore = create<HeartsStore>()(
       },
 
       getTotalAvailable: () => {
-        const tier = useAuthStore.getState().subscriptionTier;
-        if (tier === 'pro_plus') return Infinity;
         get().resetIfNewDay();
         const { dailyHearts, bonusHearts } = get();
         return dailyHearts + bonusHearts;

@@ -23,6 +23,7 @@ interface ChapterNodeProps {
   position: 'left' | 'center' | 'right';
   isExpanded: boolean;
   isDark?: boolean;
+  heartCost?: number;
   onPress: () => void;
   onAction: () => void;
 }
@@ -34,6 +35,7 @@ export function ChapterNode({
   position,
   isExpanded,
   isDark = false,
+  heartCost,
   onPress,
   onAction,
 }: ChapterNodeProps) {
@@ -95,6 +97,12 @@ export function ChapterNode({
               <Ionicons name={chapter.ionicon as any} size={24} color="#E8435A" />
             )}
           </View>
+          {heartCost != null && status !== 'completed' && (
+            <View style={styles.heartCostBadge}>
+              <Ionicons name="heart" size={8} color="#fff" />
+              <Text style={styles.heartCostText}>{heartCost}</Text>
+            </View>
+          )}
         </AnimatedPressable>
 
         <Text
@@ -190,6 +198,24 @@ const styles = StyleSheet.create({
   nodeActive: {
     borderColor: '#E8435A',
     backgroundColor: '#fff',
+  },
+  heartCostBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: '#E8435A',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  heartCostText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#fff',
   },
   nodeLabel: {
     fontSize: 12,

@@ -19,6 +19,7 @@ import { chapters, phases } from '@/src/data/content/chapters';
 import { books } from '@/src/data/content/books';
 import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { useAuthStore } from '@/src/store/auth-store';
+import { HEART_COSTS } from '@/src/config/heart-costs';
 
 function getGreeting(locale: 'en' | 'de'): string {
   const hour = new Date().getHours();
@@ -48,6 +49,7 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   const { completedChapters } = useProgressStore();
   const profile = useUserProfileStore();
   const router = useRouter();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const scale = useSharedValue(1);
 
   const nextChapter = useMemo(() => {
@@ -104,8 +106,16 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
                 : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
             </Text>
           </View>
-          <View style={styles.continueArrow}>
-            <Ionicons name="play" size={20} color="#fff" />
+          <View style={styles.continueRight}>
+            {isLoggedIn && nextChapter.phase !== 0 && !completedChapters.includes(nextChapter.id) && (
+              <View style={styles.heartCostBadge}>
+                <Ionicons name="heart" size={10} color="#fff" />
+                <Text style={styles.heartCostText}>{HEART_COSTS.CHAPTER}</Text>
+              </View>
+            )}
+            <View style={styles.continueArrow}>
+              <Ionicons name="play" size={20} color="#fff" />
+            </View>
           </View>
         </View>
       </LinearGradient>
@@ -386,6 +396,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
+  },
+  continueRight: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  heartCostBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  heartCostText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
   },
   continueArrow: {
     width: 40,

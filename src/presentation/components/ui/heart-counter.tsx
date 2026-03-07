@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -15,26 +15,50 @@ interface HeartCounterProps {
   compact?: boolean;
 }
 
+function getTimeUntilMidnight(): string {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const diff = midnight.getTime() - now.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
+
 export function HeartCounter({ compact }: HeartCounterProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const isProPlus = useAuthStore((s) => s.isProPlus);
   const dailyHearts = useHeartsStore((s) => s.dailyHearts);
   const bonusHearts = useHeartsStore((s) => s.bonusHearts);
+  const getMaxDailyHearts = useHeartsStore((s) => s.getMaxDailyHearts);
   const resetIfNewDay = useHeartsStore((s) => s.resetIfNewDay);
+
+  const [refillTime, setRefillTime] = useState(getTimeUntilMidnight());
 
   useEffect(() => {
     resetIfNewDay();
   }, []);
 
-  const total = isProPlus ? Infinity : dailyHearts + bonusHearts;
+  const total = dailyHearts + bonusHearts;
+  const maxDaily = getMaxDailyHearts();
+  const showRefill = total < maxDaily;
+
+  // Update refill timer every 60s
+  useEffect(() => {
+    if (!showRefill) return;
+    setRefillTime(getTimeUntilMidnight());
+    const timer = setInterval(() => {
+      setRefillTime(getTimeUntilMidnight());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [showRefill]);
 
   // Pulse animation when hearts decrease
   const scale = useSharedValue(1);
   const prevTotal = useSharedValue(total);
 
   useEffect(() => {
-    if (total < prevTotal.value && total !== Infinity) {
+    if (total < prevTotal.value) {
       scale.value = withSequence(
         withSpring(1.3, { damping: 8, stiffness: 400 }),
         withSpring(1, { damping: 15, stiffness: 400 })
@@ -52,7 +76,8 @@ export function HeartCounter({ compact }: HeartCounterProps) {
       <Animated.View style={[styles.compactContainer, animatedStyle]}>
         <Ionicons name="heart" size={14} color="#E8435A" />
         <Text style={[styles.compactText, isDark && styles.compactTextDark]}>
-          {isProPlus ? '\u221E' : total}
+          {total}
+          {showRefill ? ` · ${refillTime}` : ''}
         </Text>
       </Animated.View>
     );
@@ -62,8 +87,13 @@ export function HeartCounter({ compact }: HeartCounterProps) {
     <Animated.View style={[styles.container, isDark && styles.containerDark, animatedStyle]}>
       <Ionicons name="heart" size={16} color="#E8435A" />
       <Text style={[styles.text, isDark && styles.textDark]}>
-        {isProPlus ? '\u221E' : total}
+        {total}
       </Text>
+      {showRefill && (
+        <Text style={[styles.refillText, isDark && styles.refillTextDark]}>
+          · {refillTime}
+        </Text>
+      )}
     </Animated.View>
   );
 }
@@ -88,6 +118,14 @@ const styles = StyleSheet.create({
   },
   textDark: {
     color: '#F87171',
+  },
+  refillText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#A3A3A3',
+  },
+  refillTextDark: {
+    color: '#737373',
   },
   compactContainer: {
     flexDirection: 'row',

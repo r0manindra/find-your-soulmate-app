@@ -17,6 +17,7 @@ export const env = {
   heartCostMessage: 1,
   heartCostChapter: 2,
   heartCostExercise: 2,
+  proPlusHeartsPerDay: 100,
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   appleBundleId: process.env.APPLE_BUNDLE_ID || 'com.flirtiq.app',
 };

@@ -130,6 +130,24 @@ export async function purchaseHeartPack(): Promise<boolean> {
   }
 }
 
+export async function purchaseLargeHeartPack(): Promise<boolean> {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const heartPack = offerings.all['heart_pack_large']?.availablePackages[0];
+    if (!heartPack) return false;
+    const { customerInfo } = await Purchases.purchasePackage(heartPack);
+    if (customerInfo) {
+      const { useHeartsStore } = require('@/src/store/hearts-store');
+      useHeartsStore.getState().addBonusHearts(200);
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    if (e.userCancelled) return false;
+    throw e;
+  }
+}
+
 export async function purchasePdfAccess(): Promise<boolean> {
   try {
     const offerings = await Purchases.getOfferings();

@@ -34,7 +34,7 @@ const PRO_MONTHLY_FEATURES = {
 
 const PRO_PLUS_ANNUAL_FEATURES = {
   en: [
-    { icon: 'heart' as const, text: 'Unlimited hearts', highlight: true },
+    { icon: 'heart' as const, text: '100 hearts/day (2x)', highlight: true },
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
@@ -42,7 +42,7 @@ const PRO_PLUS_ANNUAL_FEATURES = {
     { icon: 'document-text' as const, text: 'PDF guide included', highlight: true },
   ],
   de: [
-    { icon: 'heart' as const, text: 'Unbegrenzte Herzen', highlight: true },
+    { icon: 'heart' as const, text: '100 Herzen/Tag (2x)', highlight: true },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
@@ -109,7 +109,7 @@ export default function PaywallScreen() {
     }
   };
 
-  const handleOneTimePurchase = async (type: 'hearts' | 'pdf' | 'chapters') => {
+  const handleOneTimePurchase = async (type: 'hearts' | 'hearts_large' | 'pdf' | 'chapters') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!isLoggedIn) {
       router.push('/auth/register');
@@ -119,6 +119,7 @@ export default function PaywallScreen() {
     try {
       let success = false;
       if (type === 'hearts') success = await purchases.purchaseHeartPack();
+      else if (type === 'hearts_large') success = await purchases.purchaseLargeHeartPack();
       else if (type === 'pdf') success = await purchases.purchasePdfAccess();
       else if (type === 'chapters') success = await purchases.purchaseChapterUnlock();
 
@@ -172,10 +173,10 @@ export default function PaywallScreen() {
   };
 
   const proMonthlyPrice = offerings?.proMonthly?.product.priceString ?? '$5.99';
-  const proPlusAnnualPrice = offerings?.proPlusAnnual?.product.priceString ?? '$49.99';
+  const proPlusAnnualPrice = offerings?.proPlusAnnual?.product.priceString ?? '$69.99';
   const proPlusMonthlyEquiv = offerings?.proPlusAnnual
     ? `${(offerings.proPlusAnnual.product.price / 12).toFixed(2)} ${offerings.proPlusAnnual.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
-    : `$4.17/${locale === 'de' ? 'Monat' : 'mo'}`;
+    : `$5.83/${locale === 'de' ? 'Monat' : 'mo'}`;
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
@@ -317,27 +318,48 @@ export default function PaywallScreen() {
         </Text>
 
         <View style={styles.oneTimeCards}>
-          {/* Heart Pack */}
-          {isPremium && (
-            <Pressable
-              onPress={() => handleOneTimePurchase('hearts')}
-              disabled={oneTimeLoading === 'hearts'}
-              style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
-            >
-              <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(232,67,90,0.08)' }]}>
-                <Ionicons name="heart" size={22} color="#E8435A" />
+          {/* Heart Pack — 50 hearts */}
+          <Pressable
+            onPress={() => handleOneTimePurchase('hearts')}
+            disabled={oneTimeLoading === 'hearts'}
+            style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
+          >
+            <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(232,67,90,0.08)' }]}>
+              <Ionicons name="heart" size={22} color="#E8435A" />
+            </View>
+            <View style={styles.oneTimeInfo}>
+              <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
+                {locale === 'de' ? '50 Herzen Paket' : '50 Hearts Pack'}
+              </Text>
+              <Text style={styles.oneTimeDesc}>
+                {locale === 'de' ? 'Bonus-Herzen, bis zur Nutzung' : 'Bonus hearts, persist until used'}
+              </Text>
+            </View>
+            <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$2.99</Text>
+          </Pressable>
+
+          {/* Heart Pack — 200 hearts */}
+          <Pressable
+            onPress={() => handleOneTimePurchase('hearts_large')}
+            disabled={oneTimeLoading === 'hearts_large'}
+            style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
+          >
+            <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(232,67,90,0.08)' }]}>
+              <Ionicons name="heart" size={22} color="#E8435A" />
+              <View style={styles.heartPackBadge}>
+                <Text style={styles.heartPackBadgeText}>4x</Text>
               </View>
-              <View style={styles.oneTimeInfo}>
-                <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
-                  {locale === 'de' ? '50 Herzen Paket' : '50 Hearts Pack'}
-                </Text>
-                <Text style={styles.oneTimeDesc}>
-                  {locale === 'de' ? 'Bonus-Herzen, bis zur Nutzung' : 'Bonus hearts, persist until used'}
-                </Text>
-              </View>
-              <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$2.99</Text>
-            </Pressable>
-          )}
+            </View>
+            <View style={styles.oneTimeInfo}>
+              <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
+                {locale === 'de' ? '200 Herzen Paket' : '200 Hearts Pack'}
+              </Text>
+              <Text style={styles.oneTimeDesc}>
+                {locale === 'de' ? 'Großes Paket, bester Wert' : 'Large pack, best value'}
+              </Text>
+            </View>
+            <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$9.99</Text>
+          </Pressable>
 
           {/* PDF Guide */}
           <Pressable
@@ -508,6 +530,14 @@ const styles = StyleSheet.create({
   oneTimeIcon: {
     width: 44, height: 44, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
+  },
+  heartPackBadge: {
+    position: 'absolute', bottom: -2, right: -2,
+    backgroundColor: '#E8435A', borderRadius: 6,
+    paddingHorizontal: 4, paddingVertical: 1,
+  },
+  heartPackBadgeText: {
+    fontSize: 9, fontWeight: '800', color: '#fff',
   },
   oneTimeInfo: { flex: 1 },
   oneTimeName: { fontSize: 15, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
