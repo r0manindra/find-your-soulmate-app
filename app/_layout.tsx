@@ -4,8 +4,12 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, withSpring, runOnJS, Easing } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import '@/src/i18n/config';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -153,11 +157,75 @@ function ProgressSync() {
   return null;
 }
 
+function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
+  const iconScale = useSharedValue(0.8);
+  const iconOpacity = useSharedValue(0);
+  const overlayOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    // Icon entrance: fade in + spring scale
+    iconOpacity.value = withTiming(1, { duration: 300 });
+    iconScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+
+    // After a beat, scale up slightly and fade everything out
+    iconScale.value = withDelay(600, withTiming(1.15, { duration: 400, easing: Easing.out(Easing.quad) }));
+    iconOpacity.value = withDelay(700, withTiming(0, { duration: 300 }));
+    overlayOpacity.value = withDelay(700, withTiming(0, { duration: 350 }, () => {
+      runOnJS(onFinish)();
+    }));
+  }, []);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    opacity: iconOpacity.value,
+    transform: [{ scale: iconScale.value }],
+  }));
+
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: overlayOpacity.value,
+  }));
+
+  return (
+    <Animated.View style={[splashStyles.overlay, overlayStyle]} pointerEvents="none">
+      <LinearGradient
+        colors={['#E8435A', '#FF7854']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={splashStyles.gradient}
+      >
+        <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
+          <CharismoIcon size={80} color="#fff" />
+        </Animated.View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
+const splashStyles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 999,
+  },
+  gradient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     if (error) throw error;
@@ -165,6 +233,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
+      // Hide native splash immediately — our animated one takes over
       SplashScreen.hideAsync();
       // Initialize RevenueCat
       const user = useAuthStore.getState().user;
@@ -178,7 +247,12 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <View style={{ flex: 1 }}>
+      <RootLayoutNav />
+      {showSplash && <AnimatedSplash onFinish={() => setShowSplash(false)} />}
+    </View>
+  );
 }
 
 /** Redirects to onboarding if user hasn't completed it */
