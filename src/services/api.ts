@@ -196,7 +196,8 @@ export async function sendCoachMessage(
   message: string,
   characterId: string = 'charismo',
   context?: JourneyContext,
-  exerciseMode?: string
+  exerciseMode?: string,
+  conversationId?: string,
 ) {
   return request<{
     response: string;
@@ -209,6 +210,7 @@ export async function sendCoachMessage(
       characterId,
       ...(context ? { context } : {}),
       ...(exerciseMode ? { exerciseMode } : {}),
+      ...(conversationId ? { conversationId } : {}),
     }),
   });
 }

@@ -9,7 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -29,6 +29,10 @@ import { getExerciseMode } from '@/src/data/content/exercise-modes';
 import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach-modal';
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
+import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
+import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
+import { useHeartsStore } from '@/src/store/hearts-store';
+import { HEART_COSTS } from '@/src/config/heart-costs';
 
 function formatMessageTime(timestamp: number): string {
   const date = new Date(timestamp);
@@ -123,14 +127,17 @@ export default function CoachScreen() {
   const [showExerciseModeModal, setShowExerciseModeModal] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
+  const [showOutOfHearts, setShowOutOfHearts] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messagesUsed, setMessagesUsed] = useState(0);
-  const [messagesLimit, setMessagesLimit] = useState<number | null>(5);
+
+  const canSpend = useHeartsStore((s) => s.canSpend);
+  const spendHearts = useHeartsStore((s) => s.spendHearts);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const activeCharacter = getCharacter(selectedCharacterId);
+  const activeConvCharacterId = activeConversation?.characterId ?? selectedCharacterId;
+  const activeCharacter = getCharacter(activeConvCharacterId);
   const insets = useSafeAreaInsets();
   const setChatInputFocused = useUIStore((s) => s.setChatInputFocused);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -179,9 +186,12 @@ export default function CoachScreen() {
   const activeConvId = useChatHistoryStore((s) => s.activeConversationId);
   useEffect(() => {
     if (!activeConvId || !chatStore.getActiveConversation()) {
-      chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
+      const charId = selectedCharacterId;
+      const char = getCharacter(charId);
+      chatStore.createConversation(charId, char.greeting[locale]);
     }
-  }, [activeConvId, selectedCharacterId, locale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConvId]);
 
   // One-time migration: import from backend if logged in and store is empty
   useEffect(() => {
@@ -212,12 +222,24 @@ export default function CoachScreen() {
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setCharacterId(id);
+
+    // Find existing conversation for this character, or create one
+    const existing = chatStore.getLatestConversationForCharacter(id);
+    if (existing) {
+      chatStore.setActiveConversation(existing.id);
+    } else {
+      chatStore.createConversation(id, char.greeting[locale]);
+    }
+
     setShowCharacterPicker(false);
   };
 
-  const handleNewChat = useCallback(() => {
-    chatStore.createConversation(selectedCharacterId, activeCharacter.greeting[locale]);
-  }, [selectedCharacterId, activeCharacter, locale]);
+  const handleNewChat = useCallback((charId?: string) => {
+    const id = charId ?? activeConvCharacterId;
+    const char = getCharacter(id);
+    chatStore.createConversation(id, char.greeting[locale]);
+    if (charId) setCharacterId(charId);
+  }, [activeConvCharacterId, locale, setCharacterId]);
 
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;
@@ -225,6 +247,13 @@ export default function CoachScreen() {
 
     const convId = chatStore.activeConversationId;
     if (!convId) return;
+
+    // Hearts check for logged-in users
+    if (isLoggedIn && !canSpend(HEART_COSTS.AI_MESSAGE)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setShowOutOfHearts(true);
+      return;
+    }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -242,10 +271,17 @@ export default function CoachScreen() {
 
     try {
       if (isLoggedIn) {
+        // Spend heart on send
+        spendHearts(HEART_COSTS.AI_MESSAGE);
+
         const context = buildJourneyContext();
-        const data = await api.sendCoachMessage(userMessage.content, selectedCharacterId, context, activeExerciseMode ?? undefined);
-        setMessagesUsed(data.messagesUsed);
-        setMessagesLimit(data.messagesLimit);
+        const data = await api.sendCoachMessage(
+          userMessage.content,
+          activeConvCharacterId,
+          context,
+          activeExerciseMode ?? undefined,
+          convId,
+        );
 
         const aiMessage: ChatMessage = {
           id: String(Date.now() + 1),
@@ -287,7 +323,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, activeConvCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore, canSpend, spendHearts]);
 
   // Inverted list data — newest messages at top of reversed array (rendered at bottom visually)
   const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
@@ -301,6 +337,27 @@ export default function CoachScreen() {
 
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
+
+  // Exercise mode hint
+  const hasSeenHint = useSettingsStore((s) => s.hasSeenExerciseModeHint);
+  const setHasSeenHint = useSettingsStore((s) => s.setHasSeenExerciseModeHint);
+  const showHintDot = isLoggedIn && !hasSeenHint && !activeExerciseMode;
+  const hintPulse = useSharedValue(1);
+  useEffect(() => {
+    if (showHintDot) {
+      hintPulse.value = withRepeat(
+        withSequence(
+          withTiming(1.4, { duration: 600 }),
+          withTiming(1, { duration: 600 })
+        ),
+        -1,
+        true
+      );
+    }
+  }, [showHintDot]);
+  const hintPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: hintPulse.value }],
+  }));
 
   // Scroll-to-bottom FAB
   const [showScrollFab, setShowScrollFab] = useState(false);
@@ -392,10 +449,8 @@ export default function CoachScreen() {
               <Text style={styles.headerSubtitle}>{activeCharacter.subtitle[locale]}</Text>
             </View>
             <View style={styles.headerRight}>
-              {!isPremium && messagesLimit && (
-                <View style={styles.limitBadge}>
-                  <Text style={styles.limitText}>{messagesUsed}/{messagesLimit}</Text>
-                </View>
+              {isLoggedIn && (
+                <HeartCounter compact />
               )}
               <Pressable
                 onPress={(e) => {
@@ -443,8 +498,10 @@ export default function CoachScreen() {
         )}
         {isLoggedIn && !isPremium && (
           <Pressable onPress={() => router.push('/paywall')} style={styles.upgradeBanner}>
-            <Ionicons name="diamond" size={16} color="#E8435A" />
-            <Text style={styles.upgradeBannerText}>{t('coach.upgradeForUnlimited')}</Text>
+            <Ionicons name="heart" size={16} color="#E8435A" />
+            <Text style={styles.upgradeBannerText}>
+              {locale === 'de' ? 'Upgrade für mehr Herzen' : 'Upgrade for more hearts'}
+            </Text>
             <Ionicons name="chevron-forward" size={14} color="#E8435A" />
           </Pressable>
         )}
@@ -525,24 +582,30 @@ export default function CoachScreen() {
             <View style={styles.floatingInputContent}>
               {/* Exercise mode toggle button */}
               {isLoggedIn && (
-                <Pressable
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowExerciseModeModal(true);
-                  }}
-                  style={[
-                    styles.exerciseModeBtn,
-                    exerciseModeForButton
-                      ? { backgroundColor: `${exerciseModeForButton.color}20` }
-                      : isDark ? styles.exerciseModeBtnDark : {},
-                  ]}
-                >
-                  <Ionicons
-                    name={(exerciseModeForButton?.icon ?? 'flash') as any}
-                    size={18}
-                    color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
-                  />
-                </Pressable>
+                <View>
+                  <Pressable
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      if (!hasSeenHint) setHasSeenHint(true);
+                      setShowExerciseModeModal(true);
+                    }}
+                    style={[
+                      styles.exerciseModeBtn,
+                      exerciseModeForButton
+                        ? { backgroundColor: `${exerciseModeForButton.color}20` }
+                        : isDark ? styles.exerciseModeBtnDark : {},
+                    ]}
+                  >
+                    <Ionicons
+                      name={(exerciseModeForButton?.icon ?? 'flash') as any}
+                      size={18}
+                      color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
+                    />
+                  </Pressable>
+                  {showHintDot && (
+                    <Animated.View style={[styles.hintDot, hintPulseStyle]} />
+                  )}
+                </View>
               )}
               <TextInput
                 style={[styles.input, isDark && styles.inputDark]}
@@ -572,7 +635,7 @@ export default function CoachScreen() {
         <VoiceCoachModal
           visible={voiceCoachVisible}
           onClose={() => setVoiceCoachVisible(false)}
-          characterId={selectedCharacterId}
+          characterId={activeConvCharacterId}
           locale={locale}
         />
 
@@ -580,6 +643,13 @@ export default function CoachScreen() {
         <ExerciseModeModal
           visible={showExerciseModeModal}
           onClose={() => setShowExerciseModeModal(false)}
+          onOutOfHearts={() => setShowOutOfHearts(true)}
+        />
+
+        {/* Out of Hearts Modal */}
+        <OutOfHeartsModal
+          visible={showOutOfHearts}
+          onClose={() => setShowOutOfHearts(false)}
         />
 
         {/* Chat History Modal */}
@@ -616,7 +686,7 @@ export default function CoachScreen() {
                 if (gender === 'diverse') return true;
                 return c.forGender === gender || c.forGender === 'all';
               }).map((char) => {
-                const isSelected = char.id === selectedCharacterId;
+                const isSelected = char.id === activeConvCharacterId;
                 const isLocked = char.isPremium && !isPremium;
 
                 return (
@@ -801,6 +871,15 @@ const styles = StyleSheet.create({
   },
   exerciseModeBtnDark: {
     backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  hintDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#E8435A',
   },
   input: {
     flex: 1, minHeight: 32, maxHeight: 100,

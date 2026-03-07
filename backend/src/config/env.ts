@@ -11,6 +11,12 @@ export const env = {
   freeCoachMessagesPerDay: 5,
   freeChaptersCount: 4, // Phase 1 is free
   proVoiceSessionsPerDay: 3,
+  // Hearts economy
+  freeHeartsPerDay: 5,
+  proHeartsPerDay: 50,
+  heartCostMessage: 1,
+  heartCostChapter: 2,
+  heartCostExercise: 2,
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   appleBundleId: process.env.APPLE_BUNDLE_ID || 'com.flirtiq.app',
 };

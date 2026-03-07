@@ -10,13 +10,16 @@ import { useUIStore } from '@/src/store/ui-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { exerciseModes, type ExerciseModeId } from '@/src/data/content/exercise-modes';
 import { useTranslation } from 'react-i18next';
+import { useHeartsStore } from '@/src/store/hearts-store';
+import { HEART_COSTS } from '@/src/config/heart-costs';
 
 interface ExerciseModeModalProps {
   visible: boolean;
   onClose: () => void;
+  onOutOfHearts?: () => void;
 }
 
-export function ExerciseModeModal({ visible, onClose }: ExerciseModeModalProps) {
+export function ExerciseModeModal({ visible, onClose, onOutOfHearts }: ExerciseModeModalProps) {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -25,6 +28,8 @@ export function ExerciseModeModal({ visible, onClose }: ExerciseModeModalProps) 
   const setExerciseMode = useUIStore((s) => s.setExerciseMode);
   const locale = useSettingsStore((s) => s.locale);
   const router = useRouter();
+  const canSpend = useHeartsStore((s) => s.canSpend);
+  const spendHearts = useHeartsStore((s) => s.spendHearts);
 
   const handlePress = (modeId: ExerciseModeId, modePremium: boolean) => {
     if (modePremium && !isPremium) {
@@ -34,12 +39,25 @@ export function ExerciseModeModal({ visible, onClose }: ExerciseModeModalProps) 
       return;
     }
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Deactivating doesn't cost hearts
     if (activeMode === modeId) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setExerciseMode(null);
-    } else {
-      setExerciseMode(modeId);
+      onClose();
+      return;
     }
+
+    // Hearts check for activating a mode
+    if (!canSpend(HEART_COSTS.EXERCISE)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      onClose();
+      onOutOfHearts?.();
+      return;
+    }
+
+    spendHearts(HEART_COSTS.EXERCISE);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setExerciseMode(modeId);
     onClose();
   };
 
@@ -89,6 +107,12 @@ export function ExerciseModeModal({ visible, onClose }: ExerciseModeModalProps) 
                         <View style={styles.proBadge}>
                           <Ionicons name="lock-closed" size={10} color="#E8435A" />
                           <Text style={styles.proBadgeText}>PRO</Text>
+                        </View>
+                      )}
+                      {!isLocked && !isActive && (
+                        <View style={styles.heartCostBadge}>
+                          <Ionicons name="heart" size={10} color="#E8435A" />
+                          <Text style={styles.heartCostText}>{HEART_COSTS.EXERCISE}</Text>
                         </View>
                       )}
                       {isActive && (
@@ -159,6 +183,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8,
   },
   proBadgeText: { fontSize: 10, fontWeight: '800', color: '#E8435A' },
+  heartCostBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: 'rgba(232,67,90,0.08)',
+    paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8,
+  },
+  heartCostText: { fontSize: 10, fontWeight: '700', color: '#E8435A' },
   description: { fontSize: 14, lineHeight: 20, color: '#525252' },
   descriptionDark: { color: '#A3A3A3' },
   deactivateHint: {

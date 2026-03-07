@@ -11,6 +11,8 @@ interface SettingsStore {
   setCharacterId: (id: string) => void;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
+  hasSeenExerciseModeHint: boolean;
+  setHasSeenExerciseModeHint: (seen: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -22,6 +24,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setCharacterId: (id) => set({ selectedCharacterId: id }),
       themeMode: 'system',
       setThemeMode: (mode) => set({ themeMode: mode }),
+      hasSeenExerciseModeHint: false,
+      setHasSeenExerciseModeHint: (seen) => set({ hasSeenExerciseModeHint: seen }),
     }),
     {
       name: 'settings-storage',

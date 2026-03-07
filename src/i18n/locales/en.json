@@ -52,7 +52,10 @@
     "chatHistory": "Chat History",
     "newChat": "New Chat",
     "noChatsYet": "No conversations yet",
-    "deleteChat": "Delete Chat"
+    "deleteChat": "Delete Chat",
+    "exerciseModeHint": "Try exercise modes to practice your skills!",
+    "startNewChat": "Start New Chat",
+    "selectCharacter": "Choose a coach for your new chat"
   },
   "booksScreen": {
     "title": "Recommended Books",
@@ -400,6 +403,37 @@
     "proPlusRequired": "Pro+ subscription required for voice coaching",
     "sessionLimit": "10 min max per session",
     "dailyLimitReached": "Daily voice session limit reached"
+  },
+  "hearts": {
+    "remaining": "{{count}} hearts left",
+    "unlimited": "Unlimited",
+    "outOfHearts": "Out of Hearts",
+    "outOfHeartsDesc": "You've used all your daily hearts. New hearts arrive at midnight.",
+    "cost": "{{count}} heart",
+    "costPlural": "{{count}} hearts",
+    "buyPack": "Buy Heart Pack",
+    "resetAt": "Resets in {{time}}",
+    "bonusHearts": "Bonus Hearts",
+    "upgradeForMore": "Upgrade for more hearts"
+  },
+  "paywall": {
+    "heartsPerDay": "{{count}} hearts/day",
+    "unlimitedHearts": "Unlimited hearts",
+    "pdfIncluded": "PDF guide included",
+    "heartPack": "50 Hearts Pack",
+    "heartPackDesc": "Bonus hearts that persist until used",
+    "pdfStandalone": "PDF Guide",
+    "pdfStandaloneDesc": "Complete guide in PDF format",
+    "unlockChapters": "Unlock All Chapters",
+    "unlockChaptersDesc": "Read chapters without spending hearts",
+    "bestValue": "BEST VALUE",
+    "oneTimePurchases": "One-Time Purchases",
+    "monthlyPro": "Monthly PRO",
+    "annualProPlus": "Annual PRO+"
+  },
+  "exerciseModes": {
+    "replyHelper": "Reply Helper",
+    "replyHelperDesc": "Paste a message you received, get smart reply suggestions"
   },
   "graduate": {
     "title": "Congratulations!",

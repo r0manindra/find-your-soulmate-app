@@ -112,6 +112,58 @@ function checkSubscriptionTier(customerInfo: CustomerInfo): SubscriptionTier {
   return 'free';
 }
 
+export async function purchaseHeartPack(): Promise<boolean> {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const heartPack = offerings.all['heart_pack']?.availablePackages[0];
+    if (!heartPack) return false;
+    const { customerInfo } = await Purchases.purchasePackage(heartPack);
+    if (customerInfo) {
+      const { useHeartsStore } = require('@/src/store/hearts-store');
+      useHeartsStore.getState().addBonusHearts(50);
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    if (e.userCancelled) return false;
+    throw e;
+  }
+}
+
+export async function purchasePdfAccess(): Promise<boolean> {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const pdfPkg = offerings.all['pdf_guide']?.availablePackages[0];
+    if (!pdfPkg) return false;
+    const { customerInfo } = await Purchases.purchasePackage(pdfPkg);
+    if (customerInfo) {
+      useAuthStore.getState().setPdfAccess(true);
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    if (e.userCancelled) return false;
+    throw e;
+  }
+}
+
+export async function purchaseChapterUnlock(): Promise<boolean> {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const chapterPkg = offerings.all['unlock_chapters']?.availablePackages[0];
+    if (!chapterPkg) return false;
+    const { customerInfo } = await Purchases.purchasePackage(chapterPkg);
+    if (customerInfo) {
+      useAuthStore.getState().setChapterUnlock(true);
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    if (e.userCancelled) return false;
+    throw e;
+  }
+}
+
 export async function loginRevenueCat(userId: string) {
   try {
     await Purchases.logIn(userId);

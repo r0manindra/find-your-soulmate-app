@@ -18,8 +18,12 @@ interface AuthStore {
   isPro: boolean;
   isProPlus: boolean;
   subscriptionTier: SubscriptionTier;
+  hasPdfAccess: boolean;
+  hasChapterUnlock: boolean;
   setUser: (user: AuthUser) => void;
   setSubscriptionStatus: (status: string) => void;
+  setPdfAccess: (has: boolean) => void;
+  setChapterUnlock: (has: boolean) => void;
   logout: () => void;
 }
 
@@ -38,17 +42,21 @@ export const useAuthStore = create<AuthStore>()(
       isPro: false,
       isProPlus: false,
       subscriptionTier: 'free' as SubscriptionTier,
+      hasPdfAccess: false,
+      hasChapterUnlock: false,
 
       setUser: (user) => {
         const tier = deriveTier(user.subscriptionStatus);
-        set({
+        set((state) => ({
           user,
           isLoggedIn: true,
           isPremium: tier === 'pro' || tier === 'pro_plus',
           isPro: tier === 'pro' || tier === 'pro_plus',
           isProPlus: tier === 'pro_plus',
           subscriptionTier: tier,
-        });
+          // Annual PRO+ includes PDF access
+          hasPdfAccess: tier === 'pro_plus' || state.hasPdfAccess,
+        }));
       },
 
       setSubscriptionStatus: (status) => {
@@ -59,8 +67,13 @@ export const useAuthStore = create<AuthStore>()(
           isProPlus: tier === 'pro_plus',
           subscriptionTier: tier,
           user: state.user ? { ...state.user, subscriptionStatus: status } : null,
+          // Annual PRO+ includes PDF access
+          hasPdfAccess: tier === 'pro_plus' || state.hasPdfAccess,
         }));
       },
+
+      setPdfAccess: (has) => set({ hasPdfAccess: has }),
+      setChapterUnlock: (has) => set({ hasChapterUnlock: has }),
 
       logout: () =>
         set({
@@ -70,6 +83,8 @@ export const useAuthStore = create<AuthStore>()(
           isPro: false,
           isProPlus: false,
           subscriptionTier: 'free',
+          hasPdfAccess: false,
+          hasChapterUnlock: false,
         }),
     }),
     {

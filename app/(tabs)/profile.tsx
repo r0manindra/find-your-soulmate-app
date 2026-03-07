@@ -24,7 +24,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const progress = useProgressStore();
   const { locale, setLocale, themeMode, setThemeMode } = useSettingsStore();
-  const { user, isLoggedIn, isPremium, logout } = useAuthStore();
+  const { user, isLoggedIn, isPremium, isProPlus, hasPdfAccess, logout } = useAuthStore();
   const userProfile = useUserProfileStore();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -92,8 +92,10 @@ export default function ProfileScreen() {
     );
   };
 
+  const canAccessPdf = hasPdfAccess || isProPlus;
+
   const handleDownloadPdf = async () => {
-    if (!isPremium) {
+    if (!canAccessPdf) {
       router.push('/paywall');
       return;
     }
@@ -205,20 +207,22 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.pdfInfo}>
               <Text style={[styles.pdfTitle, isDark && styles.textDark]}>
-                {locale === 'de' ? 'Premium PDF Guide' : 'Premium PDF Guide'}
+                {locale === 'de' ? 'PDF Guide' : 'PDF Guide'}
               </Text>
               <Text style={styles.pdfDesc}>
                 {downloadingPdf
                   ? (locale === 'de' ? 'Wird geladen...' : 'Loading...')
-                  : isPremium
+                  : canAccessPdf
                     ? (locale === 'de' ? 'Tippen zum Herunterladen' : 'Tap to download')
-                    : (locale === 'de' ? 'Premium erforderlich' : 'Premium required')}
+                    : isPremium
+                      ? (locale === 'de' ? 'Separat kaufen oder auf PRO+ upgraden' : 'Buy separately or upgrade to PRO+')
+                      : (locale === 'de' ? 'PRO+ Abo oder separat kaufen' : 'PRO+ subscription or buy separately')}
               </Text>
             </View>
             <Ionicons
-              name={isPremium ? 'download-outline' : 'lock-closed'}
+              name={canAccessPdf ? 'download-outline' : 'lock-closed'}
               size={20}
-              color={isPremium ? '#E8435A' : '#A3A3A3'}
+              color={canAccessPdf ? '#E8435A' : '#A3A3A3'}
             />
           </Pressable>
         </GlassCard>

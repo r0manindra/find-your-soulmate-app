@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Pressable, FlatList, Modal, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, FlatList, ScrollView, Modal, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,12 +7,13 @@ import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useTranslation } from 'react-i18next';
 import { useChatHistoryStore, type Conversation } from '@/src/store/chat-history-store';
-import { getCharacter } from '@/src/data/content/coach-characters';
+import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 
 interface ChatHistoryModalProps {
   visible: boolean;
   onClose: () => void;
-  onNewChat: () => void;
+  onNewChat: (characterId?: string) => void;
 }
 
 function formatRelativeTime(timestamp: number): string {
@@ -36,6 +37,14 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
   const activeConversationId = useChatHistoryStore((s) => s.activeConversationId);
   const setActiveConversation = useChatHistoryStore((s) => s.setActiveConversation);
   const deleteConversation = useChatHistoryStore((s) => s.deleteConversation);
+  const userGender = useUserProfileStore((s) => s.userGender);
+  const [showCharacterSelect, setShowCharacterSelect] = useState(false);
+
+  const filteredCharacters = coachCharacters.filter((c) => {
+    const gender = userGender ?? 'male';
+    if (gender === 'diverse') return true;
+    return c.forGender === gender || c.forGender === 'all';
+  });
 
   const handleSelect = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -48,9 +57,15 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
     deleteConversation(id);
   };
 
-  const handleNewChat = () => {
+  const handleNewChatPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onNewChat();
+    setShowCharacterSelect((prev) => !prev);
+  };
+
+  const handleCharacterSelect = (characterId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setShowCharacterSelect(false);
+    onNewChat(characterId);
     onClose();
   };
 
@@ -80,6 +95,12 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
               {title}
             </Text>
             <Text style={styles.rowTime}>{formatRelativeTime(item.updatedAt)}</Text>
+          </View>
+          <View style={styles.characterBadge}>
+            <Ionicons name={character.icon as any} size={10} color={character.color} />
+            <Text style={[styles.characterBadgeText, { color: character.color }]}>
+              {character.name}
+            </Text>
           </View>
           <Text style={[styles.rowPreview, isDark && styles.rowPreviewDark]} numberOfLines={1}>
             {preview}
@@ -113,7 +134,7 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
           </Pressable>
         </View>
 
-        <Pressable onPress={handleNewChat} style={styles.newChatBtn}>
+        <Pressable onPress={handleNewChatPress} style={styles.newChatBtn}>
           <LinearGradient
             colors={['#E8435A', '#FF7854']}
             start={{ x: 0, y: 0 }}
@@ -121,9 +142,33 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
             style={styles.newChatGradient}
           >
             <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.newChatText}>{t('coach.newChat')}</Text>
+            <Text style={styles.newChatText}>{t('coach.startNewChat')}</Text>
           </LinearGradient>
         </Pressable>
+
+        {showCharacterSelect && (
+          <View style={styles.characterSelectContainer}>
+            <Text style={[styles.characterSelectLabel, isDark && styles.characterSelectLabelDark]}>
+              {t('coach.selectCharacter')}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.characterSelectRow}>
+              {filteredCharacters.map((char) => (
+                <Pressable
+                  key={char.id}
+                  onPress={() => handleCharacterSelect(char.id)}
+                  style={styles.characterSelectItem}
+                >
+                  <View style={[styles.characterSelectCircle, { backgroundColor: `${char.color}15`, borderColor: char.color }]}>
+                    <Ionicons name={char.icon as any} size={22} color={char.color} />
+                  </View>
+                  <Text style={[styles.characterSelectName, isDark && styles.characterSelectNameDark]} numberOfLines={1}>
+                    {char.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         <FlatList
           data={conversations}
@@ -166,6 +211,35 @@ const styles = StyleSheet.create({
     gap: 8, paddingVertical: 12, borderRadius: 14,
   },
   newChatText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  characterSelectContainer: {
+    paddingHorizontal: 20, marginBottom: 12,
+  },
+  characterSelectLabel: {
+    fontSize: 13, color: '#737373', marginBottom: 10,
+  },
+  characterSelectLabelDark: { color: '#A3A3A3' },
+  characterSelectRow: {
+    gap: 14, paddingBottom: 4,
+  },
+  characterSelectItem: {
+    alignItems: 'center', width: 60,
+  },
+  characterSelectCircle: {
+    width: 48, height: 48, borderRadius: 24,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2,
+  },
+  characterSelectName: {
+    fontSize: 11, fontWeight: '500', color: '#525252',
+    marginTop: 4, textAlign: 'center',
+  },
+  characterSelectNameDark: { color: '#A3A3A3' },
+  characterBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1,
+  },
+  characterBadgeText: {
+    fontSize: 12, fontWeight: '500',
+  },
   list: { paddingHorizontal: 20, gap: 2 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,

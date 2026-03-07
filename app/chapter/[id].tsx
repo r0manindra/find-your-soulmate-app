@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, FlatList, Modal,
   KeyboardAvoidingView, Platform, StyleSheet,
@@ -31,6 +31,9 @@ import { getCharacter } from '@/src/data/content/coach-characters';
 import { getBooksForChapter } from '@/src/data/content/books';
 import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
+import { useHeartsStore } from '@/src/store/hearts-store';
+import { HEART_COSTS } from '@/src/config/heart-costs';
+import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -77,8 +80,11 @@ export default function ChapterDetailScreen() {
   const [coachVisible, setCoachVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
   const [voiceCoachVisible, setVoiceCoachVisible] = useState(false);
+  const [showOutOfHearts, setShowOutOfHearts] = useState(false);
+  const [heartsCharged, setHeartsCharged] = useState(false);
   const isPremium = useAuthStore((s) => s.isPremium);
   const isProPlus = useAuthStore((s) => s.isProPlus);
+  const hasChapterUnlock = useAuthStore((s) => (s as any).hasChapterUnlock ?? false);
   const quizScore = progressStore.quizScores[chapterId];
   const [coachMessages, setCoachMessages] = useState<CoachMessage[]>([]);
   const [coachInput, setCoachInput] = useState('');
@@ -104,6 +110,19 @@ export default function ChapterDetailScreen() {
     return base;
   }, [chapterId, locale, userGender]);
   const isCompleted = completedChapters.includes(chapterId);
+
+  // Hearts gating: charge 2 hearts to open a new (not already completed) chapter
+  useEffect(() => {
+    if (isCompleted || heartsCharged || hasChapterUnlock) return;
+    const heartsStore = useHeartsStore.getState();
+    if (!heartsStore.canSpend(HEART_COSTS.CHAPTER)) {
+      setShowOutOfHearts(true);
+      return;
+    }
+    heartsStore.spendHearts(HEART_COSTS.CHAPTER);
+    setHeartsCharged(true);
+  }, [isCompleted, heartsCharged, hasChapterUnlock]);
+
   const prevChapter = useMemo(() => chapters.find((c) => c.id === chapterId - 1), [chapterId]);
   const nextChapterNav = useMemo(() => chapters.find((c) => c.id === chapterId + 1), [chapterId]);
 
@@ -634,6 +653,17 @@ export default function ChapterDetailScreen() {
         onComplete={handleQuizComplete}
         onSkip={handleQuizSkip}
         onNavigateNext={handleNavigateToNextChapter}
+      />
+
+      {/* Out of Hearts Modal */}
+      <OutOfHeartsModal
+        visible={showOutOfHearts}
+        onClose={() => {
+          setShowOutOfHearts(false);
+          if (!heartsCharged && !isCompleted && !hasChapterUnlock) {
+            router.back();
+          }
+        }}
       />
 
       {/* Voice Coach Modal */}

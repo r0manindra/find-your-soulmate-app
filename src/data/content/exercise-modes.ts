@@ -3,7 +3,8 @@ export type ExerciseModeId =
   | 'conversation_ping_pong'
   | 'rejection_gym'
   | 'date_simulator'
-  | 'flirty_banter';
+  | 'flirty_banter'
+  | 'reply_helper';
 
 export interface ExerciseMode {
   id: ExerciseModeId;
@@ -68,6 +69,17 @@ export const exerciseModes: ExerciseMode[] = [
     },
     icon: 'sparkles',
     color: '#EC4899',
+    isPremium: true,
+  },
+  {
+    id: 'reply_helper',
+    name: { en: 'Reply Helper', de: 'Antwort-Helfer' },
+    description: {
+      en: 'Paste a message you received, get smart reply suggestions in your coach\'s style.',
+      de: 'Füge eine erhaltene Nachricht ein und bekomme smarte Antwortvorschläge im Stil deines Coaches.',
+    },
+    icon: 'chatbubble-outline',
+    color: '#14B8A6',
     isPremium: true,
   },
 ];

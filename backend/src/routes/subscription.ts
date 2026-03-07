@@ -12,7 +12,15 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { subscriptionStatus: true, revenuecatId: true },
+      select: {
+        subscriptionStatus: true,
+        revenuecatId: true,
+        dailyHeartsUsed: true,
+        lastHeartsResetDate: true,
+        bonusHearts: true,
+        hasPdfAccess: true,
+        hasChapterUnlock: true,
+      },
     });
 
     if (!user) {
@@ -27,6 +35,12 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
     // Map to tier string for frontend
     const tier = isProPlus ? 'pro_plus' : isPro ? 'pro' : 'free';
 
+    // Hearts info
+    const maxHeartsPerDay = isProPlus ? null : isPro ? env.proHeartsPerDay : env.freeHeartsPerDay;
+    const today = new Date().toISOString().split('T')[0];
+    const dailyUsed = user.lastHeartsResetDate === today ? user.dailyHeartsUsed : 0;
+    const dailyRemaining = maxHeartsPerDay === null ? null : Math.max(0, maxHeartsPerDay - dailyUsed);
+
     res.json({
       status: user.subscriptionStatus,
       tier,
@@ -36,6 +50,15 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
       freeChapters: env.freeChaptersCount,
       freeCoachMessagesPerDay: env.freeCoachMessagesPerDay,
       voiceSessionsPerDay: env.proVoiceSessionsPerDay,
+      // Hearts economy
+      hearts: {
+        dailyRemaining,
+        maxDaily: maxHeartsPerDay,
+        bonus: user.bonusHearts,
+        unlimited: isProPlus,
+      },
+      hasPdfAccess: isProPlus || user.hasPdfAccess,
+      hasChapterUnlock: user.hasChapterUnlock,
     });
   } catch (err) {
     console.error('Subscription status error:', err);

@@ -3,13 +3,15 @@ export type ExerciseModeId =
   | 'conversation_ping_pong'
   | 'rejection_gym'
   | 'date_simulator'
-  | 'flirty_banter';
+  | 'flirty_banter'
+  | 'reply_helper';
 
 export const PREMIUM_EXERCISE_MODES: ExerciseModeId[] = [
   'conversation_ping_pong',
   'rejection_gym',
   'date_simulator',
   'flirty_banter',
+  'reply_helper',
 ];
 
 const EXERCISE_PROMPTS: Record<ExerciseModeId, string> = {
@@ -102,6 +104,27 @@ Rules:
 6. Give 2-3 specific tips to level up their banter game.
 7. Offer another round with a different vibe (sarcastic, sweet, bold, mysterious).
 8. Match the user's language.`,
+
+  reply_helper: `=== EXERCISE MODE: REPLY HELPER ===
+You are now in Reply Helper mode. The user will paste a message they received from someone they're interested in. Your job is to help them craft the perfect reply.
+
+Rules:
+1. When the user pastes a message, first do a brief analysis:
+   - Tone: Is the message casual, flirty, formal, cold, warm, playful?
+   - Intent: What is this person trying to communicate or achieve?
+   - Emotional subtext: What's the vibe beneath the words?
+2. Then suggest exactly 3 reply options, each with a different tone:
+   - Option 1 (Casual): A relaxed, low-effort but smooth reply
+   - Option 2 (Flirty): A reply that builds tension and shows interest
+   - Option 3 (Witty): A clever, humorous reply that stands out
+3. Each option should:
+   - Match your coach character's personality and style
+   - Be natural and sound like something a real person would say
+   - Be appropriate for the context (texting, dating app, in-person follow-up)
+4. After the 3 options, give a brief tip on WHY each approach works
+5. If the user asks for more options or wants to modify one, adapt accordingly
+6. Match the user's language (English or German based on their messages).
+7. Keep replies concise — real texts are short. No essays.`,
 };
 
 export function getExercisePromptBlock(exerciseMode: ExerciseModeId): string | null {

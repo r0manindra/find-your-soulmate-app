@@ -17,6 +17,8 @@ import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { books } from '@/src/data/content/books';
+import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
+import { useAuthStore } from '@/src/store/auth-store';
 
 function getGreeting(locale: 'en' | 'de'): string {
   const hour = new Date().getHours();
@@ -191,6 +193,7 @@ export default function HomeScreen() {
   const isDark = colorScheme === 'dark';
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   useEffect(() => {
     updateStreak();
@@ -218,7 +221,10 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(400)}>
-          <Text style={[styles.title, isDark && styles.titleDark]}>{greeting}</Text>
+          <View style={styles.headerRow}>
+            <Text style={[styles.title, isDark && styles.titleDark, { flex: 1 }]}>{greeting}</Text>
+            {isLoggedIn && <HeartCounter />}
+          </View>
           <Text style={[styles.greetingSubtitle, isDark && styles.greetingSubtitleDark]}>{motivationalLine}</Text>
         </Animated.View>
 
@@ -329,7 +335,8 @@ const styles = StyleSheet.create({
   safeAreaDark: { backgroundColor: '#171717' },
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 100 },
-  title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717', marginBottom: 4 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
+  title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717' },
   titleDark: { color: '#F5F5F5' },
   greetingSubtitle: { fontSize: 15, color: '#737373', marginBottom: 20 },
   greetingSubtitleDark: { color: '#A3A3A3' },

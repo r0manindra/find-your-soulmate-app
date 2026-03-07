@@ -26,7 +26,7 @@ router.get('/guide', async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { subscriptionStatus: true },
+      select: { subscriptionStatus: true, hasPdfAccess: true },
     });
 
     if (!user) {
@@ -34,10 +34,10 @@ router.get('/guide', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const isSubscribed = user.subscriptionStatus === 'PRO' || user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM';
-    if (!isSubscribed) {
+    const hasAccess = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM' || user.hasPdfAccess === true;
+    if (!hasAccess) {
       res.status(403).json({
-        error: 'Pro subscription required',
+        error: 'PDF access required (PRO+ subscription or one-time purchase)',
         upgrade: true,
       });
       return;

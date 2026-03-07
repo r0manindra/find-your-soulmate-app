@@ -52,7 +52,10 @@
     "chatHistory": "Chatverlauf",
     "newChat": "Neuer Chat",
     "noChatsYet": "Noch keine Gespräche",
-    "deleteChat": "Chat löschen"
+    "deleteChat": "Chat löschen",
+    "exerciseModeHint": "Probier die Übungsmodi aus, um deine Skills zu trainieren!",
+    "startNewChat": "Neuen Chat starten",
+    "selectCharacter": "Wähle einen Coach für deinen neuen Chat"
   },
   "booksScreen": {
     "title": "Buchempfehlungen",
@@ -400,6 +403,37 @@
     "proPlusRequired": "Pro+ Abo erforderlich für Sprach-Coaching",
     "sessionLimit": "Max. 10 Min. pro Sitzung",
     "dailyLimitReached": "Tägliches Sprach-Sitzungslimit erreicht"
+  },
+  "hearts": {
+    "remaining": "{{count}} Herzen übrig",
+    "unlimited": "Unbegrenzt",
+    "outOfHearts": "Keine Herzen mehr",
+    "outOfHeartsDesc": "Deine täglichen Herzen sind aufgebraucht. Neue Herzen gibt es um Mitternacht.",
+    "cost": "{{count}} Herz",
+    "costPlural": "{{count}} Herzen",
+    "buyPack": "Herz-Paket kaufen",
+    "resetAt": "Reset in {{time}}",
+    "bonusHearts": "Bonus-Herzen",
+    "upgradeForMore": "Upgrade für mehr Herzen"
+  },
+  "paywall": {
+    "heartsPerDay": "{{count}} Herzen/Tag",
+    "unlimitedHearts": "Unbegrenzte Herzen",
+    "pdfIncluded": "PDF-Guide inklusive",
+    "heartPack": "50 Herzen Paket",
+    "heartPackDesc": "Bonus-Herzen, die bis zur Nutzung bestehen bleiben",
+    "pdfStandalone": "PDF-Guide",
+    "pdfStandaloneDesc": "Kompletter Guide im PDF-Format",
+    "unlockChapters": "Alle Kapitel freischalten",
+    "unlockChaptersDesc": "Kapitel lesen ohne Herzen auszugeben",
+    "bestValue": "BESTER WERT",
+    "oneTimePurchases": "Einmalkäufe",
+    "monthlyPro": "Monatlich PRO",
+    "annualProPlus": "Jährlich PRO+"
+  },
+  "exerciseModes": {
+    "replyHelper": "Antwort-Helfer",
+    "replyHelperDesc": "Füge eine erhaltene Nachricht ein und bekomme smarte Antwortvorschläge"
   },
   "graduate": {
     "title": "Herzlichen Glückwunsch!",

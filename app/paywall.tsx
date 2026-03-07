@@ -13,44 +13,52 @@ import { useSettingsStore } from '@/src/store/settings-store';
 import * as purchases from '@/src/services/purchases';
 import type { TieredOfferings } from '@/src/services/purchases';
 
-type BillingPeriod = 'monthly' | 'yearly';
-type Tier = 'pro' | 'pro_plus';
+type SelectedPlan = 'pro_monthly' | 'pro_plus_annual';
 
-const PRO_FEATURES = {
+const PRO_MONTHLY_FEATURES = {
   en: [
-    { icon: 'book' as const, text: 'All 20 chapters' },
-    { icon: 'chatbubbles' as const, text: 'Unlimited AI coach' },
+    { icon: 'heart' as const, text: '50 hearts/day', highlight: true },
     { icon: 'people' as const, text: 'All coach characters' },
-    { icon: 'flash' as const, text: 'All exercise modes' },
+    { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
+    { icon: 'cart' as const, text: 'Buy heart packs' },
   ],
   de: [
-    { icon: 'book' as const, text: 'Alle 20 Kapitel' },
-    { icon: 'chatbubbles' as const, text: 'Unbegrenzter KI-Coach' },
+    { icon: 'heart' as const, text: '50 Herzen/Tag', highlight: true },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
-    { icon: 'flash' as const, text: 'Alle Übungsmodi' },
+    { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
+    { icon: 'cart' as const, text: 'Herz-Pakete kaufen' },
   ],
 };
 
-const PRO_PLUS_EXTRAS = {
+const PRO_PLUS_ANNUAL_FEATURES = {
   en: [
-    { icon: 'mic' as const, text: 'Real-time voice coaching' },
-    { icon: 'call' as const, text: '3 voice sessions/day' },
+    { icon: 'heart' as const, text: 'Unlimited hearts', highlight: true },
+    { icon: 'people' as const, text: 'All coach characters' },
+    { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
+    { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
+    { icon: 'mic' as const, text: 'Voice coaching (3/day)', highlight: true },
+    { icon: 'document-text' as const, text: 'PDF guide included', highlight: true },
   ],
   de: [
-    { icon: 'mic' as const, text: 'Echtzeit-Sprach-Coaching' },
-    { icon: 'call' as const, text: '3 Sprach-Sitzungen/Tag' },
+    { icon: 'heart' as const, text: 'Unbegrenzte Herzen', highlight: true },
+    { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
+    { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
+    { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
+    { icon: 'mic' as const, text: 'Sprach-Coaching (3/Tag)', highlight: true },
+    { icon: 'document-text' as const, text: 'PDF-Guide inklusive', highlight: true },
   ],
 };
 
 export default function PaywallScreen() {
   const router = useRouter();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const isPremium = useAuthStore((s) => s.isPremium);
   const locale = useSettingsStore((s) => s.locale);
-  const [selectedTier, setSelectedTier] = useState<Tier>('pro_plus');
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('yearly');
+  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>('pro_plus_annual');
   const [loading, setLoading] = useState(false);
+  const [oneTimeLoading, setOneTimeLoading] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
@@ -72,12 +80,9 @@ export default function PaywallScreen() {
 
     setLoading(true);
     try {
-      let pkg = null;
-      if (selectedTier === 'pro_plus') {
-        pkg = billingPeriod === 'yearly' ? offerings?.proPlusAnnual : offerings?.proPlusMonthly;
-      } else {
-        pkg = billingPeriod === 'yearly' ? offerings?.proAnnual : offerings?.proMonthly;
-      }
+      const pkg = selectedPlan === 'pro_plus_annual'
+        ? offerings?.proPlusAnnual
+        : offerings?.proMonthly;
 
       if (pkg) {
         const result = await purchases.purchasePackage(pkg);
@@ -101,6 +106,36 @@ export default function PaywallScreen() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOneTimePurchase = async (type: 'hearts' | 'pdf' | 'chapters') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!isLoggedIn) {
+      router.push('/auth/register');
+      return;
+    }
+    setOneTimeLoading(type);
+    try {
+      let success = false;
+      if (type === 'hearts') success = await purchases.purchaseHeartPack();
+      else if (type === 'pdf') success = await purchases.purchasePdfAccess();
+      else if (type === 'chapters') success = await purchases.purchaseChapterUnlock();
+
+      if (success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert(
+          locale === 'de' ? 'Gekauft!' : 'Purchased!',
+          locale === 'de' ? 'Dein Kauf war erfolgreich.' : 'Your purchase was successful.'
+        );
+      }
+    } catch (e: any) {
+      Alert.alert(
+        locale === 'de' ? 'Fehler' : 'Error',
+        e.message || (locale === 'de' ? 'Kauf fehlgeschlagen' : 'Purchase failed')
+      );
+    } finally {
+      setOneTimeLoading(null);
     }
   };
 
@@ -136,37 +171,11 @@ export default function PaywallScreen() {
     }
   };
 
-  const selectTier = (tier: Tier) => {
-    Haptics.selectionAsync();
-    setSelectedTier(tier);
-  };
-
-  const toggleBilling = (period: BillingPeriod) => {
-    Haptics.selectionAsync();
-    setBillingPeriod(period);
-  };
-
-  // Use real prices from RevenueCat when available, fallback to defaults
-  const proMonthlyPkg = offerings?.proMonthly;
-  const proAnnualPkg = offerings?.proAnnual;
-  const proPlusMonthlyPkg = offerings?.proPlusMonthly;
-  const proPlusAnnualPkg = offerings?.proPlusAnnual;
-
-  const proPrice = billingPeriod === 'yearly'
-    ? (proAnnualPkg?.product.priceString ?? '$49.99')
-    : (proMonthlyPkg?.product.priceString ?? '$6.99');
-  const proPlusPrice = billingPeriod === 'yearly'
-    ? (proPlusAnnualPkg?.product.priceString ?? '$69.99')
-    : (proPlusMonthlyPkg?.product.priceString ?? '$9.99');
-  const proPeriod = billingPeriod === 'yearly'
-    ? (locale === 'de' ? '/Jahr' : '/year')
-    : (locale === 'de' ? '/Monat' : '/month');
-  const proMonthlyEquiv = billingPeriod === 'yearly' && proAnnualPkg
-    ? `${(proAnnualPkg.product.price / 12).toFixed(2)} ${proAnnualPkg.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
-    : billingPeriod === 'yearly' ? `$4.17/${locale === 'de' ? 'Monat' : 'mo'}` : null;
-  const proPlusMonthlyEquiv = billingPeriod === 'yearly' && proPlusAnnualPkg
-    ? `${(proPlusAnnualPkg.product.price / 12).toFixed(2)} ${proPlusAnnualPkg.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
-    : billingPeriod === 'yearly' ? `$5.83/${locale === 'de' ? 'Monat' : 'mo'}` : null;
+  const proMonthlyPrice = offerings?.proMonthly?.product.priceString ?? '$5.99';
+  const proPlusAnnualPrice = offerings?.proPlusAnnual?.product.priceString ?? '$49.99';
+  const proPlusMonthlyEquiv = offerings?.proPlusAnnual
+    ? `${(offerings.proPlusAnnual.product.price / 12).toFixed(2)} ${offerings.proPlusAnnual.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
+    : `$4.17/${locale === 'de' ? 'Monat' : 'mo'}`;
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
@@ -178,82 +187,48 @@ export default function PaywallScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.hero}
         >
-          <Ionicons name="diamond" size={44} color="#fff" />
+          <Ionicons name="heart" size={44} color="#fff" />
           <Text style={styles.heroTitle}>
-            {locale === 'de' ? 'Level Up' : 'Upgrade Your Game'}
+            {locale === 'de' ? 'Mehr Herzen, mehr Game' : 'More Hearts, More Game'}
           </Text>
           <Text style={styles.heroSubtitle}>
             {locale === 'de'
-              ? 'Wähle den Plan, der zu dir passt'
-              : 'Choose the plan that fits your goals'}
+              ? 'Herzen sind deine Währung für Coaching, Kapitel und Übungen'
+              : 'Hearts power your coaching, chapters, and exercises'}
           </Text>
         </LinearGradient>
 
-        {/* Billing toggle */}
-        <View style={[styles.billingToggle, isDark && styles.billingToggleDark]}>
-          <Pressable
-            onPress={() => toggleBilling('monthly')}
-            style={[styles.billingOption, billingPeriod === 'monthly' && styles.billingOptionActive, billingPeriod === 'monthly' && isDark && styles.billingOptionActiveDark]}
-          >
-            <Text style={[
-              styles.billingText,
-              isDark && styles.billingTextDark,
-              billingPeriod === 'monthly' && styles.billingTextActive,
-            ]}>
-              {locale === 'de' ? 'Monatlich' : 'Monthly'}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => toggleBilling('yearly')}
-            style={[styles.billingOption, billingPeriod === 'yearly' && styles.billingOptionActive, billingPeriod === 'yearly' && isDark && styles.billingOptionActiveDark]}
-          >
-            <Text style={[
-              styles.billingText,
-              isDark && styles.billingTextDark,
-              billingPeriod === 'yearly' && styles.billingTextActive,
-            ]}>
-              {locale === 'de' ? 'Jährlich' : 'Yearly'}
-            </Text>
-            <View style={styles.saveBadge}>
-              <Text style={styles.saveText}>
-                {locale === 'de' ? '-40%' : 'SAVE 40%'}
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* Tier cards */}
+        {/* Subscription cards */}
         <View style={styles.tierCards}>
-          {/* Pro Card */}
-          <Pressable onPress={() => selectTier('pro')}>
+          {/* Monthly PRO */}
+          <Pressable onPress={() => { Haptics.selectionAsync(); setSelectedPlan('pro_monthly'); }}>
             <View style={[
               styles.tierCard,
               isDark && styles.tierCardDark,
-              selectedTier === 'pro' && styles.tierCardSelected,
+              selectedPlan === 'pro_monthly' && styles.tierCardSelected,
             ]}>
               <View style={styles.tierHeader}>
                 <View style={styles.tierTitleRow}>
-                  <Text style={[styles.tierName, isDark && styles.tierNameDark]}>Pro</Text>
-                  <View style={[styles.tierRadio, selectedTier === 'pro' && styles.tierRadioSelected]}>
-                    {selectedTier === 'pro' && <View style={styles.tierRadioDot} />}
+                  <Text style={[styles.tierName, isDark && styles.tierNameDark]}>
+                    {locale === 'de' ? 'Monatlich PRO' : 'Monthly PRO'}
+                  </Text>
+                  <View style={[styles.tierRadio, selectedPlan === 'pro_monthly' && styles.tierRadioSelected]}>
+                    {selectedPlan === 'pro_monthly' && <View style={styles.tierRadioDot} />}
                   </View>
                 </View>
-                <View style={styles.tierPriceRow}>
-                  <Text style={[styles.tierPrice, isDark && styles.tierPriceDark]}>
-                    {proPrice}{proPeriod}
-                  </Text>
-                  {proMonthlyEquiv && (
-                    <Text style={[styles.tierPriceEquiv, isDark && styles.tierPriceEquivDark]}>
-                      {proMonthlyEquiv}
-                    </Text>
-                  )}
-                </View>
+                <Text style={[styles.tierPrice, isDark && styles.tierPriceDark]}>
+                  {proMonthlyPrice}/{locale === 'de' ? 'Monat' : 'month'}
+                </Text>
               </View>
               <View style={styles.tierFeatures}>
-                {PRO_FEATURES[locale].map((f, i) => (
+                {PRO_MONTHLY_FEATURES[locale].map((f, i) => (
                   <View key={i} style={styles.featureRow}>
-                    <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-                    <Text style={[styles.featureText, isDark && styles.featureTextDark]}>{f.text}</Text>
+                    <Ionicons name="checkmark-circle" size={18} color={(f as any).highlight ? '#E8435A' : '#22C55E'} />
+                    <Text style={[
+                      styles.featureText,
+                      isDark && styles.featureTextDark,
+                      (f as any).highlight && styles.featureTextHighlight,
+                    ]}>{f.text}</Text>
                   </View>
                 ))}
                 <View style={styles.featureRow}>
@@ -266,49 +241,46 @@ export default function PaywallScreen() {
             </View>
           </Pressable>
 
-          {/* Pro+ Card */}
-          <Pressable onPress={() => selectTier('pro_plus')}>
+          {/* Annual PRO+ */}
+          <Pressable onPress={() => { Haptics.selectionAsync(); setSelectedPlan('pro_plus_annual'); }}>
             <View style={[
               styles.tierCard,
               isDark && styles.tierCardDark,
-              selectedTier === 'pro_plus' && styles.tierCardSelected,
+              selectedPlan === 'pro_plus_annual' && styles.tierCardSelected,
             ]}>
-              {/* Recommended badge */}
-              <View style={styles.recommendedBadge}>
+              <View style={styles.bestValueBadge}>
                 <Ionicons name="star" size={11} color="#fff" />
-                <Text style={styles.recommendedText}>
-                  {locale === 'de' ? 'EMPFOHLEN' : 'RECOMMENDED'}
+                <Text style={styles.bestValueText}>
+                  {locale === 'de' ? 'BESTER WERT' : 'BEST VALUE'}
                 </Text>
               </View>
               <View style={styles.tierHeader}>
                 <View style={styles.tierTitleRow}>
-                  <Text style={[styles.tierName, isDark && styles.tierNameDark]}>Pro+</Text>
-                  <View style={[styles.tierRadio, selectedTier === 'pro_plus' && styles.tierRadioSelected]}>
-                    {selectedTier === 'pro_plus' && <View style={styles.tierRadioDot} />}
+                  <Text style={[styles.tierName, isDark && styles.tierNameDark]}>
+                    {locale === 'de' ? 'Jährlich PRO+' : 'Annual PRO+'}
+                  </Text>
+                  <View style={[styles.tierRadio, selectedPlan === 'pro_plus_annual' && styles.tierRadioSelected]}>
+                    {selectedPlan === 'pro_plus_annual' && <View style={styles.tierRadioDot} />}
                   </View>
                 </View>
                 <View style={styles.tierPriceRow}>
                   <Text style={[styles.tierPrice, isDark && styles.tierPriceDark]}>
-                    {proPlusPrice}{proPeriod}
+                    {proPlusAnnualPrice}/{locale === 'de' ? 'Jahr' : 'year'}
                   </Text>
-                  {proPlusMonthlyEquiv && (
-                    <Text style={[styles.tierPriceEquiv, isDark && styles.tierPriceEquivDark]}>
-                      {proPlusMonthlyEquiv}
-                    </Text>
-                  )}
+                  <Text style={[styles.tierPriceEquiv, isDark && styles.tierPriceEquivDark]}>
+                    {proPlusMonthlyEquiv}
+                  </Text>
                 </View>
               </View>
               <View style={styles.tierFeatures}>
-                {PRO_FEATURES[locale].map((f, i) => (
+                {PRO_PLUS_ANNUAL_FEATURES[locale].map((f, i) => (
                   <View key={i} style={styles.featureRow}>
-                    <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-                    <Text style={[styles.featureText, isDark && styles.featureTextDark]}>{f.text}</Text>
-                  </View>
-                ))}
-                {PRO_PLUS_EXTRAS[locale].map((f, i) => (
-                  <View key={`extra-${i}`} style={styles.featureRow}>
-                    <Ionicons name="checkmark-circle" size={18} color="#E8435A" />
-                    <Text style={[styles.featureText, styles.featureTextHighlight]}>{f.text}</Text>
+                    <Ionicons name="checkmark-circle" size={18} color={(f as any).highlight ? '#E8435A' : '#22C55E'} />
+                    <Text style={[
+                      styles.featureText,
+                      isDark && styles.featureTextDark,
+                      (f as any).highlight && styles.featureTextHighlight,
+                    ]}>{f.text}</Text>
                   </View>
                 ))}
               </View>
@@ -337,6 +309,75 @@ export default function PaywallScreen() {
               ? 'Die Zahlung wird nach Ablauf der Testphase über deinen App Store Account abgerechnet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der aktuellen Laufzeit gekündigt wird.'
               : 'Payment will be charged to your App Store account after the trial period. Subscription renews automatically unless cancelled at least 24 hours before the end of the current period.'}
           </Text>
+        </View>
+
+        {/* One-Time Purchases */}
+        <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+          {locale === 'de' ? 'Einmalkäufe' : 'One-Time Purchases'}
+        </Text>
+
+        <View style={styles.oneTimeCards}>
+          {/* Heart Pack */}
+          {isPremium && (
+            <Pressable
+              onPress={() => handleOneTimePurchase('hearts')}
+              disabled={oneTimeLoading === 'hearts'}
+              style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
+            >
+              <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(232,67,90,0.08)' }]}>
+                <Ionicons name="heart" size={22} color="#E8435A" />
+              </View>
+              <View style={styles.oneTimeInfo}>
+                <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
+                  {locale === 'de' ? '50 Herzen Paket' : '50 Hearts Pack'}
+                </Text>
+                <Text style={styles.oneTimeDesc}>
+                  {locale === 'de' ? 'Bonus-Herzen, bis zur Nutzung' : 'Bonus hearts, persist until used'}
+                </Text>
+              </View>
+              <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$2.99</Text>
+            </Pressable>
+          )}
+
+          {/* PDF Guide */}
+          <Pressable
+            onPress={() => handleOneTimePurchase('pdf')}
+            disabled={oneTimeLoading === 'pdf'}
+            style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
+          >
+            <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(139,92,246,0.08)' }]}>
+              <Ionicons name="document-text" size={22} color="#8B5CF6" />
+            </View>
+            <View style={styles.oneTimeInfo}>
+              <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
+                {locale === 'de' ? 'PDF-Guide' : 'PDF Guide'}
+              </Text>
+              <Text style={styles.oneTimeDesc}>
+                {locale === 'de' ? 'Kompletter Guide im PDF-Format' : 'Complete guide in PDF format'}
+              </Text>
+            </View>
+            <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$4.99</Text>
+          </Pressable>
+
+          {/* Unlock All Chapters */}
+          <Pressable
+            onPress={() => handleOneTimePurchase('chapters')}
+            disabled={oneTimeLoading === 'chapters'}
+            style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark]}
+          >
+            <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(14,165,233,0.08)' }]}>
+              <Ionicons name="book" size={22} color="#0EA5E9" />
+            </View>
+            <View style={styles.oneTimeInfo}>
+              <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
+                {locale === 'de' ? 'Alle Kapitel freischalten' : 'Unlock All Chapters'}
+              </Text>
+              <Text style={styles.oneTimeDesc}>
+                {locale === 'de' ? 'Kapitel lesen ohne Herzen' : 'Read chapters without spending hearts'}
+              </Text>
+            </View>
+            <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~$9.99</Text>
+          </Pressable>
         </View>
 
         {/* Restore */}
@@ -379,40 +420,6 @@ const styles = StyleSheet.create({
     textAlign: 'center', lineHeight: 21,
   },
 
-  // Billing toggle
-  billingToggle: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 14, padding: 4,
-    marginBottom: 16,
-  },
-  billingToggleDark: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  billingOption: {
-    flex: 1, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 10, borderRadius: 11,
-  },
-  billingOptionActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
-  },
-  billingOptionActiveDark: {
-    backgroundColor: '#333',
-  },
-  billingText: {
-    fontSize: 14, fontWeight: '600', color: '#737373',
-  },
-  billingTextDark: { color: '#A3A3A3' },
-  billingTextActive: { color: '#171717' },
-  saveBadge: {
-    backgroundColor: '#E8435A',
-    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6,
-  },
-  saveText: { fontSize: 10, fontWeight: '700', color: '#fff' },
-
   // Tier cards
   tierCards: { gap: 12, marginBottom: 20 },
   tierCard: {
@@ -428,14 +435,14 @@ const styles = StyleSheet.create({
   tierCardSelected: {
     borderColor: '#E8435A',
   },
-  recommendedBadge: {
+  bestValueBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     alignSelf: 'flex-start',
     backgroundColor: '#E8435A',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
     marginBottom: 10,
   },
-  recommendedText: {
+  bestValueText: {
     fontSize: 11, fontWeight: '800', color: '#fff', letterSpacing: 0.5,
   },
   tierHeader: { marginBottom: 14 },
@@ -466,7 +473,7 @@ const styles = StyleSheet.create({
   featureTextDisabledDark: { color: '#525252' },
 
   // CTA
-  ctaContainer: { gap: 8, marginBottom: 16 },
+  ctaContainer: { gap: 8, marginBottom: 24 },
   trialNote: {
     fontSize: 14, fontWeight: '600', color: '#171717',
     textAlign: 'center',
@@ -477,6 +484,37 @@ const styles = StyleSheet.create({
     lineHeight: 16, paddingHorizontal: 16,
   },
   termsDark: { color: '#737373' },
+
+  // Section title
+  sectionTitle: {
+    fontSize: 20, fontWeight: '700', color: '#171717',
+    letterSpacing: -0.3, marginBottom: 12,
+  },
+  sectionTitleDark: { color: '#F5F5F5' },
+
+  // One-time purchases
+  oneTimeCards: { gap: 10, marginBottom: 20 },
+  oneTimeCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: '#fff', borderRadius: 16, padding: 16,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03, shadowRadius: 4, elevation: 1,
+  },
+  oneTimeCardDark: {
+    backgroundColor: '#252525',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  oneTimeIcon: {
+    width: 44, height: 44, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  oneTimeInfo: { flex: 1 },
+  oneTimeName: { fontSize: 15, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
+  oneTimeNameDark: { color: '#F5F5F5' },
+  oneTimeDesc: { fontSize: 12, color: '#737373', marginTop: 2 },
+  oneTimePrice: { fontSize: 15, fontWeight: '700', color: '#E8435A' },
+  oneTimePriceDark: { color: '#F87171' },
 
   // Restore
   restoreButton: { alignItems: 'center', paddingVertical: 12 },

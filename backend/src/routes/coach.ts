@@ -47,13 +47,15 @@ const messageSchema = z.object({
     'rejection_gym',
     'date_simulator',
     'flirty_banter',
+    'reply_helper',
   ]).optional(),
+  conversationId: z.string().optional(),
 });
 
 // POST /api/coach/message
 router.post('/message', async (req: AuthRequest, res: Response) => {
   try {
-    const { message, characterId, context, exerciseMode } = messageSchema.parse(req.body);
+    const { message, characterId, context, exerciseMode, conversationId } = messageSchema.parse(req.body);
 
     // Premium characters require Pro or Pro+ subscription
     const FREE_CHARACTERS = ['charismo', 'bestfriend'];
@@ -88,6 +90,9 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
         subscriptionStatus: true,
         dailyCoachMessages: true,
         lastCoachResetDate: true,
+        dailyHeartsUsed: true,
+        lastHeartsResetDate: true,
+        bonusHearts: true,
       },
     });
 
@@ -96,31 +101,58 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Rate limiting for free users
+    // Hearts-based rate limiting
     const today = new Date().toISOString().split('T')[0];
-    let dailyCount = user.dailyCoachMessages;
+    const heartCost = env.heartCostMessage;
 
-    if (user.lastCoachResetDate !== today) {
-      dailyCount = 0;
+    // PRO+ users skip heart checks
+    if (!isSubscribed(user.subscriptionStatus) || user.subscriptionStatus === 'PRO') {
+      const maxDaily = user.subscriptionStatus === 'PRO' ? env.proHeartsPerDay : env.freeHeartsPerDay;
+      let dailyUsed = user.dailyHeartsUsed;
+
+      if (user.lastHeartsResetDate !== today) {
+        dailyUsed = 0;
+      }
+
+      const dailyRemaining = Math.max(0, maxDaily - dailyUsed);
+      const totalAvailable = dailyRemaining + user.bonusHearts;
+
+      if (totalAvailable < heartCost) {
+        res.status(429).json({
+          error: 'Not enough hearts',
+          heartsRemaining: totalAvailable,
+          resetAt: 'midnight',
+          upgrade: true,
+        });
+        return;
+      }
+
+      // Deduct hearts
+      const dailyDeduct = Math.min(dailyRemaining, heartCost);
+      const bonusDeduct = heartCost - dailyDeduct;
+
       await prisma.user.update({
         where: { id: req.userId },
-        data: { dailyCoachMessages: 0, lastCoachResetDate: today },
+        data: {
+          dailyHeartsUsed: dailyUsed + dailyDeduct,
+          lastHeartsResetDate: today,
+          bonusHearts: Math.max(0, user.bonusHearts - bonusDeduct),
+        },
       });
     }
 
-    if (!isSubscribed(user.subscriptionStatus) && dailyCount >= env.freeCoachMessagesPerDay) {
-      res.status(429).json({
-        error: 'Daily message limit reached',
-        limit: env.freeCoachMessagesPerDay,
-        resetAt: 'midnight',
-        upgrade: true,
-      });
-      return;
+    // Legacy: keep dailyCoachMessages counter in sync
+    let dailyCount = user.dailyCoachMessages;
+    if (user.lastCoachResetDate !== today) {
+      dailyCount = 0;
     }
 
-    // Get conversation history (last 20 messages for context)
+    // Get conversation history (last 20 messages for context), scoped by conversationId
     const history = await prisma.chatMessage.findMany({
-      where: { userId: req.userId },
+      where: {
+        userId: req.userId,
+        ...(conversationId ? { conversationId } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       take: 20,
       select: { role: true, content: true },
@@ -142,10 +174,18 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     // Save both messages
     await prisma.$transaction([
       prisma.chatMessage.create({
-        data: { userId: req.userId!, role: 'user', content: message },
+        data: {
+          userId: req.userId!, role: 'user', content: message,
+          conversationId: conversationId ?? null,
+          characterId,
+        },
       }),
       prisma.chatMessage.create({
-        data: { userId: req.userId!, role: 'assistant', content: aiResponse },
+        data: {
+          userId: req.userId!, role: 'assistant', content: aiResponse,
+          conversationId: conversationId ?? null,
+          characterId,
+        },
       }),
       prisma.user.update({
         where: { id: req.userId },
@@ -156,10 +196,18 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       }),
     ]);
 
+    // Calculate remaining hearts for response
+    const maxDaily = isSubscribed(user.subscriptionStatus)
+      ? (user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM' ? Infinity : env.proHeartsPerDay)
+      : env.freeHeartsPerDay;
+    const heartsUsed = user.lastHeartsResetDate === today ? user.dailyHeartsUsed + heartCost : heartCost;
+    const heartsRemaining = maxDaily === Infinity ? null : Math.max(0, maxDaily - heartsUsed) + Math.max(0, user.bonusHearts - Math.max(0, heartCost - Math.max(0, maxDaily - (user.lastHeartsResetDate === today ? user.dailyHeartsUsed : 0))));
+
     res.json({
       response: aiResponse,
       messagesUsed: dailyCount + 1,
       messagesLimit: isSubscribed(user.subscriptionStatus) ? null : env.freeCoachMessagesPerDay,
+      heartsRemaining,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

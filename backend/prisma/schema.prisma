@@ -37,21 +37,33 @@ model User {
   dailyVoiceSessions  Int      @default(0)
   lastVoiceResetDate  String   @default("")
 
+  // Hearts economy
+  dailyHeartsUsed     Int      @default(0)
+  lastHeartsResetDate String   @default("")
+  bonusHearts         Int      @default(0)
+
+  // One-time purchases
+  hasPdfAccess        Boolean  @default(false)
+  hasChapterUnlock    Boolean  @default(false)
+
   chatMessages        ChatMessage[]
 
   @@index([authProvider, authProviderId])
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
-  userId    String
-  role      String   // 'user' | 'assistant'
-  content   String
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  userId         String
+  role           String   // 'user' | 'assistant'
+  content        String
+  createdAt      DateTime @default(now())
+  conversationId String?
+  characterId    String?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, conversationId, createdAt])
 }
 
 enum SubscriptionStatus {

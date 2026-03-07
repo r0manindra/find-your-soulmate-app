@@ -15,7 +15,7 @@ import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import type { HabitTimeSlot } from '@/src/core/entities/habit-types';
 import { createHabitEvent } from '@/src/services/calendar';
 
-const FREE_HABIT_LIMIT = 10;
+const FREE_HABIT_LIMIT = 5;
 
 const EMOJI_GRID = [
   '\u{1F525}', '\u{1F4AA}', '\u{1F9E0}', '\u{1F4DD}', '\u{1F3C3}', '\u{1F9D8}', '\u{1F4A7}', '\u{1F957}', '\u{1F60A}', '\u{1F3AF}',
