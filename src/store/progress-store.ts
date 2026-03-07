@@ -17,6 +17,13 @@ interface ProgressStore extends ProgressState {
   dequeueAchievement: () => void;
   clearAchievementQueue: () => void;
   saveQuizScore: (chapterId: number, score: number) => void;
+  restoreFromBackend: (data: {
+    completedChapters: number[];
+    completedBooks: number[];
+    chatMessageCount: number;
+    streak: number;
+    graduated: boolean;
+  }) => void;
 }
 
 const initialState: ProgressState = {
@@ -107,6 +114,15 @@ export const useProgressStore = create<ProgressStore>()(
             [chapterId]: Math.max(state.quizScores[chapterId] ?? 0, score),
           },
         })),
+
+      restoreFromBackend: (data) =>
+        set({
+          completedChapters: data.completedChapters,
+          completedBooks: data.completedBooks,
+          chatMessageCount: data.chatMessageCount,
+          streak: data.streak,
+          graduated: data.graduated,
+        }),
     }),
     {
       name: 'progress-storage',

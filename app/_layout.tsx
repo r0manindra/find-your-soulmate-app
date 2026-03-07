@@ -123,6 +123,17 @@ function ProgressSync() {
       });
     }
 
+    // Pull latest progress from backend on login to keep local state in sync
+    api.getMe().then(({ user }) => {
+      useProgressStore.getState().restoreFromBackend({
+        completedChapters: user.completedChapters,
+        completedBooks: user.completedBooks,
+        chatMessageCount: user.chatMessageCount,
+        streak: user.streak,
+        graduated: user.graduated,
+      });
+    }).catch(() => {});
+
     // Debounced sync: wait 2s after last change, compare to avoid unnecessary syncs
     let lastSyncedJson = '';
     const unsubscribe = useProgressStore.subscribe((state) => {

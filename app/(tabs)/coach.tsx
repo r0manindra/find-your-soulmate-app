@@ -66,38 +66,42 @@ export default function CoachScreen() {
   );
 
   const buildJourneyContext = useCallback((): JourneyContext => {
-    const completed = progressStore.completedChapters;
+    // Read fresh state directly from the store to avoid stale closures
+    const freshProgress = useProgressStore.getState();
+    const completed = freshProgress.completedChapters;
     const currentChapterId = chapterOrder.find((id) => !completed.includes(id)) ?? null;
-    const activeHabits = habitStore.getActiveHabits();
+    const freshHabits = useHabitStore.getState();
+    const activeHabits = freshHabits.getActiveHabits();
     const activeWithStreaks = activeHabits.map((h) => ({
       name: h.title[locale] || h.title.en,
-      currentStreak: habitStore.getStreak(h.id).current,
+      currentStreak: freshHabits.getStreak(h.id).current,
     }));
+    const freshProfile = useUserProfileStore.getState();
 
     return {
       profile: {
-        gender: userProfile.userGender,
-        ageGroup: userProfile.ageGroup,
-        skillLevel: userProfile.skillLevel,
-        socialEnergy: userProfile.socialEnergy,
-        basicsLevel: userProfile.basicsLevel,
-        goal: userProfile.goal,
+        gender: freshProfile.userGender,
+        ageGroup: freshProfile.ageGroup,
+        skillLevel: freshProfile.skillLevel,
+        socialEnergy: freshProfile.socialEnergy,
+        basicsLevel: freshProfile.basicsLevel,
+        goal: freshProfile.goal,
       },
       progress: {
         completedChapters: completed,
         currentChapterId,
-        streak: progressStore.streak,
-        graduated: progressStore.graduated,
+        streak: freshProgress.streak,
+        graduated: freshProgress.graduated,
       },
       habits: {
         active: activeWithStreaks,
-        todayCompleted: habitStore.getTodayCompletedCount(),
-        todayTotal: habitStore.getTodayTotalCount(),
-        weeklyCompletionRate: habitStore.getWeeklyCompletionRate(),
+        todayCompleted: freshHabits.getTodayCompletedCount(),
+        todayTotal: freshHabits.getTodayTotalCount(),
+        weeklyCompletionRate: freshHabits.getWeeklyCompletionRate(),
       },
       locale,
     };
-  }, [progressStore, habitStore, userProfile, locale, chapterOrder]);
+  }, [locale, chapterOrder]);
 
   const activeExerciseMode = useUIStore((s) => s.activeExerciseMode);
   const setExerciseMode = useUIStore((s) => s.setExerciseMode);
@@ -272,12 +276,8 @@ export default function CoachScreen() {
     }
   }, [input, isLoading, incrementChatCount, isLoggedIn, selectedCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore]);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
-    }
-  }, [messages.length]);
+  // Inverted list data — newest messages at top of reversed array (rendered at bottom visually)
+  const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
 
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
@@ -395,17 +395,33 @@ export default function CoachScreen() {
           />
         )}
 
-        {/* Messages */}
+        {/* Messages — inverted FlatList for WhatsApp-like chat behavior */}
         <FlatList
           ref={flatListRef}
-          data={messages}
+          data={invertedMessages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
+          inverted
           contentContainerStyle={styles.messageList}
           showsVerticalScrollIndicator={false}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListHeaderComponent={
+            isLoading ? (
+              <View style={[styles.messageRow, { transform: [{ scaleY: -1 }] }]}>
+                <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
+                  <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
+                </View>
+                <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
+                  <Text style={styles.loadingText}>{t('coach.sending', { name: activeCharacter.name })}</Text>
+                </View>
+              </View>
+            ) : null
+          }
+          ListFooterComponent={
             messages.length <= 1 ? (
-              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
+              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark, { transform: [{ scaleY: -1 }] }]}>
                 <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
                 <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
                   {t('coach.welcomeTitle')}
@@ -413,18 +429,6 @@ export default function CoachScreen() {
                 <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
                   {t('coach.welcomeDesc')}
                 </Text>
-              </View>
-            ) : null
-          }
-          ListFooterComponent={
-            isLoading ? (
-              <View style={styles.messageRow}>
-                <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-                  <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
-                </View>
-                <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
-                  <Text style={styles.loadingText}>{t('coach.sending', { name: activeCharacter.name })}</Text>
-                </View>
               </View>
             ) : null
           }
@@ -628,7 +632,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 10,
   },
   upgradeBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#E8435A' },
-  messageList: { paddingHorizontal: 14, paddingTop: 4, paddingBottom: 8 },
+  messageList: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4, flexGrow: 1 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 6 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
