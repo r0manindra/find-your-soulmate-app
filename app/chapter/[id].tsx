@@ -18,6 +18,7 @@ import { ChapterHabitsSheet } from '@/src/presentation/components/habits/chapter
 import { QuizModal } from '@/src/presentation/components/quiz/quiz-modal';
 import { VoiceTrainer } from '@/src/presentation/components/voice/voice-trainer';
 import { VoiceCoachModal } from '@/src/presentation/components/voice/voice-coach-modal';
+import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -598,22 +599,18 @@ export default function ChapterDetailScreen() {
         })()}
       </ScrollView>
 
-      {/* Floating glass back button */}
-      <Pressable
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.back();
-        }}
-        style={[styles.floatingBack, { top: 8 }]}
-      >
-        <BlurView
-          intensity={isDark ? 40 : 60}
-          tint={isDark ? 'dark' : 'light'}
-          style={styles.floatingBackBlur}
-        >
-          <Ionicons name="arrow-back" size={22} color={isDark ? '#F5F5F5' : '#171717'} />
-        </BlurView>
-      </Pressable>
+      {/* Floating liquid glass back button */}
+      <View style={[styles.floatingBack, { top: 8 }]}>
+        <LiquidGlassIconButton
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          icon="arrow-back"
+          size={42}
+          iconSize={22}
+        />
+      </View>
 
       {/* Floating "Ask Coach" button */}
       <Pressable
@@ -785,27 +782,11 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
   },
-  // Floating glass back button
+  // Floating liquid glass back button
   floatingBack: {
     position: 'absolute',
     left: 20,
     zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  floatingBackBlur: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.4)',
   },
 
   // Chapter nav (inline in header)
