@@ -157,20 +157,28 @@ function ProgressSync() {
   return null;
 }
 
-function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
-  const iconScale = useSharedValue(0.8);
+function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: () => void }) {
+  const iconScale = useSharedValue(0.6);
   const iconOpacity = useSharedValue(0);
   const overlayOpacity = useSharedValue(1);
+  const textOpacity = useSharedValue(0);
 
   useEffect(() => {
-    // Icon entrance: fade in + spring scale
-    iconOpacity.value = withTiming(1, { duration: 300 });
-    iconScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+    // Signal that overlay is mounted — safe to hide native splash
+    onReady();
 
-    // After a beat, scale up slightly and fade everything out
-    iconScale.value = withDelay(600, withTiming(1.15, { duration: 400, easing: Easing.out(Easing.quad) }));
-    iconOpacity.value = withDelay(700, withTiming(0, { duration: 300 }));
-    overlayOpacity.value = withDelay(700, withTiming(0, { duration: 350 }, () => {
+    // 0-500ms: Icon fades in with bouncy spring
+    iconOpacity.value = withTiming(1, { duration: 400 });
+    iconScale.value = withSpring(1, { damping: 10, stiffness: 150 });
+
+    // 300-700ms: "Charismo" text fades in
+    textOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+
+    // 1500ms: Hold for a moment, then scale up + fade out
+    iconScale.value = withDelay(1500, withTiming(1.2, { duration: 500, easing: Easing.out(Easing.quad) }));
+    iconOpacity.value = withDelay(1600, withTiming(0, { duration: 400 }));
+    textOpacity.value = withDelay(1500, withTiming(0, { duration: 300 }));
+    overlayOpacity.value = withDelay(1700, withTiming(0, { duration: 400 }, () => {
       runOnJS(onFinish)();
     }));
   }, []);
@@ -178,6 +186,10 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   const iconStyle = useAnimatedStyle(() => ({
     opacity: iconOpacity.value,
     transform: [{ scale: iconScale.value }],
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
   }));
 
   const overlayStyle = useAnimatedStyle(() => ({
@@ -195,6 +207,9 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
         <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
           <CharismoIcon size={80} color="#fff" />
         </Animated.View>
+        <Animated.Text style={[splashStyles.brandText, textStyle]}>
+          Charismo
+        </Animated.Text>
       </LinearGradient>
     </Animated.View>
   );
@@ -218,6 +233,13 @@ const splashStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  brandText: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 1,
+    marginTop: 16,
+  },
 });
 
 export default function RootLayout() {
@@ -233,15 +255,18 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      // Hide native splash immediately — our animated one takes over
-      SplashScreen.hideAsync();
-      // Initialize RevenueCat
+      // Initialize RevenueCat while splash is still showing
       const user = useAuthStore.getState().user;
       initPurchases(user?.id).then(() => {
         checkSubscriptionStatus();
       }).catch(() => { /* RevenueCat not configured yet */ });
     }
   }, [loaded]);
+
+  // Don't hide native splash until animated overlay is mounted
+  const handleSplashReady = useCallback(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   if (!loaded) {
     return null;
@@ -250,7 +275,12 @@ export default function RootLayout() {
   return (
     <View style={{ flex: 1 }}>
       <RootLayoutNav />
-      {showSplash && <AnimatedSplash onFinish={() => setShowSplash(false)} />}
+      {showSplash && (
+        <AnimatedSplash
+          onReady={handleSplashReady}
+          onFinish={() => setShowSplash(false)}
+        />
+      )}
     </View>
   );
 }
