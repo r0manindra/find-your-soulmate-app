@@ -206,7 +206,7 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
         style={splashStyles.gradient}
       >
         <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-          <CharismoIcon size={80} color="#fff" />
+          <CharismoIcon size={100} color="#fff" />
         </Animated.View>
         <Animated.Text style={[splashStyles.brandText, textStyle]}>
           Charismo
@@ -227,10 +227,10 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    width: 130,
+    height: 130,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
