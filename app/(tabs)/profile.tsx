@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TextInput, Pressable, Alert, Linking, Modal, StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -502,7 +503,7 @@ export default function ProfileScreen() {
           }}
           style={styles.versionLabel}
         >
-          <Text style={styles.versionText}>Charismo v1.0.0 (20)</Text>
+          <Text style={styles.versionText}>Charismo v{Constants.expoConfig?.version ?? '1.0.0'} ({Constants.expoConfig?.ios?.buildNumber ?? '?'})</Text>
         </Pressable>
 
         {/* Dev unlock modal */}
@@ -537,17 +538,24 @@ export default function ProfileScreen() {
               />
               <Pressable
                 onPress={async () => {
-                  if (devKey === 'charismo2026') {
-                    useAuthStore.getState().setSubscriptionStatus('PREMIUM');
-                    // Also update backend if logged in
-                    if (isLoggedIn) {
-                      api.devUnlock(devKey).catch(() => {});
+                  if (!devKey.trim() || !isLoggedIn) {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                    Alert.alert('Error', isLoggedIn ? 'Please enter a key.' : 'You must be logged in.');
+                    return;
+                  }
+                  try {
+                    const result = await api.devUnlock(devKey.trim());
+                    if (result.success) {
+                      useAuthStore.getState().setSubscriptionStatus(result.subscriptionStatus);
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      setShowDevUnlock(false);
+                      setDevKey('');
+                      Alert.alert('Premium Unlocked', 'All premium features are now active.');
+                    } else {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                      Alert.alert('Invalid Key', 'That key is not recognized.');
                     }
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    setShowDevUnlock(false);
-                    setDevKey('');
-                    Alert.alert('Premium Unlocked', 'All premium features are now active.');
-                  } else {
+                  } catch {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
                     Alert.alert('Invalid Key', 'That key is not recognized.');
                   }

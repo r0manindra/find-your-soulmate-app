@@ -142,17 +142,27 @@ export default function PaywallScreen() {
     setBillingPeriod(period);
   };
 
-  const proPrice = billingPeriod === 'yearly' ? '$49.99' : '$6.99';
-  const proPlusPrice = billingPeriod === 'yearly' ? '$69.99' : '$9.99';
+  // Use real prices from RevenueCat when available, fallback to defaults
+  const proMonthlyPkg = offerings?.proMonthly;
+  const proAnnualPkg = offerings?.proAnnual;
+  const proPlusMonthlyPkg = offerings?.proPlusMonthly;
+  const proPlusAnnualPkg = offerings?.proPlusAnnual;
+
+  const proPrice = billingPeriod === 'yearly'
+    ? (proAnnualPkg?.product.priceString ?? '$49.99')
+    : (proMonthlyPkg?.product.priceString ?? '$6.99');
+  const proPlusPrice = billingPeriod === 'yearly'
+    ? (proPlusAnnualPkg?.product.priceString ?? '$69.99')
+    : (proPlusMonthlyPkg?.product.priceString ?? '$9.99');
   const proPeriod = billingPeriod === 'yearly'
     ? (locale === 'de' ? '/Jahr' : '/year')
     : (locale === 'de' ? '/Monat' : '/month');
-  const proMonthlyEquiv = billingPeriod === 'yearly'
-    ? `$4.17/${locale === 'de' ? 'Monat' : 'mo'}`
-    : null;
-  const proPlusMonthlyEquiv = billingPeriod === 'yearly'
-    ? `$5.83/${locale === 'de' ? 'Monat' : 'mo'}`
-    : null;
+  const proMonthlyEquiv = billingPeriod === 'yearly' && proAnnualPkg
+    ? `${(proAnnualPkg.product.price / 12).toFixed(2)} ${proAnnualPkg.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
+    : billingPeriod === 'yearly' ? `$4.17/${locale === 'de' ? 'Monat' : 'mo'}` : null;
+  const proPlusMonthlyEquiv = billingPeriod === 'yearly' && proPlusAnnualPkg
+    ? `${(proPlusAnnualPkg.product.price / 12).toFixed(2)} ${proPlusAnnualPkg.product.currencyCode}/${locale === 'de' ? 'Monat' : 'mo'}`
+    : billingPeriod === 'yearly' ? `$5.83/${locale === 'de' ? 'Monat' : 'mo'}` : null;
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
@@ -184,7 +194,7 @@ export default function PaywallScreen() {
         <View style={[styles.billingToggle, isDark && styles.billingToggleDark]}>
           <Pressable
             onPress={() => toggleBilling('monthly')}
-            style={[styles.billingOption, billingPeriod === 'monthly' && styles.billingOptionActive]}
+            style={[styles.billingOption, billingPeriod === 'monthly' && styles.billingOptionActive, billingPeriod === 'monthly' && isDark && styles.billingOptionActiveDark]}
           >
             <Text style={[
               styles.billingText,
@@ -196,7 +206,7 @@ export default function PaywallScreen() {
           </Pressable>
           <Pressable
             onPress={() => toggleBilling('yearly')}
-            style={[styles.billingOption, billingPeriod === 'yearly' && styles.billingOptionActive]}
+            style={[styles.billingOption, billingPeriod === 'yearly' && styles.billingOptionActive, billingPeriod === 'yearly' && isDark && styles.billingOptionActiveDark]}
           >
             <Text style={[
               styles.billingText,
@@ -386,6 +396,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08, shadowRadius: 4, elevation: 2,
+  },
+  billingOptionActiveDark: {
+    backgroundColor: '#333',
   },
   billingText: {
     fontSize: 14, fontWeight: '600', color: '#737373',

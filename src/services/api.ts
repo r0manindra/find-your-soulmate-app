@@ -16,6 +16,8 @@ export async function clearToken(): Promise<void> {
   await AsyncStorage.removeItem(TOKEN_KEY);
 }
 
+const REQUEST_TIMEOUT_MS = 15000;
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -27,14 +29,44 @@ async function request<T>(
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  // Add timeout via AbortController
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const data = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new ApiError('Request timed out', 0, null);
+    }
+    throw new ApiError('Network error', 0, null);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  // Safe JSON parsing — server may return HTML on 502/503
+  let data: any;
+  try {
+    data = await res.json();
+  } catch {
+    throw new ApiError(
+      res.ok ? 'Invalid response from server' : `Server error (${res.status})`,
+      res.status,
+      null,
+    );
+  }
 
   if (!res.ok) {
+    // Auto-logout on 401 (expired/invalid token)
+    if (res.status === 401 && token) {
+      await clearToken();
+    }
     throw new ApiError(data.error || 'Request failed', res.status, data);
   }
 
@@ -212,16 +244,37 @@ export async function analyzeVoice(audioUri: string, locale: string): Promise<{
   } as any);
   formData.append('locale', locale);
 
-  const res = await fetch(`${API_BASE}/voice/analyze`, {
-    method: 'POST',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for audio upload
 
-  const data = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/voice/analyze`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new ApiError('Voice analysis timed out', 0, null);
+    }
+    throw new ApiError('Network error', 0, null);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  let data: any;
+  try {
+    data = await res.json();
+  } catch {
+    throw new ApiError(`Server error (${res.status})`, res.status, null);
+  }
   if (!res.ok) {
+    if (res.status === 401) await clearToken();
     throw new ApiError(data.error || 'Voice analysis failed', res.status, data);
   }
   return data;

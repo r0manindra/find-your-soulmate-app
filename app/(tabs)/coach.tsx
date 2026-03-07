@@ -241,11 +241,17 @@ export default function CoachScreen() {
         chatStore.addMessage(convId, aiMessage);
       }
     } catch (err: any) {
+      // Auto-logout on expired token
+      if (err?.status === 401) {
+        useAuthStore.getState().logout();
+      }
       const errorMsg = err?.status === 429
         ? t('coach.limitReached')
         : err?.status === 403
           ? (locale === 'de' ? 'Premium erforderlich für diesen Charakter' : 'Premium required for this character')
-          : t('coach.errorMessage');
+          : err?.status === 401
+            ? (locale === 'de' ? 'Sitzung abgelaufen. Bitte erneut anmelden.' : 'Session expired. Please sign in again.')
+            : t('coach.errorMessage');
       const aiMessage: ChatMessage = {
         id: String(Date.now() + 1),
         role: 'assistant',

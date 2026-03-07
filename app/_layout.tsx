@@ -135,7 +135,12 @@ function ProgressSync() {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
       syncTimeoutRef.current = setTimeout(() => {
         lastSyncedJson = json;
-        api.syncProgress(payload).catch(() => { /* silent fail for offline */ });
+        api.syncProgress(payload).catch((err: any) => {
+          // Auto-logout on expired token (API already clears token)
+          if (err?.status === 401) {
+            useAuthStore.getState().logout();
+          }
+        });
       }, 2000);
     });
 

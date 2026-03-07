@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ChatMessage } from '@/src/core/entities/types';
 
 const MAX_CONVERSATIONS = 50;
+const MAX_MESSAGES_PER_CONVERSATION = 200;
 
 export interface Conversation {
   id: string;
@@ -65,9 +66,14 @@ export const useChatHistoryStore = create<ChatHistoryStore>()(
         set((state) => {
           const convs = state.conversations.map((c) => {
             if (c.id !== conversationId) return c;
+            let messages = [...c.messages, message];
+            // Cap messages to prevent AsyncStorage overflow
+            if (messages.length > MAX_MESSAGES_PER_CONVERSATION) {
+              messages = messages.slice(-MAX_MESSAGES_PER_CONVERSATION);
+            }
             const updated = {
               ...c,
-              messages: [...c.messages, message],
+              messages,
               updatedAt: Date.now(),
             };
             // Auto-title from first user message
