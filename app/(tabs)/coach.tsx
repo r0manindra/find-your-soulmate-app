@@ -279,6 +279,13 @@ export default function CoachScreen() {
   // Inverted list data — newest messages at top of reversed array (rendered at bottom visually)
   const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
 
+  // Auto-scroll to bottom (offset 0 in inverted list) when new messages arrive
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+    }
+  }, [messages.length]);
+
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
 
@@ -406,7 +413,6 @@ export default function CoachScreen() {
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="handled"
-          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           ListHeaderComponent={
             isLoading ? (
               <View style={[styles.messageRow, { transform: [{ scaleY: -1 }] }]}>
