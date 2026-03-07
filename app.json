@@ -9,12 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#E8435A"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flirtiq.app",
-      "buildNumber": "42",
+      "buildNumber": "43",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -45,6 +47,8 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
           "backgroundColor": "#E8435A"
         }
       ],
