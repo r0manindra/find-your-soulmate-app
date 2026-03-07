@@ -3,8 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Habit, HabitCompletion, HabitTimeSlot } from '@/src/core/entities/habit-types';
 
+function getLocalDateString(date: Date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function getToday(): string {
-  return new Date().toISOString().split('T')[0];
+  return getLocalDateString();
 }
 
 interface HabitStore {
@@ -115,7 +122,9 @@ export const useHabitStore = create<HabitStore>()(
         // Current streak: count consecutive days backward from today or yesterday
         let current = 0;
         const today = getToday();
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const yesterdayDate = new Date();
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        const yesterday = getLocalDateString(yesterdayDate);
         const startDate = dateSet.has(today) ? today : dateSet.has(yesterday) ? yesterday : null;
 
         if (startDate) {

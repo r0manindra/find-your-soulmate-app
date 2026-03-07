@@ -65,12 +65,15 @@ export const useProgressStore = create<ProgressStore>()(
         })),
 
       updateStreak: () => {
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const { lastActiveDate, streak } = get();
 
         if (lastActiveDate === today) return;
 
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const yesterdayDate = new Date();
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        const yesterday = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
         const isConsecutive = lastActiveDate === yesterday;
 
         set({

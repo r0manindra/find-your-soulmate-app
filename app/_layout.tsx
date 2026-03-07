@@ -189,12 +189,22 @@ function OnboardingGate() {
   const completedChapters = useProgressStore((s) => s.completedChapters);
   const [hydrated, setHydrated] = useState(false);
 
-  // Wait for zustand hydration
+  // Wait for both stores to hydrate before routing
   useEffect(() => {
-    const unsub = useUserProfileStore.persist.onFinishHydration(() => setHydrated(true));
-    // If already hydrated
-    if (useUserProfileStore.persist.hasHydrated()) setHydrated(true);
-    return unsub;
+    let cancelled = false;
+    const checkHydrated = () => {
+      if (!cancelled &&
+        useUserProfileStore.persist.hasHydrated() &&
+        useProgressStore.persist.hasHydrated()
+      ) {
+        setHydrated(true);
+      }
+    };
+
+    checkHydrated();
+    const unsub1 = useUserProfileStore.persist.onFinishHydration(checkHydrated);
+    const unsub2 = useProgressStore.persist.onFinishHydration(checkHydrated);
+    return () => { cancelled = true; unsub1(); unsub2(); };
   }, []);
 
   useEffect(() => {

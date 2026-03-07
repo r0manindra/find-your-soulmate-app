@@ -234,13 +234,18 @@ export default function ChapterDetailScreen() {
     );
   }
 
+  const completingRef = useRef(false);
   const handleToggleComplete = () => {
+    if (completingRef.current) return;
+    completingRef.current = true;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isCompleted) {
       uncompleteChapter(chapterId);
     } else {
       setQuizVisible(true);
     }
+    // Reset after short delay to allow re-interaction
+    setTimeout(() => { completingRef.current = false; }, 500);
   };
 
   const handleQuizComplete = (score: number) => {
