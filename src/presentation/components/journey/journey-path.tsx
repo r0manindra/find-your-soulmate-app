@@ -12,6 +12,8 @@ import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { HEART_COSTS } from '@/src/config/heart-costs';
+import { useAuthStore } from '@/src/store/auth-store';
+import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { PhaseHeader } from './phase-header';
 import { ChapterNode } from './chapter-node';
 
@@ -101,6 +103,7 @@ export function JourneyPath() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
 
@@ -130,7 +133,10 @@ export function JourneyPath() {
       >
         <View style={styles.header}>
           <View style={styles.headerTextContainer}>
-            <Text style={[styles.title, isDark && styles.titleDark]}>{t('guide.title')}</Text>
+            <View style={styles.headerRow}>
+              <Text style={[styles.title, isDark && styles.titleDark]}>{t('guide.title')}</Text>
+              {isLoggedIn && <HeartCounter />}
+            </View>
             <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>{t('guide.subtitle')}</Text>
           </View>
         </View>
@@ -229,6 +235,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTextContainer: {},
   title: {
