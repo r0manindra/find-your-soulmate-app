@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, Pressable, Linking, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
+import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
@@ -21,6 +22,7 @@ export default function BooksScreen() {
   const userProfile = useUserProfileStore();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
 
   const sortedBooks = React.useMemo(() => {
     if (!userProfile.hasCompletedOnboarding || !userProfile.skillLevel) return books;
@@ -54,22 +56,10 @@ export default function BooksScreen() {
       <FlatList
         data={sortedBooks}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingTop: 58 }]}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.back();
-              }}
-              style={styles.backButton}
-            >
-              <Ionicons name="chevron-back" size={24} color={isDark ? '#F5F5F5' : '#171717'} />
-              <Text style={[styles.backText, isDark && { color: '#F5F5F5' }]}>
-                {locale === 'de' ? 'Zurück' : 'Back'}
-              </Text>
-            </Pressable>
             <Text style={[styles.title, isDark && { color: '#F5F5F5' }]}>{t('booksScreen.title')}</Text>
             <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>{t('booksScreen.subtitle')}</Text>
           </View>
@@ -121,6 +111,17 @@ export default function BooksScreen() {
           );
         }}
       />
+      <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+        <LiquidGlassIconButton
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          icon="arrow-back"
+          size={42}
+          iconSize={22}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -129,8 +130,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   list: { padding: 20, paddingBottom: 100 },
-  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 16 },
-  backText: { fontSize: 17, color: '#171717', fontWeight: '500' },
+  floatingBack: { position: 'absolute', left: 20, zIndex: 10 },
   header: { marginBottom: 20 },
   title: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, color: '#171717' },
   subtitle: { fontSize: 15, color: '#737373', marginTop: 4 },

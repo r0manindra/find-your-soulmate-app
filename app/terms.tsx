@@ -1,16 +1,18 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
+import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useSettingsStore } from '@/src/store/settings-store';
 
 export default function TermsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
   const locale = useSettingsStore((s) => s.locale);
   const isDE = locale === 'de';
 
@@ -19,20 +21,7 @@ export default function TermsScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.back();
-          }}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={24} color={textColor} />
-          <Text style={[styles.backText, { color: textColor }]}>
-            {isDE ? 'Zurück' : 'Back'}
-          </Text>
-        </Pressable>
-
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 58 }]} showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: textColor }]}>
           {isDE ? 'Nutzungsbedingungen' : 'Terms of Service'}
         </Text>
@@ -182,6 +171,17 @@ export default function TermsScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+        <LiquidGlassIconButton
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          icon="arrow-back"
+          size={42}
+          iconSize={22}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -190,8 +190,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 60 },
-  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 16 },
-  backText: { fontSize: 17, fontWeight: '500' },
+  floatingBack: { position: 'absolute', left: 20, zIndex: 10 },
   title: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5, marginBottom: 4 },
   lastUpdated: { fontSize: 13, marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '700', letterSpacing: -0.2, marginTop: 24, marginBottom: 8 },

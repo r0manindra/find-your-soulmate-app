@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -127,7 +128,6 @@ export default function CoachScreen() {
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       () => {
         setKeyboardVisible(true);
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       }
     );
     const hideSub = Keyboard.addListener(
@@ -147,8 +147,16 @@ export default function CoachScreen() {
     setChatInputFocused(false);
   }, [setChatInputFocused]);
 
-  // When tab bar is hidden (input focused + keyboard visible), use minimal bottom padding
-  const inputBottomPadding = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight;
+  // Animated bottom padding — smooth transition when keyboard opens/closes
+  const inputBottomPaddingValue = useSharedValue(tabBarHeight);
+  useEffect(() => {
+    const target = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight;
+    inputBottomPaddingValue.value = withTiming(target, { duration: 250 });
+  }, [isInputFocused, keyboardVisible, tabBarHeight, insets.bottom]);
+
+  const animatedInputWrapperStyle = useAnimatedStyle(() => ({
+    marginBottom: inputBottomPaddingValue.value,
+  }));
 
   // Ensure active conversation always exists
   const activeConvId = useChatHistoryStore((s) => s.activeConversationId);
@@ -267,7 +275,7 @@ export default function CoachScreen() {
   // Scroll to bottom when messages change
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
     }
   }, [messages.length]);
 
@@ -300,7 +308,7 @@ export default function CoachScreen() {
     <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         {/* Header with character selector */}
@@ -395,7 +403,6 @@ export default function CoachScreen() {
           renderItem={renderMessage}
           contentContainerStyle={styles.messageList}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListHeaderComponent={
             messages.length <= 1 ? (
               <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
@@ -424,7 +431,7 @@ export default function CoachScreen() {
         />
 
         {/* Floating Glass Input */}
-        <View style={[styles.floatingInputWrapper, { marginBottom: inputBottomPadding }]}>
+        <Animated.View style={[styles.floatingInputWrapper, animatedInputWrapperStyle]}>
           <View style={styles.floatingInputOuter}>
             <BlurView
               intensity={isDark ? 40 : 80}
@@ -476,7 +483,7 @@ export default function CoachScreen() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Voice Coach Modal */}
         <VoiceCoachModal

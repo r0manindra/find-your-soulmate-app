@@ -318,45 +318,9 @@ export default function ChapterDetailScreen() {
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: 58 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with chapter nav */}
-        <View style={styles.header}>
-          {/* Spacer where back button used to be — now floating */}
-          <View style={{ width: 40 }} />
-          <View style={styles.chapterNav}>
-            {prevChapter ? (
-              <Pressable
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.replace(`/chapter/${prevChapter.id}`);
-                }}
-                style={[styles.chapterNavBtn, isDark && styles.chapterNavBtnDark]}
-              >
-                <Ionicons name="chevron-back" size={16} color="#E8435A" />
-                <Text style={styles.chapterNavText} numberOfLines={1}>
-                  {prevChapter.phase === 0 ? prevChapter.title[locale] : prevChapter.id}
-                </Text>
-              </Pressable>
-            ) : null}
-            {nextChapterNav ? (
-              <Pressable
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.replace(`/chapter/${nextChapterNav.id}`);
-                }}
-                style={[styles.chapterNavBtn, isDark && styles.chapterNavBtnDark]}
-              >
-                <Text style={styles.chapterNavText} numberOfLines={1}>
-                  {nextChapterNav.phase === 0 ? nextChapterNav.title[locale] : nextChapterNav.id}
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color="#E8435A" />
-              </Pressable>
-            ) : null}
-          </View>
-        </View>
-
         {/* Chapter intro */}
         <LinearGradient
           colors={['#E8435A', '#FF7854']}
@@ -612,6 +576,32 @@ export default function ChapterDetailScreen() {
         />
       </View>
 
+      {/* Floating chapter nav buttons */}
+      <View style={[styles.floatingNav, { top: insets.top + 8 }]}>
+        {prevChapter ? (
+          <LiquidGlassIconButton
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.replace(`/chapter/${prevChapter.id}`);
+            }}
+            icon="chevron-back"
+            size={36}
+            iconSize={18}
+          />
+        ) : null}
+        {nextChapterNav ? (
+          <LiquidGlassIconButton
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.replace(`/chapter/${nextChapterNav.id}`);
+            }}
+            icon="chevron-forward"
+            size={36}
+            iconSize={18}
+          />
+        ) : null}
+      </View>
+
       {/* Floating "Ask Coach" button */}
       <Pressable
         onPress={() => {
@@ -773,44 +763,19 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 120 },
   errorText: { fontSize: 16, color: '#737373', textAlign: 'center', marginTop: 40 },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
   // Floating liquid glass back button
   floatingBack: {
     position: 'absolute',
     left: 20,
     zIndex: 10,
   },
-
-  // Chapter nav (inline in header)
-  chapterNav: {
+  // Floating chapter nav buttons (top-right)
+  floatingNav: {
+    position: 'absolute',
+    right: 20,
+    zIndex: 10,
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
-  },
-  chapterNavBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: 'rgba(232,67,90,0.08)',
-  },
-  chapterNavBtnDark: {
-    backgroundColor: 'rgba(232,67,90,0.15)',
-  },
-  chapterNavText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#E8435A',
   },
 
   // Intro card

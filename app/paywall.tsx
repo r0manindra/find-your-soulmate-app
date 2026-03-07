@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/components/useColorScheme';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
+import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import * as purchases from '@/src/services/purchases';
@@ -50,6 +51,7 @@ export default function PaywallScreen() {
   const [loading, setLoading] = useState(false);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
   const [offerings, setOfferings] = useState<TieredOfferings | null>(null);
 
   useEffect(() => {
@@ -166,12 +168,7 @@ export default function PaywallScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Close button */}
-        <Pressable onPress={() => router.back()} style={[styles.closeButton, isDark && styles.closeButtonDark]}>
-          <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
-        </Pressable>
-
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 58 }]} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <LinearGradient
           colors={['#E8435A', '#FF7854']}
@@ -347,6 +344,17 @@ export default function PaywallScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+      <View style={[styles.floatingClose, { top: insets.top + 8 }]}>
+        <LiquidGlassIconButton
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          icon="close"
+          size={42}
+          iconSize={22}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -355,15 +363,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 40 },
-  closeButton: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center', justifyContent: 'center',
-    alignSelf: 'flex-end', marginBottom: 8,
-  },
-  closeButtonDark: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
+  floatingClose: { position: 'absolute', right: 20, zIndex: 10 },
   hero: {
     borderRadius: 24, padding: 28,
     alignItems: 'center', marginBottom: 20,

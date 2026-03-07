@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, FlatList, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from '@/components/useColorScheme';
+import { LiquidGlassIconButton } from '@/src/presentation/components/ui/liquid-glass-icon-button';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { usePhrasebookStore } from '@/src/store/phrasebook-store';
@@ -28,6 +29,7 @@ export default function PhrasebookScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
   const locale = useSettingsStore((s) => s.locale);
   const isPremium = useAuthStore((s) => s.isPremium);
   const userGender = useUserProfileStore((s) => s.userGender);
@@ -63,17 +65,7 @@ export default function PhrasebookScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
         {/* Category detail header */}
-        <View style={styles.detailHeader}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedCategory(null);
-              setShowSavedOnly(false);
-            }}
-            style={[styles.backButton, isDark && styles.backButtonDark]}
-          >
-            <Ionicons name="chevron-back" size={22} color={isDark ? '#F5F5F5' : '#171717'} />
-          </Pressable>
+        <View style={[styles.detailHeader, { paddingLeft: 62 }]}>
           <View style={styles.detailHeaderText}>
             <Text style={[styles.detailTitle, isDark && styles.detailTitleDark]}>
               {activeCategory.name[locale]}
@@ -82,6 +74,20 @@ export default function PhrasebookScreen() {
               {filteredPhrases.length} {locale === 'de' ? 'Sprüche' : 'phrases'}
             </Text>
           </View>
+        </View>
+
+        {/* Floating back button */}
+        <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+          <LiquidGlassIconButton
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedCategory(null);
+              setShowSavedOnly(false);
+            }}
+            icon="arrow-back"
+            size={42}
+            iconSize={22}
+          />
         </View>
 
         {/* Saved filter toggle */}
@@ -144,22 +150,9 @@ export default function PhrasebookScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: 58 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.back();
-            }}
-            style={[styles.backButton, isDark && styles.backButtonDark]}
-          >
-            <Ionicons name="chevron-back" size={22} color={isDark ? '#F5F5F5' : '#171717'} />
-          </Pressable>
-        </View>
-
         <Animated.View entering={FadeInDown.duration(400)}>
           <Text style={[styles.title, isDark && styles.titleDark]}>
             {t('phrasebook.title')}
@@ -208,6 +201,17 @@ export default function PhrasebookScreen() {
           ))}
         </View>
       </ScrollView>
+      <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+        <LiquidGlassIconButton
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          icon="arrow-back"
+          size={42}
+          iconSize={22}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -216,18 +220,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   safeAreaDark: { backgroundColor: '#171717' },
   content: { padding: 20, paddingBottom: 100 },
-  header: { marginBottom: 8 },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backButtonDark: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
+  floatingBack: { position: 'absolute', left: 20, zIndex: 10 },
   title: {
     fontSize: 34,
     fontWeight: '700',
