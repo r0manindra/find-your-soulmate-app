@@ -24,6 +24,7 @@ interface HeartsStore {
   addBonusHearts: (amount: number) => void;
   getTotalAvailable: () => number;
   claimWelcomeGift: () => void;
+  reset: () => void;
 }
 
 export const useHeartsStore = create<HeartsStore>()(
@@ -99,6 +100,13 @@ export const useHeartsStore = create<HeartsStore>()(
           }));
         }
       },
+
+      reset: () => set({
+        dailyHearts: 5,
+        bonusHearts: 0,
+        lastResetDate: getLocalDateString(),
+        welcomeGiftClaimed: false,
+      }),
 
       getTotalAvailable: () => {
         get().resetIfNewDay();

@@ -13,6 +13,7 @@ interface UIStore {
   setBattleCharacter: (id: string | null) => void;
   incrementBattleMessageCount: () => void;
   resetBattle: () => void;
+  reset: () => void;
 }
 
 export const useUIStore = create<UIStore>()((set) => ({
@@ -27,4 +28,5 @@ export const useUIStore = create<UIStore>()((set) => ({
   setBattleCharacter: (id) => set({ activeBattleCharacterId: id }),
   incrementBattleMessageCount: () => set((s) => ({ battleMessageCount: s.battleMessageCount + 1 })),
   resetBattle: () => set({ activeBattleCharacterId: null, battleMessageCount: 0, activeExerciseMode: null }),
+  reset: () => set({ chatInputFocused: false, activeExerciseMode: null, activeBattleCharacterId: null, battleMessageCount: 0 }),
 }));

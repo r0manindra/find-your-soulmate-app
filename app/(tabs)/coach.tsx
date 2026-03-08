@@ -191,6 +191,10 @@ export default function CoachScreen() {
     marginBottom: inputBottomPaddingValue.value,
   }));
 
+  const animatedScrollFabStyle = useAnimatedStyle(() => ({
+    bottom: inputBottomPaddingValue.value + 60,
+  }));
+
   // Ensure active conversation always exists
   const activeConvId = useChatHistoryStore((s) => s.activeConversationId);
   useEffect(() => {
@@ -279,9 +283,8 @@ export default function CoachScreen() {
     setIsLoading(true);
 
     try {
-      if (canSpend(HEART_COSTS.AI_MESSAGE)) {
-        spendHearts(HEART_COSTS.AI_MESSAGE);
-      }
+      const shouldSpend = canSpend(HEART_COSTS.AI_MESSAGE);
+      if (shouldSpend) spendHearts(HEART_COSTS.AI_MESSAGE);
       const context = buildJourneyContext();
       const data = await api.sendCoachMessage(
         text,
@@ -298,7 +301,8 @@ export default function CoachScreen() {
       };
       chatStore.addMessage(convId, aiMessage);
     } catch {
-      // ignore errors for score message
+      // Refund hearts on error
+      useHeartsStore.getState().addBonusHearts(HEART_COSTS.AI_MESSAGE);
     } finally {
       setIsLoading(false);
       resetBattle();
@@ -390,6 +394,10 @@ export default function CoachScreen() {
       // Auto-logout on expired token
       if (err?.status === 401) {
         useAuthStore.getState().logout();
+      }
+      // Refund hearts on error — backend no longer deducts on failure either
+      if (isLoggedIn && err?.status !== 429) {
+        useHeartsStore.getState().addBonusHearts(HEART_COSTS.AI_MESSAGE);
       }
       const errorMsg = err?.status === 429
         ? t('coach.limitReached')
@@ -680,13 +688,15 @@ export default function CoachScreen() {
 
         {/* Scroll-to-bottom FAB */}
         {showScrollFab && (
-          <Pressable
-            onPress={scrollToBottom}
-            style={[styles.scrollFab, isDark && styles.scrollFabDark]}
-            hitSlop={8}
-          >
-            <Ionicons name="chevron-down" size={20} color={isDark ? '#F5F5F5' : '#525252'} />
-          </Pressable>
+          <Animated.View style={[styles.scrollFab, isDark && styles.scrollFabDark, animatedScrollFabStyle]}>
+            <Pressable
+              onPress={scrollToBottom}
+              hitSlop={8}
+              style={styles.scrollFabInner}
+            >
+              <Ionicons name="chevron-down" size={20} color={isDark ? '#F5F5F5' : '#525252'} />
+            </Pressable>
+          </Animated.View>
         )}
 
         {/* Floating Glass Input */}
@@ -938,10 +948,9 @@ const styles = StyleSheet.create({
   timestampText: { fontSize: 11, color: '#A3A3A3', fontWeight: '500' },
   timestampTextDark: { color: '#737373' },
   scrollFab: {
-    position: 'absolute', bottom: 80, right: 20, zIndex: 10,
+    position: 'absolute', right: 20, zIndex: 10,
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12, shadowRadius: 6, elevation: 4,
     borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(0,0,0,0.08)',
@@ -949,6 +958,10 @@ const styles = StyleSheet.create({
   scrollFabDark: {
     backgroundColor: '#333',
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+  scrollFabInner: {
+    width: 36, height: 36, borderRadius: 18,
+    alignItems: 'center', justifyContent: 'center',
   },
 
   // Footer container for welcome + battle card

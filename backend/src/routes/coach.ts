@@ -102,47 +102,32 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Hearts-based rate limiting (all tiers now go through hearts check)
+    // Hearts-based rate limiting — check availability first, deduct AFTER successful AI response
     const today = new Date().toISOString().split('T')[0];
     const heartCost = env.heartCostMessage;
 
-    {
-      const maxDaily = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM'
-        ? env.proPlusHeartsPerDay
-        : user.subscriptionStatus === 'PRO'
-          ? env.proHeartsPerDay
-          : env.freeHeartsPerDay;
-      let dailyUsed = user.dailyHeartsUsed;
+    const maxDaily = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM'
+      ? env.proPlusHeartsPerDay
+      : user.subscriptionStatus === 'PRO'
+        ? env.proHeartsPerDay
+        : env.freeHeartsPerDay;
+    let dailyUsed = user.dailyHeartsUsed;
 
-      if (user.lastHeartsResetDate !== today) {
-        dailyUsed = 0;
-      }
+    if (user.lastHeartsResetDate !== today) {
+      dailyUsed = 0;
+    }
 
-      const dailyRemaining = Math.max(0, maxDaily - dailyUsed);
-      const totalAvailable = dailyRemaining + user.bonusHearts;
+    const dailyRemaining = Math.max(0, maxDaily - dailyUsed);
+    const totalAvailable = dailyRemaining + user.bonusHearts;
 
-      if (totalAvailable < heartCost) {
-        res.status(429).json({
-          error: 'Not enough hearts',
-          heartsRemaining: totalAvailable,
-          resetAt: 'midnight',
-          upgrade: true,
-        });
-        return;
-      }
-
-      // Deduct hearts
-      const dailyDeduct = Math.min(dailyRemaining, heartCost);
-      const bonusDeduct = heartCost - dailyDeduct;
-
-      await prisma.user.update({
-        where: { id: req.userId },
-        data: {
-          dailyHeartsUsed: dailyUsed + dailyDeduct,
-          lastHeartsResetDate: today,
-          bonusHearts: Math.max(0, user.bonusHearts - bonusDeduct),
-        },
+    if (totalAvailable < heartCost) {
+      res.status(429).json({
+        error: 'Not enough hearts',
+        heartsRemaining: totalAvailable,
+        resetAt: 'midnight',
+        upgrade: true,
       });
+      return;
     }
 
     // Legacy: keep dailyCoachMessages counter in sync
@@ -168,14 +153,17 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       ? buildContextAwarePrompt(characterId, context as UserJourneyContext, exerciseMode as ExerciseModeId | undefined)
       : getCharacterPrompt(characterId);
 
-    // Get AI response
+    // Get AI response — hearts are NOT deducted yet, only after success
     const aiResponse = await getCoachResponse(
       history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       message,
       systemPrompt
     );
 
-    // Save both messages
+    // Deduct hearts + save messages in one transaction (only on success)
+    const dailyDeduct = Math.min(dailyRemaining, heartCost);
+    const bonusDeduct = heartCost - dailyDeduct;
+
     await prisma.$transaction([
       prisma.chatMessage.create({
         data: {
@@ -194,20 +182,18 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
       prisma.user.update({
         where: { id: req.userId },
         data: {
+          dailyHeartsUsed: dailyUsed + dailyDeduct,
+          lastHeartsResetDate: today,
+          bonusHearts: Math.max(0, user.bonusHearts - bonusDeduct),
           dailyCoachMessages: dailyCount + 1,
           chatMessageCount: { increment: 1 },
         },
       }),
     ]);
 
-    // Calculate remaining hearts for response
-    const maxDaily = user.subscriptionStatus === 'PRO_PLUS' || user.subscriptionStatus === 'PREMIUM'
-      ? env.proPlusHeartsPerDay
-      : user.subscriptionStatus === 'PRO'
-        ? env.proHeartsPerDay
-        : env.freeHeartsPerDay;
+    // Calculate remaining hearts for response (reuse maxDaily from above)
     const heartsUsed = user.lastHeartsResetDate === today ? user.dailyHeartsUsed + heartCost : heartCost;
-    const heartsRemaining = Math.max(0, maxDaily - heartsUsed) + Math.max(0, user.bonusHearts - Math.max(0, heartCost - Math.max(0, maxDaily - (user.lastHeartsResetDate === today ? user.dailyHeartsUsed : 0))));
+    const heartsRemaining = Math.max(0, maxDaily - heartsUsed) + Math.max(0, user.bonusHearts - bonusDeduct);
 
     res.json({
       response: aiResponse,

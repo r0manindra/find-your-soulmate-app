@@ -15,7 +15,9 @@ import '@/src/i18n/config';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useSettingsStore } from '@/src/store/settings-store';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
+import i18n from '@/src/i18n/config';
 import { achievements } from '@/src/data/content/achievements';
 import { AchievementModal } from '@/src/presentation/components/celebration/achievement-modal';
 import * as api from '@/src/services/api';
@@ -176,23 +178,22 @@ function ProgressSync() {
  * (solid #E8435A + white icon at full opacity/scale) so the handoff is invisible.
  * Then it subtly enhances (gradient, glow, text) and exits cleanly.
  */
-function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: () => void }) {
-  // Start matching native splash exactly: icon visible, solid background
+function AnimatedSplash({ onFinish, onReady, appReady }: { onFinish: () => void; onReady: () => void; appReady: boolean }) {
+  // Start matching native splash exactly: icon visible at same size, solid red background
   const gradientProgress = useSharedValue(0);   // 0 = solid red, 1 = gradient visible
   const glowOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
   const textTranslateY = useSharedValue(10);
-  const iconScale = useSharedValue(2);           // Start at 2 — matches native splash (200pt icon / 100pt SVG)
+  const iconScale = useSharedValue(1);           // Start at 1 — matches native splash exactly (no size change)
   const overlayOpacity = useSharedValue(1);
+  const exitStarted = useRef(false);
 
+  // Phase 1-3: entrance animations (run immediately)
   useEffect(() => {
     // Signal ready immediately — native splash fades fast (250ms) into this identical view
     onReady();
 
-    // Phase 0 (0–600ms): Icon smoothly scales down from native splash size (200pt) to 100pt
-    iconScale.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-
-    // Phase 1 (0–400ms): Morph solid red → gradient. Barely noticeable.
+    // Phase 1 (100–500ms): Morph solid red → gradient. Subtle enhancement.
     gradientProgress.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
 
     // Phase 2 (300–800ms): Subtle glow ring appears behind icon
@@ -201,17 +202,23 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
     // Phase 3 (400–900ms): Brand text slides up
     textOpacity.value = withDelay(400, withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }));
     textTranslateY.value = withDelay(400, withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
+  }, []);
 
-    // Phase 4 (1800ms): Everything exits together — unified, not staggered
-    const exitStart = 1800;
-    iconScale.value = withDelay(exitStart, withTiming(1.06, { duration: 300, easing: Easing.out(Easing.quad) }));
-    glowOpacity.value = withDelay(exitStart, withTiming(0, { duration: 350 }));
-    textOpacity.value = withDelay(exitStart, withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) }));
-    textTranslateY.value = withDelay(exitStart, withTiming(-3, { duration: 300, easing: Easing.in(Easing.cubic) }));
-    overlayOpacity.value = withDelay(exitStart + 200, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, () => {
+  // Phase 4: exit — only starts once appReady (stores hydrated, routing settled)
+  useEffect(() => {
+    if (!appReady || exitStarted.current) return;
+    exitStarted.current = true;
+
+    // Small delay to let the destination screen render beneath before we fade out
+    const exitDelay = 200;
+    iconScale.value = withDelay(exitDelay, withTiming(1.06, { duration: 300, easing: Easing.out(Easing.quad) }));
+    glowOpacity.value = withDelay(exitDelay, withTiming(0, { duration: 350 }));
+    textOpacity.value = withDelay(exitDelay, withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) }));
+    textTranslateY.value = withDelay(exitDelay, withTiming(-3, { duration: 300, easing: Easing.in(Easing.cubic) }));
+    overlayOpacity.value = withDelay(exitDelay + 200, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, () => {
       runOnJS(onFinish)();
     }));
-  }, []);
+  }, [appReady]);
 
   const iconStyle = useAnimatedStyle(() => ({
     transform: [{ scale: iconScale.value }],
@@ -253,7 +260,7 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
           <View style={splashStyles.iconWrapper}>
             <Animated.View style={[splashStyles.glowRing, glowStyle]} />
             <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-              <CharismoIcon size={100} color="#fff" />
+              <CharismoIcon size={200} color="#fff" />
             </Animated.View>
           </View>
           <Animated.Text style={[splashStyles.brandText, textStyle]}>
@@ -285,9 +292,9 @@ const splashStyles = StyleSheet.create({
   },
   glowRing: {
     position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
   iconContainer: {
@@ -309,6 +316,7 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
   const [showSplash, setShowSplash] = useState(true);
+  const [storesHydrated, setStoresHydrated] = useState(false);
 
   useEffect(() => {
     if (error) throw error;
@@ -323,6 +331,28 @@ export default function RootLayout() {
       }).catch(() => { /* RevenueCat not configured yet */ });
     }
   }, [loaded]);
+
+  // Wait for stores to hydrate so routing is settled before splash exits
+  useEffect(() => {
+    let cancelled = false;
+    const check = () => {
+      if (!cancelled &&
+        useUserProfileStore.persist.hasHydrated() &&
+        useProgressStore.persist.hasHydrated() &&
+        useSettingsStore.persist.hasHydrated()
+      ) {
+        // Small delay to let OnboardingGate redirect if needed
+        setTimeout(() => {
+          if (!cancelled) setStoresHydrated(true);
+        }, 100);
+      }
+    };
+    check();
+    const unsub1 = useUserProfileStore.persist.onFinishHydration(check);
+    const unsub2 = useProgressStore.persist.onFinishHydration(check);
+    const unsub3 = useSettingsStore.persist.onFinishHydration(check);
+    return () => { cancelled = true; unsub1(); unsub2(); unsub3(); };
+  }, []);
 
   // Don't hide native splash until animated overlay is mounted
   const handleSplashReady = useCallback(() => {
@@ -340,10 +370,25 @@ export default function RootLayout() {
         <AnimatedSplash
           onReady={handleSplashReady}
           onFinish={() => setShowSplash(false)}
+          appReady={storesHydrated}
         />
       )}
     </View>
   );
+}
+
+/** Syncs i18n language with the persisted settings store locale on startup */
+function I18nSync() {
+  const locale = useSettingsStore((s) => s.locale);
+
+  useEffect(() => {
+    // After settings store rehydrates, sync i18n to the user's saved language
+    if (i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale]);
+
+  return null;
 }
 
 /** Redirects to onboarding if user hasn't completed it */
@@ -417,6 +462,7 @@ function RootLayoutNav() {
             }}
           />
         </Stack>
+        <I18nSync />
         <OnboardingGate />
         <AchievementListener />
         <ProgressSync />

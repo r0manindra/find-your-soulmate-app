@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +14,7 @@ import { HabitCalendar } from '@/src/presentation/components/habits/habit-calend
 import { WeeklyReview } from '@/src/presentation/components/habits/weekly-review';
 import { useHabitStore } from '@/src/store/habit-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useAuthStore } from '@/src/store/auth-store';
 import { createHabitEvent } from '@/src/services/calendar';
 import { getTopNudge } from '@/src/core/habit-nudges';
 import type { Habit } from '@/src/core/entities/habit-types';
@@ -153,9 +155,14 @@ function groupByTimeSlot(habits: Habit[]): Record<TimeSlotKey, Habit[]> {
   return groups;
 }
 
+const FREE_HABIT_LIMIT = 5;
+
 export default function HabitsScreen() {
+  const { t } = useTranslation();
   const locale = useSettingsStore((s) => s.locale);
   const characterId = useSettingsStore((s) => s.selectedCharacterId);
+  const habitNudgesEnabled = useSettingsStore((s) => s.habitNudgesEnabled);
+  const isPremium = useAuthStore((s) => s.isPremium);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
@@ -211,7 +218,7 @@ export default function HabitsScreen() {
   const timeGroups = useMemo(() => groupByTimeSlot(habitsForDate), [habitsForDate]);
 
   const nudge = useMemo(() => {
-    if (nudgeDismissed || activeHabits.length === 0 || !isToday) return null;
+    if (!habitNudgesEnabled || nudgeDismissed || activeHabits.length === 0 || !isToday) return null;
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     const contexts = activeHabits.map((h) => {
       const streak = getStreak(h.id);
@@ -310,7 +317,7 @@ export default function HabitsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.screenTitle, isDark && styles.textDark]}>
-          Habits
+          {t('habits.title')}
         </Text>
 
         {/* Weekly Calendar */}
@@ -406,11 +413,21 @@ export default function HabitsScreen() {
         })}
 
         {/* Add Habit Button */}
-        <BrandButton
-          title={locale === 'de' ? 'Habit hinzufügen' : 'Add Habit'}
-          variant="secondary"
-          onPress={openModal}
-        />
+        {!isPremium && activeHabits.length >= FREE_HABIT_LIMIT ? (
+          <GlassCard style={styles.limitCard}>
+            <Text style={[styles.limitText, isDark && styles.textMutedDark]}>
+              {locale === 'de'
+                ? 'Limit von 5 Habits erreicht. Upgrade für unbegrenzte Habits!'
+                : 'Limit of 5 habits reached. Upgrade for unlimited habits!'}
+            </Text>
+          </GlassCard>
+        ) : (
+          <BrandButton
+            title={locale === 'de' ? 'Habit hinzufügen' : 'Add Habit'}
+            variant="secondary"
+            onPress={openModal}
+          />
+        )}
 
         {/* Weekly Review */}
         <WeeklyReview locale={locale} isDark={isDark} />
@@ -519,4 +536,10 @@ const styles = StyleSheet.create({
     lineHeight: 22, marginBottom: 24,
   },
   emptyButton: { width: '100%' },
+
+  // Habit limit
+  limitCard: { marginBottom: 16 },
+  limitText: {
+    fontSize: 14, color: '#737373', textAlign: 'center', lineHeight: 20,
+  },
 });

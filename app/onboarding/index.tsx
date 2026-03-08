@@ -18,12 +18,13 @@ import { OptionCard } from '@/src/presentation/components/onboarding/option-card
 import { ProgressDots } from '@/src/presentation/components/onboarding/progress-dots';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import i18n from '@/src/i18n/config';
 import { getPersonalization } from '@/src/core/personalization';
 import { getCharacter } from '@/src/data/content/coach-characters';
 import { chapters, phases } from '@/src/data/content/chapters';
 import type { SkillLevel, Goal, UserGender } from '@/src/store/user-profile-store';
 
-const TOTAL_PAGES = 5;
+const TOTAL_PAGES = 6;
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
@@ -36,6 +37,7 @@ export default function OnboardingScreen() {
   const isDark = colorScheme === 'dark';
 
   const locale = useSettingsStore((s) => s.locale);
+  const setLocale = useSettingsStore((s) => s.setLocale);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const {
@@ -96,10 +98,18 @@ export default function OnboardingScreen() {
     return ids.map((id) => chapters.find((c) => c.id === id)).filter((c): c is typeof chapters[number] => !!c);
   }, []);
 
+  const handleLanguageSelect = useCallback((lang: 'en' | 'de') => {
+    setLocale(lang);
+    i18n.changeLanguage(lang);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTimeout(advance, 400);
+  }, [setLocale, advance]);
+
   const renderPage = useCallback(({ item }: { item: number }) => {
     switch (item) {
-      case 0: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} isDark={isDark} />;
-      case 1: return (
+      case 0: return <LanguagePage locale={locale} onSelect={handleLanguageSelect} isDark={isDark} width={width} />;
+      case 1: return <WelcomePage locale={locale} t={t} onAdvance={advance} onSkip={handleSkip} isDark={isDark} />;
+      case 2: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -119,7 +129,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 2: return (
+      case 3: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -139,7 +149,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 3: return (
+      case 4: return (
         <QuestionPage
           locale={locale}
           isDark={isDark}
@@ -160,7 +170,7 @@ export default function OnboardingScreen() {
           width={width}
         />
       );
-      case 4: return (
+      case 5: return (
         <SummaryPage
           locale={locale}
           isDark={isDark}
@@ -177,11 +187,11 @@ export default function OnboardingScreen() {
   }, [
     locale, t, width, g, isDark, userGender, skillLevel, goal,
     recommendedCharacter, highlightChapters,
-    advance, handleSkip, handleComplete,
+    advance, handleSkip, handleComplete, handleLanguageSelect,
     setUserGender, setSkillLevel, setGoal,
   ]);
 
-  const pages = useMemo(() => [0, 1, 2, 3, 4], []);
+  const pages = useMemo(() => [0, 1, 2, 3, 4, 5], []);
 
   return (
     <View style={[styles.screen, isDark && styles.screenDark, { paddingTop: insets.top }]}>
@@ -221,6 +231,49 @@ export default function OnboardingScreen() {
           index,
         })}
       />
+    </View>
+  );
+}
+
+/* ---------- Language Page ---------- */
+
+function LanguagePage({
+  locale,
+  onSelect,
+  isDark,
+  width,
+}: {
+  locale: string;
+  onSelect: (lang: 'en' | 'de') => void;
+  isDark: boolean;
+  width: number;
+}) {
+  return (
+    <View style={[styles.page, { width }]}>
+      <ScrollView
+        contentContainerStyle={styles.pageContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeInDown.duration(500)} style={styles.questionHeader}>
+          <Text style={[styles.questionTitle, isDark && styles.textLight]}>Choose your language</Text>
+          <Text style={[styles.questionSubtitle, isDark && styles.textMutedDark]}>Wähle deine Sprache</Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.optionsList}>
+          <OptionCard
+            emoji="🇬🇧"
+            label="English"
+            selected={locale === 'en'}
+            onSelect={() => onSelect('en')}
+          />
+          <OptionCard
+            emoji="🇩🇪"
+            label="Deutsch"
+            selected={locale === 'de'}
+            onSelect={() => onSelect('de')}
+          />
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }

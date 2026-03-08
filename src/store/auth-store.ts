@@ -75,7 +75,7 @@ export const useAuthStore = create<AuthStore>()(
       setPdfAccess: (has) => set({ hasPdfAccess: has }),
       setChapterUnlock: (has) => set({ hasChapterUnlock: has }),
 
-      logout: () =>
+      logout: () => {
         set({
           user: null,
           isLoggedIn: false,
@@ -85,7 +85,22 @@ export const useAuthStore = create<AuthStore>()(
           subscriptionTier: 'free',
           hasPdfAccess: false,
           hasChapterUnlock: false,
-        }),
+        });
+        // Reset all other stores so new account starts fresh
+        // Use require() to avoid circular imports (hearts-store & habit-store import auth-store)
+        const { useProgressStore } = require('./progress-store');
+        const { useHeartsStore } = require('./hearts-store');
+        const { useUserProfileStore } = require('./user-profile-store');
+        const { useChatHistoryStore } = require('./chat-history-store');
+        const { useHabitStore } = require('./habit-store');
+        const { useUIStore } = require('./ui-store');
+        useProgressStore.getState().reset();
+        useHeartsStore.getState().reset();
+        useUserProfileStore.getState().resetProfile();
+        useChatHistoryStore.getState().reset();
+        useHabitStore.getState().reset();
+        useUIStore.getState().reset();
+      },
     }),
     {
       name: 'auth-storage',

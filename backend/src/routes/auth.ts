@@ -12,6 +12,14 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   name: z.string().min(1).optional(),
+  birthDate: z.string().refine((val) => {
+    const date = new Date(val);
+    if (isNaN(date.getTime())) return false;
+    const now = new Date();
+    const age = now.getFullYear() - date.getFullYear() -
+      (now < new Date(now.getFullYear(), date.getMonth(), date.getDate()) ? 1 : 0);
+    return age >= 16;
+  }, { message: 'You must be at least 16 years old' }),
 });
 
 const loginSchema = z.object({
@@ -41,7 +49,7 @@ function userResponse(user: { id: string; email: string; name: string | null; su
 // POST /api/auth/register
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = registerSchema.parse(req.body);
+    const { email, password, name, birthDate } = registerSchema.parse(req.body);
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -51,7 +59,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { email, passwordHash, name, bonusHearts: 10 },
+      data: { email, passwordHash, name, birthDate: new Date(birthDate), bonusHearts: 10 },
     });
 
     const token = generateToken(user.id);

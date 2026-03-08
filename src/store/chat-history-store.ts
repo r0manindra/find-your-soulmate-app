@@ -25,6 +25,7 @@ interface ChatHistoryStore {
   deleteConversation: (id: string) => void;
   getActiveConversation: () => Conversation | undefined;
   getLatestConversationForCharacter: (characterId: string) => Conversation | undefined;
+  reset: () => void;
 }
 
 export const useChatHistoryStore = create<ChatHistoryStore>()(
@@ -105,6 +106,8 @@ export const useChatHistoryStore = create<ChatHistoryStore>()(
       getLatestConversationForCharacter: (characterId) => {
         return get().conversations.find((c) => c.characterId === characterId);
       },
+
+      reset: () => set({ conversations: [], activeConversationId: null }),
     }),
     {
       name: 'chat-history-storage',

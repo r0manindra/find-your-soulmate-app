@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Habit, HabitCompletion, HabitTimeSlot } from '@/src/core/entities/habit-types';
+import { useAuthStore } from './auth-store';
+
+const FREE_HABIT_LIMIT = 5;
 
 function getLocalDateString(date: Date = new Date()): string {
   const y = date.getFullYear();
@@ -33,6 +36,7 @@ interface HabitStore {
   getTodayTotalCount: () => number;
   setHabitSchedule: (habitId: string, time: HabitTimeSlot, days: number[], specificTime?: string) => void;
   getHabitsForDate: (date: Date) => Habit[];
+  reset: () => void;
 }
 
 export const useHabitStore = create<HabitStore>()(
@@ -44,6 +48,8 @@ export const useHabitStore = create<HabitStore>()(
       addHabitFromPreset: (presetId, emoji, title, chapterId) => {
         const { habits } = get();
         if (habits.some((h) => h.presetId === presetId && !h.isArchived)) return;
+        const activeCount = habits.filter((h) => !h.isArchived).length;
+        if (!useAuthStore.getState().isPremium && activeCount >= FREE_HABIT_LIMIT) return;
 
         const habit: Habit = {
           id: `habit-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -59,6 +65,8 @@ export const useHabitStore = create<HabitStore>()(
       },
 
       addCustomHabit: (emoji, titleText) => {
+        const activeCount = get().habits.filter((h) => !h.isArchived).length;
+        if (!useAuthStore.getState().isPremium && activeCount >= FREE_HABIT_LIMIT) return;
         const habit: Habit = {
           id: `habit-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           title: { en: titleText, de: titleText },
@@ -214,6 +222,8 @@ export const useHabitStore = create<HabitStore>()(
             h.id === habitId ? { ...h, scheduledTime: time, scheduledDays: days, specificTime: specificTime || undefined } : h
           ),
         })),
+
+      reset: () => set({ habits: [], completions: [] }),
 
       getHabitsForDate: (date) => {
         const dayOfWeek = date.getDay();

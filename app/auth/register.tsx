@@ -11,6 +11,7 @@ import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useHeartsStore } from '@/src/store/hearts-store';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { useOAuth } from '@/src/hooks/useOAuth';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
@@ -24,6 +25,9 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -48,12 +52,31 @@ export default function RegisterScreen() {
       setFormError(locale === 'de' ? 'Passwort muss mindestens 8 Zeichen lang sein' : 'Password must be at least 8 characters');
       return;
     }
+    // Validate date of birth
+    const day = parseInt(birthDay, 10);
+    const month = parseInt(birthMonth, 10);
+    const year = parseInt(birthYear, 10);
+    if (!day || !month || !year || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
+      setFormError(locale === 'de' ? 'Bitte gib ein gültiges Geburtsdatum ein' : 'Please enter a valid date of birth');
+      return;
+    }
+    const birthDate = new Date(year, month - 1, day);
+    const now = new Date();
+    const age = now.getFullYear() - birthDate.getFullYear() -
+      (now < new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate()) ? 1 : 0);
+    if (age < 16) {
+      setFormError(locale === 'de' ? 'Du musst mindestens 16 Jahre alt sein' : 'You must be at least 16 years old');
+      return;
+    }
+    const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     setFormError('');
     setOAuthError('');
     setLoading(true);
     try {
-      const { user } = await api.register(email.trim(), password, name.trim() || undefined);
+      const { user } = await api.register(email.trim(), password, name.trim() || undefined, birthDateStr);
       setUser(user);
+      // Ensure onboarding triggers for new account
+      useUserProfileStore.getState().resetProfile();
       // Welcome gift: 10 bonus hearts for new users
       useHeartsStore.getState().claimWelcomeGift();
       loginRevenueCat(user.id).catch(() => {});
@@ -135,6 +158,39 @@ export default function RegisterScreen() {
                   autoComplete="new-password"
                 />
 
+                <Text style={[styles.dobLabel, isDark && styles.dobLabelDark]}>
+                  {locale === 'de' ? 'Geburtsdatum' : 'Date of Birth'}
+                </Text>
+                <View style={styles.dobRow}>
+                  <TextInput
+                    style={[styles.input, styles.dobInput, isDark && styles.inputDark]}
+                    placeholder={locale === 'de' ? 'TT' : 'DD'}
+                    placeholderTextColor="#A3A3A3"
+                    value={birthDay}
+                    onChangeText={(t) => setBirthDay(t.replace(/[^0-9]/g, '').slice(0, 2))}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                  <TextInput
+                    style={[styles.input, styles.dobInput, isDark && styles.inputDark]}
+                    placeholder={locale === 'de' ? 'MM' : 'MM'}
+                    placeholderTextColor="#A3A3A3"
+                    value={birthMonth}
+                    onChangeText={(t) => setBirthMonth(t.replace(/[^0-9]/g, '').slice(0, 2))}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                  <TextInput
+                    style={[styles.input, styles.dobInputYear, isDark && styles.inputDark]}
+                    placeholder={locale === 'de' ? 'JJJJ' : 'YYYY'}
+                    placeholderTextColor="#A3A3A3"
+                    value={birthYear}
+                    onChangeText={(t) => setBirthYear(t.replace(/[^0-9]/g, '').slice(0, 4))}
+                    keyboardType="number-pad"
+                    maxLength={4}
+                  />
+                </View>
+
                 <BrandButton
                   title={loading
                     ? (locale === 'de' ? 'Konto wird erstellt...' : 'Creating account...')
@@ -202,6 +258,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     color: '#F5F5F5',
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+  dobLabel: {
+    fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: -4,
+  },
+  dobLabelDark: { color: '#A3A3A3' },
+  dobRow: {
+    flexDirection: 'row', gap: 8,
+  },
+  dobInput: {
+    flex: 1, textAlign: 'center',
+  },
+  dobInputYear: {
+    flex: 1.5, textAlign: 'center',
   },
   switchButton: { marginTop: 24, alignItems: 'center' },
   switchText: { fontSize: 15, color: '#737373' },

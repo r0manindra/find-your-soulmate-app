@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TextInput, Pressable, Alert, Linking, Modal, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TextInput, Pressable, Alert, Linking, Modal, Switch, StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const progress = useProgressStore();
-  const { locale, setLocale, themeMode, setThemeMode } = useSettingsStore();
+  const { locale, setLocale, themeMode, setThemeMode, habitNudgesEnabled, setHabitNudgesEnabled } = useSettingsStore();
   const { user, isLoggedIn, isPremium, isProPlus, hasPdfAccess, logout } = useAuthStore();
   const userProfile = useUserProfileStore();
   const colorScheme = useColorScheme();
@@ -368,6 +368,22 @@ export default function ProfileScreen() {
               </Text>
               <Ionicons name="chevron-forward" size={14} color="#A3A3A3" />
             </Pressable>
+          </View>
+
+          <View style={styles.settingDivider} />
+          <View style={styles.settingRow}>
+            <Text style={[styles.settingLabel, isDark && styles.textDark]}>
+              {locale === 'de' ? 'Habit-Erinnerungen' : 'Habit Nudges'}
+            </Text>
+            <Switch
+              value={habitNudgesEnabled}
+              onValueChange={(val) => {
+                setHabitNudgesEnabled(val);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              trackColor={{ false: '#D4D4D4', true: '#E8435A' }}
+              thumbColor="#fff"
+            />
           </View>
 
         {/* Theme Modal */}

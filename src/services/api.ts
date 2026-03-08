@@ -84,13 +84,13 @@ export class ApiError extends Error {
 }
 
 // Auth
-export async function register(email: string, password: string, name?: string) {
+export async function register(email: string, password: string, name?: string, birthDate?: string) {
   const data = await request<{
     token: string;
     user: { id: string; email: string; name: string | null; subscriptionStatus: string };
   }>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify({ email, password, name, birthDate }),
   });
   await setToken(data.token);
   return data;

@@ -13,6 +13,8 @@ interface SettingsStore {
   setThemeMode: (mode: ThemeMode) => void;
   hasSeenExerciseModeHint: boolean;
   setHasSeenExerciseModeHint: (seen: boolean) => void;
+  habitNudgesEnabled: boolean;
+  setHabitNudgesEnabled: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -26,6 +28,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setThemeMode: (mode) => set({ themeMode: mode }),
       hasSeenExerciseModeHint: false,
       setHasSeenExerciseModeHint: (seen) => set({ hasSeenExerciseModeHint: seen }),
+      habitNudgesEnabled: true,
+      setHabitNudgesEnabled: (enabled) => set({ habitNudgesEnabled: enabled }),
     }),
     {
       name: 'settings-storage',

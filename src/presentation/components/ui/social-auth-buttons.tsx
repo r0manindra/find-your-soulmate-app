@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useColorScheme } from '@/components/useColorScheme';
+import { useSettingsStore } from '@/src/store/settings-store';
 import { GlassCard } from './glass-card';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -22,12 +24,14 @@ function SocialButton({
   onPress,
   loading,
   disabled,
+  isDark,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
   loading: boolean;
   disabled: boolean;
+  isDark: boolean;
 }) {
   const scale = useSharedValue(1);
 
@@ -54,8 +58,10 @@ function SocialButton({
     >
       <GlassCard borderRadius={14} padding={14}>
         <View style={styles.socialButtonInner}>
-          <Ionicons name={icon} size={20} color="#171717" style={styles.icon} />
-          <Text style={styles.socialButtonText}>{loading ? 'Signing in...' : label}</Text>
+          <Ionicons name={icon} size={20} color={isDark ? '#F5F5F5' : '#171717'} style={styles.icon} />
+          <Text style={[styles.socialButtonText, isDark && styles.socialButtonTextDark]}>
+            {loading ? 'Signing in...' : label}
+          </Text>
         </View>
       </GlassCard>
     </AnimatedPressable>
@@ -70,6 +76,9 @@ export function SocialAuthButtons({
   googleReady,
 }: SocialAuthButtonsProps) {
   const [appleAvailable, setAppleAvailable] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const locale = useSettingsStore((s) => s.locale);
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
@@ -81,26 +90,28 @@ export function SocialAuthButtons({
     <View style={styles.container}>
       <SocialButton
         icon="logo-google"
-        label="Continue with Google"
+        label={locale === 'de' ? 'Weiter mit Google' : 'Continue with Google'}
         onPress={onGooglePress}
         loading={googleLoading}
         disabled={!googleReady}
+        isDark={isDark}
       />
 
       {appleAvailable && (
         <SocialButton
           icon="logo-apple"
-          label="Continue with Apple"
+          label={locale === 'de' ? 'Weiter mit Apple' : 'Continue with Apple'}
           onPress={onApplePress}
           loading={appleLoading}
           disabled={false}
+          isDark={isDark}
         />
       )}
 
       <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
+        <View style={[styles.dividerLine, isDark && styles.dividerLineDark]} />
+        <Text style={styles.dividerText}>{locale === 'de' ? 'oder' : 'or'}</Text>
+        <View style={[styles.dividerLine, isDark && styles.dividerLineDark]} />
       </View>
     </View>
   );
@@ -128,6 +139,9 @@ const styles = StyleSheet.create({
     color: '#171717',
     letterSpacing: -0.2,
   },
+  socialButtonTextDark: {
+    color: '#F5F5F5',
+  },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -137,6 +151,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: StyleSheet.hairlineWidth,
     backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  dividerLineDark: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   dividerText: {
     marginHorizontal: 16,
