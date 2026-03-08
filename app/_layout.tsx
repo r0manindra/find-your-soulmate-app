@@ -260,7 +260,7 @@ function AnimatedSplash({ onFinish, onReady, appReady }: { onFinish: () => void;
           <View style={splashStyles.iconWrapper}>
             <Animated.View style={[splashStyles.glowRing, glowStyle]} />
             <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-              <CharismoIcon size={200} color="#fff" />
+              <CharismoIcon size={310} color="#fff" />
             </Animated.View>
           </View>
           <Animated.Text style={[splashStyles.brandText, textStyle]}>
@@ -292,9 +292,9 @@ const splashStyles = StyleSheet.create({
   },
   glowRing: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
   iconContainer: {
