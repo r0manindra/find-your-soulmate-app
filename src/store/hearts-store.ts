@@ -37,8 +37,8 @@ export const useHeartsStore = create<HeartsStore>()(
 
       getMaxDailyHearts: () => {
         const tier = useAuthStore.getState().subscriptionTier;
-        if (tier === 'pro_plus') return 100;
-        if (tier === 'pro') return 50;
+        if (tier === 'pro_plus') return 25;
+        if (tier === 'pro') return 15;
         return 5;
       },
 

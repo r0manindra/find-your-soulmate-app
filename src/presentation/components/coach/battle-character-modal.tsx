@@ -47,7 +47,7 @@ export function BattleCharacterModal({ visible, onClose, onSelectCharacter }: Ba
   const handleSelect = (character: BattleCharacter) => {
     if (character.isPremium && !isPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=character');
       onClose();
       return;
     }

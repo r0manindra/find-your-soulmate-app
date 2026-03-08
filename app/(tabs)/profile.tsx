@@ -96,7 +96,7 @@ export default function ProfileScreen() {
 
   const handleDownloadPdf = async () => {
     if (!canAccessPdf) {
-      router.push('/paywall');
+      router.push('/paywall?trigger=chapter');
       return;
     }
     setDownloadingPdf(true);
@@ -153,7 +153,7 @@ export default function ProfileScreen() {
               </View>
             </View>
             {!isPremium && (
-              <Pressable onPress={() => router.push('/paywall')} style={styles.upgradeRow}>
+              <Pressable onPress={() => router.push('/paywall?trigger=general')} style={styles.upgradeRow}>
                 <Ionicons name="sparkles" size={16} color="#E8435A" />
                 <Text style={styles.upgradeText}>
                   {locale === 'de' ? 'Auf Premium upgraden' : 'Upgrade to Premium'}

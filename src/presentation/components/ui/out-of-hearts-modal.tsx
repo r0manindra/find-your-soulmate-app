@@ -85,7 +85,7 @@ export function OutOfHeartsModal({ visible, onClose }: OutOfHeartsModalProps) {
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   onClose();
-                  router.push('/paywall');
+                  router.push('/paywall?trigger=hearts');
                 }}
               />
             ) : (
@@ -95,14 +95,14 @@ export function OutOfHeartsModal({ visible, onClose }: OutOfHeartsModalProps) {
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     onClose();
-                    router.push('/paywall');
+                    router.push('/paywall?trigger=hearts');
                   }}
                 />
                 <Pressable
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     onClose();
-                    router.push('/paywall');
+                    router.push('/paywall?trigger=hearts');
                   }}
                   style={styles.secondaryAction}
                 >

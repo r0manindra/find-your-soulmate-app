@@ -229,7 +229,7 @@ export default function CoachScreen() {
     const char = getCharacter(id);
     if (char.isPremium && !isPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=character');
       setShowCharacterPicker(false);
       return;
     }
@@ -583,7 +583,7 @@ export default function CoachScreen() {
           </Pressable>
         )}
         {isLoggedIn && !isPremium && (
-          <Pressable onPress={() => router.push('/paywall')} style={styles.upgradeBanner}>
+          <Pressable onPress={() => router.push('/paywall?trigger=hearts')} style={styles.upgradeBanner}>
             <Ionicons name="heart" size={16} color="#E8435A" />
             <Text style={styles.upgradeBannerText}>
               {locale === 'de' ? 'Upgrade für mehr Herzen' : 'Upgrade for more hearts'}
@@ -740,7 +740,7 @@ export default function CoachScreen() {
                 <Pressable
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push('/paywall');
+                    router.push('/paywall?trigger=hearts');
                   }}
                   style={styles.inputHeartBadge}
                   hitSlop={6}

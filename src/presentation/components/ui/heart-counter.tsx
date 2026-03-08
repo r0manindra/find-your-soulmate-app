@@ -73,7 +73,7 @@ export function HeartCounter({ compact }: HeartCounterProps) {
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/paywall');
+    router.push('/paywall?trigger=hearts');
   };
 
   if (compact) {

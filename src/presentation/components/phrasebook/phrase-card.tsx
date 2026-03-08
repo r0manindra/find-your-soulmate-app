@@ -31,7 +31,7 @@ export function PhraseCard({ phrase, locale, accentColor }: PhraseCardProps) {
   const handleCopy = async () => {
     if (isLocked) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=general');
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -43,7 +43,7 @@ export function PhraseCard({ phrase, locale, accentColor }: PhraseCardProps) {
   const handleSave = () => {
     if (isLocked) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=general');
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -53,7 +53,7 @@ export function PhraseCard({ phrase, locale, accentColor }: PhraseCardProps) {
   const handleExpand = () => {
     if (isLocked) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=general');
       return;
     }
     setExpanded(!expanded);

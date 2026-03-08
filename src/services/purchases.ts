@@ -94,8 +94,11 @@ function checkSubscriptionTier(customerInfo: CustomerInfo): SubscriptionTier {
 
   // Pro+ check (also treat legacy 'premium' as Pro+)
   if (active[ENTITLEMENT_PRO_PLUS] !== undefined || active[ENTITLEMENT_LEGACY_PREMIUM] !== undefined) {
-    const { setSubscriptionStatus } = useAuthStore.getState();
-    setSubscriptionStatus('PRO_PLUS');
+    const store = useAuthStore.getState();
+    store.setSubscriptionStatus('PRO_PLUS');
+    // Pro+ annual includes all chapters + PDF
+    store.setChapterUnlock(true);
+    store.setPdfAccess(true);
     return 'pro_plus';
   }
 
@@ -120,25 +123,7 @@ export async function purchaseHeartPack(): Promise<boolean> {
     const { customerInfo } = await Purchases.purchasePackage(heartPack);
     if (customerInfo) {
       const { useHeartsStore } = require('@/src/store/hearts-store');
-      useHeartsStore.getState().addBonusHearts(50);
-      return true;
-    }
-    return false;
-  } catch (e: any) {
-    if (e.userCancelled) return false;
-    throw e;
-  }
-}
-
-export async function purchaseLargeHeartPack(): Promise<boolean> {
-  try {
-    const offerings = await Purchases.getOfferings();
-    const heartPack = offerings.all['heart_pack_large']?.availablePackages[0];
-    if (!heartPack) return false;
-    const { customerInfo } = await Purchases.purchasePackage(heartPack);
-    if (customerInfo) {
-      const { useHeartsStore } = require('@/src/store/hearts-store');
-      useHeartsStore.getState().addBonusHearts(200);
+      useHeartsStore.getState().addBonusHearts(10);
       return true;
     }
     return false;
@@ -173,6 +158,24 @@ export async function purchaseChapterUnlock(): Promise<boolean> {
     const { customerInfo } = await Purchases.purchasePackage(chapterPkg);
     if (customerInfo) {
       useAuthStore.getState().setChapterUnlock(true);
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    if (e.userCancelled) return false;
+    throw e;
+  }
+}
+
+export async function purchasePdfAndChaptersBundle(): Promise<boolean> {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const bundlePkg = offerings.all['pdf_chapters_bundle']?.availablePackages[0];
+    if (!bundlePkg) return false;
+    const { customerInfo } = await Purchases.purchasePackage(bundlePkg);
+    if (customerInfo) {
+      useAuthStore.getState().setChapterUnlock(true);
+      useAuthStore.getState().setPdfAccess(true);
       return true;
     }
     return false;

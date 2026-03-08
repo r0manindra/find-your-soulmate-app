@@ -252,7 +252,7 @@ export function AddHabitModal({ visible, onClose, locale, isDark = false }: AddH
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 handleClose();
-                router.push('/paywall' as any);
+                router.push('/paywall?trigger=habits' as any);
               }}
               style={styles.limitButton}
             />

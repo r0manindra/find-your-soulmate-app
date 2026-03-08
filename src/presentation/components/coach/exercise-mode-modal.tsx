@@ -34,7 +34,7 @@ export function ExerciseModeModal({ visible, onClose, onOutOfHearts }: ExerciseM
   const handlePress = (modeId: ExerciseModeId, modePremium: boolean) => {
     if (modePremium && !isPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.push('/paywall');
+      router.push('/paywall?trigger=exercise');
       onClose();
       return;
     }
