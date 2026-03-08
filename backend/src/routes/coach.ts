@@ -48,6 +48,7 @@ const messageSchema = z.object({
     'date_simulator',
     'flirty_banter',
     'reply_helper',
+    'flirting_battle',
   ]).optional(),
   conversationId: z.string().optional(),
 });
@@ -58,7 +59,7 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     const { message, characterId, context, exerciseMode, conversationId } = messageSchema.parse(req.body);
 
     // Premium characters require Pro or Pro+ subscription
-    const FREE_CHARACTERS = ['charismo', 'bestfriend'];
+    const FREE_CHARACTERS = ['charismo', 'bestfriend', 'battle_girl_nextdoor', 'battle_boy_nextdoor'];
     const isSubscribed = (status: string) => status === 'PRO' || status === 'PRO_PLUS' || status === 'PREMIUM';
 
     if (!FREE_CHARACTERS.includes(characterId)) {

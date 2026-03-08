@@ -15,6 +15,7 @@ interface HeartsStore {
   dailyHearts: number;
   bonusHearts: number;
   lastResetDate: string;
+  welcomeGiftClaimed: boolean;
 
   getMaxDailyHearts: () => number;
   canSpend: (amount: number) => boolean;
@@ -22,6 +23,7 @@ interface HeartsStore {
   resetIfNewDay: () => void;
   addBonusHearts: (amount: number) => void;
   getTotalAvailable: () => number;
+  claimWelcomeGift: () => void;
 }
 
 export const useHeartsStore = create<HeartsStore>()(
@@ -30,6 +32,7 @@ export const useHeartsStore = create<HeartsStore>()(
       dailyHearts: 5,
       bonusHearts: 0,
       lastResetDate: getLocalDateString(),
+      welcomeGiftClaimed: false,
 
       getMaxDailyHearts: () => {
         const tier = useAuthStore.getState().subscriptionTier;
@@ -87,6 +90,16 @@ export const useHeartsStore = create<HeartsStore>()(
         set((state) => ({ bonusHearts: state.bonusHearts + amount }));
       },
 
+      claimWelcomeGift: () => {
+        const { welcomeGiftClaimed } = get();
+        if (!welcomeGiftClaimed) {
+          set((state) => ({
+            bonusHearts: state.bonusHearts + 10,
+            welcomeGiftClaimed: true,
+          }));
+        }
+      },
+
       getTotalAvailable: () => {
         get().resetIfNewDay();
         const { dailyHearts, bonusHearts } = get();
@@ -100,7 +113,17 @@ export const useHeartsStore = create<HeartsStore>()(
         dailyHearts: state.dailyHearts,
         bonusHearts: state.bonusHearts,
         lastResetDate: state.lastResetDate,
+        welcomeGiftClaimed: state.welcomeGiftClaimed,
       }),
+      onRehydrateStorage: () => {
+        return (state) => {
+          // After rehydration, immediately reset daily hearts if it's a new day
+          // This prevents showing stale 0 from yesterday before useEffect runs
+          if (state) {
+            state.resetIfNewDay();
+          }
+        };
+      },
     }
   )
 );

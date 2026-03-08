@@ -25,10 +25,13 @@ import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 import { ExerciseBanner } from '@/src/presentation/components/coach/exercise-banner';
-import { getExerciseMode } from '@/src/data/content/exercise-modes';
+import { getExerciseMode, isBattleMode } from '@/src/data/content/exercise-modes';
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
 import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
+import { BattleBanner } from '@/src/presentation/components/coach/battle-banner';
+import { BattleCharacterModal } from '@/src/presentation/components/coach/battle-character-modal';
+import { getBattleCharacter, type BattleCharacter } from '@/src/data/content/battle-characters';
 import { useHeartsStore } from '@/src/store/hearts-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 
@@ -124,8 +127,17 @@ export default function CoachScreen() {
   const [showExerciseModeModal, setShowExerciseModeModal] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showOutOfHearts, setShowOutOfHearts] = useState(false);
+  const [showBattleModal, setShowBattleModal] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Battle mode state
+  const activeBattleCharacterId = useUIStore((s) => s.activeBattleCharacterId);
+  const battleMessageCount = useUIStore((s) => s.battleMessageCount);
+  const setBattleCharacter = useUIStore((s) => s.setBattleCharacter);
+  const incrementBattleMessageCount = useUIStore((s) => s.incrementBattleMessageCount);
+  const resetBattle = useUIStore((s) => s.resetBattle);
+  const isBattleActive = !!activeBattleCharacterId;
 
   const canSpend = useHeartsStore((s) => s.canSpend);
   const spendHearts = useHeartsStore((s) => s.spendHearts);
@@ -236,6 +248,63 @@ export default function CoachScreen() {
     chatStore.createConversation(activeConvCharacterId, char.greeting[locale]);
   }, [activeConvCharacterId, locale]);
 
+  const handleStartBattle = useCallback((character: BattleCharacter) => {
+    // Create a new conversation with battle character greeting
+    chatStore.createConversation(character.id, character.greeting[locale]);
+    setBattleCharacter(character.id);
+    setExerciseMode('flirting_battle');
+  }, [locale, chatStore, setBattleCharacter, setExerciseMode]);
+
+  const handleEndBattle = useCallback(() => {
+    // Send a score request before resetting
+    const scoreMsg = locale === 'de'
+      ? 'Gib mir bitte meine Bewertung. [BATTLE_SCORE_NOW]'
+      : 'Give me my score please. [BATTLE_SCORE_NOW]';
+    sendBattleScoreMessage(scoreMsg);
+  }, [locale]);
+
+  const sendBattleScoreMessage = useCallback(async (text: string) => {
+    const convId = chatStore.activeConversationId;
+    if (!convId || !isLoggedIn) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const userMessage: ChatMessage = {
+      id: String(Date.now()),
+      role: 'user',
+      // Strip the signal from the displayed message
+      content: text.replace(' [BATTLE_SCORE_NOW]', '').replace('[BATTLE_SCORE_NOW]', ''),
+      timestamp: Date.now(),
+    };
+    chatStore.addMessage(convId, userMessage);
+    setIsLoading(true);
+
+    try {
+      if (canSpend(HEART_COSTS.AI_MESSAGE)) {
+        spendHearts(HEART_COSTS.AI_MESSAGE);
+      }
+      const context = buildJourneyContext();
+      const data = await api.sendCoachMessage(
+        text,
+        activeBattleCharacterId ?? 'charismo',
+        context,
+        'flirting_battle',
+        convId,
+      );
+      const aiMessage: ChatMessage = {
+        id: String(Date.now() + 1),
+        role: 'assistant',
+        content: data.response,
+        timestamp: Date.now(),
+      };
+      chatStore.addMessage(convId, aiMessage);
+    } catch {
+      // ignore errors for score message
+    } finally {
+      setIsLoading(false);
+      resetBattle();
+    }
+  }, [chatStore, isLoggedIn, activeBattleCharacterId, buildJourneyContext, canSpend, spendHearts, resetBattle]);
+
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;
     if (!text.trim() || isLoading) return;
@@ -251,6 +320,20 @@ export default function CoachScreen() {
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // Battle mode: track message count and auto-score on 10th
+    const currentBattleCharId = useUIStore.getState().activeBattleCharacterId;
+    const isBattleMsg = !!currentBattleCharId;
+    let apiMessage = text.trim();
+    let newBattleCount = 0;
+
+    if (isBattleMsg) {
+      incrementBattleMessageCount();
+      newBattleCount = useUIStore.getState().battleMessageCount;
+      if (newBattleCount >= 10) {
+        apiMessage = `${apiMessage} [BATTLE_SCORE_NOW]`;
+      }
+    }
 
     const userMessage: ChatMessage = {
       id: String(Date.now()),
@@ -270,9 +353,11 @@ export default function CoachScreen() {
         spendHearts(HEART_COSTS.AI_MESSAGE);
 
         const context = buildJourneyContext();
+        // In battle mode, use the battle character ID
+        const characterForApi = isBattleMsg ? currentBattleCharId : activeConvCharacterId;
         const data = await api.sendCoachMessage(
-          userMessage.content,
-          activeConvCharacterId,
+          apiMessage,
+          characterForApi,
           context,
           activeExerciseMode ?? undefined,
           convId,
@@ -285,6 +370,11 @@ export default function CoachScreen() {
           timestamp: Date.now(),
         };
         chatStore.addMessage(convId, aiMessage);
+
+        // Auto-reset battle after scorecard (10th message)
+        if (isBattleMsg && newBattleCount >= 10) {
+          resetBattle();
+        }
       } else {
         await new Promise((resolve) => setTimeout(resolve, 600));
         const response = locale === 'de' ? FALLBACK_RESPONSE.de : FALLBACK_RESPONSE.en;
@@ -318,7 +408,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, activeConvCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore, canSpend, spendHearts]);
+  }, [input, isLoading, incrementChatCount, isLoggedIn, activeConvCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore, canSpend, spendHearts, incrementBattleMessageCount, resetBattle]);
 
   // Inverted list data — newest messages at top of reversed array (rendered at bottom visually)
   const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
@@ -400,15 +490,18 @@ export default function CoachScreen() {
           </View>
         )}
         <View style={[styles.messageRow, isUser && styles.messageRowUser, { marginBottom: spacing }]}>
-          {!isUser && (
-            showAvatar ? (
-              <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-                <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
+          {!isUser && (() => {
+            const bChar = isBattleActive ? getBattleCharacter(activeBattleCharacterId!) : null;
+            const avatarColor = bChar?.color ?? activeCharacter.color;
+            const avatarIcon = bChar?.icon ?? activeCharacter.icon;
+            return showAvatar ? (
+              <View style={[styles.avatarContainer, { backgroundColor: `${avatarColor}15` }]}>
+                <Ionicons name={avatarIcon as any} size={14} color={avatarColor} />
               </View>
             ) : (
               <View style={styles.avatarSpacer} />
-            )
-          )}
+            );
+          })()}
           <View style={[
             styles.messageBubble,
             isUser ? styles.userBubble : [styles.aiBubble, isDark && styles.aiBubbleDark],
@@ -431,18 +524,31 @@ export default function CoachScreen() {
         keyboardVerticalOffset={0}
       >
         {/* Header with character selector */}
-        <Pressable onPress={() => setShowCharacterPicker(true)} style={styles.header}>
+        <Pressable onPress={() => !isBattleActive && setShowCharacterPicker(true)} style={styles.header}>
           <LinearGradient
-            colors={[activeCharacter.color, `${activeCharacter.color}CC`]}
+            colors={isBattleActive
+              ? ['#E8435A', '#FF7854']
+              : [activeCharacter.color, `${activeCharacter.color}CC`]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.headerGradient}
           >
-            <Ionicons name={activeCharacter.icon as any} size={26} color="#fff" />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{activeCharacter.name}</Text>
-              <Text style={styles.headerSubtitle}>{activeCharacter.subtitle[locale]}</Text>
-            </View>
+            {(() => {
+              const battleChar = isBattleActive ? getBattleCharacter(activeBattleCharacterId!) : null;
+              return (
+                <>
+                  <Ionicons name={(battleChar?.icon ?? activeCharacter.icon) as any} size={26} color="#fff" />
+                  <View style={styles.headerTextContainer}>
+                    <Text style={styles.headerTitle}>
+                      {battleChar ? battleChar.name : activeCharacter.name}
+                    </Text>
+                    <Text style={styles.headerSubtitle}>
+                      {battleChar ? battleChar.subtitle[locale] : activeCharacter.subtitle[locale]}
+                    </Text>
+                  </View>
+                </>
+              );
+            })()}
             <View style={styles.headerRight}>
               <Pressable
                 onPress={(e) => {
@@ -478,8 +584,13 @@ export default function CoachScreen() {
           </Pressable>
         )}
 
-        {/* Active exercise banner */}
-        {activeExerciseMode && (
+        {/* Active battle banner */}
+        {isBattleActive && (
+          <BattleBanner onEndBattle={handleEndBattle} />
+        )}
+
+        {/* Active exercise banner (non-battle) */}
+        {activeExerciseMode && !isBattleActive && (
           <ExerciseBanner
             onEndExercise={() => {
               const debriefMsg = locale === 'de'
@@ -505,27 +616,63 @@ export default function CoachScreen() {
           onScroll={handleScroll}
           scrollEventThrottle={100}
           ListHeaderComponent={
-            isLoading ? (
-              <View style={styles.messageRow}>
-                <View style={[styles.avatarContainer, { backgroundColor: `${activeCharacter.color}15` }]}>
-                  <Ionicons name={activeCharacter.icon as any} size={14} color={activeCharacter.color} />
+            isLoading ? (() => {
+              const bChar = isBattleActive ? getBattleCharacter(activeBattleCharacterId!) : null;
+              const loadColor = bChar?.color ?? activeCharacter.color;
+              const loadIcon = bChar?.icon ?? activeCharacter.icon;
+              const loadName = bChar?.name ?? activeCharacter.name;
+              return (
+                <View style={styles.messageRow}>
+                  <View style={[styles.avatarContainer, { backgroundColor: `${loadColor}15` }]}>
+                    <Ionicons name={loadIcon as any} size={14} color={loadColor} />
+                  </View>
+                  <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
+                    <Text style={styles.loadingText}>{t('coach.sending', { name: loadName })}</Text>
+                  </View>
                 </View>
-                <View style={[styles.aiBubble, isDark && styles.aiBubbleDark]}>
-                  <Text style={styles.loadingText}>{t('coach.sending', { name: activeCharacter.name })}</Text>
-                </View>
-              </View>
-            ) : null
+              );
+            })() : null
           }
           ListFooterComponent={
             messages.length <= 1 ? (
-              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
-                <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
-                <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
-                  {t('coach.welcomeTitle')}
-                </Text>
-                <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
-                  {t('coach.welcomeDesc')}
-                </Text>
+              <View style={styles.footerContainer}>
+                {/* Flirting Battle card */}
+                {isLoggedIn && !isBattleActive && (
+                  <Pressable
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      setShowBattleModal(true);
+                    }}
+                    style={styles.battleCard}
+                  >
+                    <LinearGradient
+                      colors={['#E8435A', '#FF7854']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.battleCardGradient}
+                    >
+                      <View style={styles.battleCardContent}>
+                        <View style={styles.battleCardIcon}>
+                          <Ionicons name="flash" size={22} color="#fff" />
+                        </View>
+                        <View style={styles.battleCardText}>
+                          <Text style={styles.battleCardTitle}>{t('battle.cardTitle')}</Text>
+                          <Text style={styles.battleCardSubtitle}>{t('battle.cardSubtitle')}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+                      </View>
+                    </LinearGradient>
+                  </Pressable>
+                )}
+                <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
+                  <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
+                  <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
+                    {t('coach.welcomeTitle')}
+                  </Text>
+                  <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
+                    {t('coach.welcomeDesc')}
+                  </Text>
+                </View>
               </View>
             ) : null
           }
@@ -617,6 +764,13 @@ export default function CoachScreen() {
             </View>
           </View>
         </Animated.View>
+
+        {/* Battle Character Modal */}
+        <BattleCharacterModal
+          visible={showBattleModal}
+          onClose={() => setShowBattleModal(false)}
+          onSelectCharacter={handleStartBattle}
+        />
 
         {/* Exercise Mode Modal */}
         <ExerciseModeModal
@@ -795,6 +949,33 @@ const styles = StyleSheet.create({
   scrollFabDark: {
     backgroundColor: '#333',
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+
+  // Footer container for welcome + battle card
+  footerContainer: { gap: 8 },
+
+  // Battle card
+  battleCard: {
+    marginBottom: 4, borderRadius: 16, overflow: 'hidden',
+  },
+  battleCardGradient: {
+    borderRadius: 16,
+  },
+  battleCardContent: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingHorizontal: 16, paddingVertical: 14,
+  },
+  battleCardIcon: {
+    width: 40, height: 40, borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  battleCardText: { flex: 1 },
+  battleCardTitle: {
+    fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
+  },
+  battleCardSubtitle: {
+    fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2,
   },
 
   // Welcome card

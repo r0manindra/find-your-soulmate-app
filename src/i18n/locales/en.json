@@ -385,6 +385,21 @@
     "monthlyPro": "Monthly PRO",
     "annualProPlus": "Annual PRO+"
   },
+  "battle": {
+    "title": "Flirting Battle",
+    "subtitle": "Practice flirting with AI characters and get scored",
+    "cardTitle": "Flirting Battle",
+    "cardSubtitle": "Practice your flirting skills against AI opponents",
+    "messageCount": "Message {{count}}/10",
+    "endBattle": "End & Score",
+    "startBattle": "Start Battle",
+    "chooseOpponent": "Choose Your Opponent",
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
+  },
   "exerciseModes": {
     "replyHelper": "Reply Helper",
     "replyHelperDesc": "Paste a message you received, get smart reply suggestions"

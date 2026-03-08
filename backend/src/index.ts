@@ -11,6 +11,9 @@ import pdfRoutes from './routes/pdf';
 import heartsRoutes from './routes/hearts';
 const app = express();
 
+// Trust proxy (Railway runs behind a reverse proxy)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));

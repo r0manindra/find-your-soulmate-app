@@ -4,7 +4,12 @@ export type ExerciseModeId =
   | 'rejection_gym'
   | 'date_simulator'
   | 'flirty_banter'
-  | 'reply_helper';
+  | 'reply_helper'
+  | 'flirting_battle';
+
+export function isBattleMode(mode: ExerciseModeId | null): boolean {
+  return mode === 'flirting_battle';
+}
 
 export interface ExerciseMode {
   id: ExerciseModeId;

@@ -5,6 +5,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useHeartsStore } from '@/src/store/hearts-store';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
 import {
@@ -48,6 +49,7 @@ export function useOAuth() {
     try {
       const { user } = await api.loginWithGoogle(idToken);
       setUser(user);
+      useHeartsStore.getState().claimWelcomeGift();
       loginRevenueCat(user.id).catch(() => {});
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');
@@ -89,6 +91,7 @@ export function useOAuth() {
         credential.email || undefined
       );
       setUser(user);
+      useHeartsStore.getState().claimWelcomeGift();
       loginRevenueCat(user.id).catch(() => {});
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');

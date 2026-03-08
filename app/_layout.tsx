@@ -182,12 +182,15 @@ function AnimatedSplash({ onFinish, onReady }: { onFinish: () => void; onReady: 
   const glowOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
   const textTranslateY = useSharedValue(10);
-  const iconScale = useSharedValue(1);           // Start at 1 — matches native splash
+  const iconScale = useSharedValue(2);           // Start at 2 — matches native splash (200pt icon / 100pt SVG)
   const overlayOpacity = useSharedValue(1);
 
   useEffect(() => {
     // Signal ready immediately — native splash fades fast (250ms) into this identical view
     onReady();
+
+    // Phase 0 (0–600ms): Icon smoothly scales down from native splash size (200pt) to 100pt
+    iconScale.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
 
     // Phase 1 (0–400ms): Morph solid red → gradient. Barely noticeable.
     gradientProgress.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));

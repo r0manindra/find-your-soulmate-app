@@ -197,6 +197,16 @@ export function buildContextAwarePrompt(
   exerciseMode?: ExerciseModeId
 ): string {
   const characterPrompt = getCharacterPrompt(characterId);
+  const isBattle = exerciseMode === 'flirting_battle';
+
+  // In battle mode, the AI is a person, not a coach — skip coaching context
+  if (isBattle) {
+    const parts = [characterPrompt];
+    const exerciseBlock = getExercisePromptBlock(exerciseMode);
+    if (exerciseBlock) parts.push('', exerciseBlock);
+    return parts.join('\n');
+  }
+
   const userBlock = buildUserContextBlock(ctx);
   const chapterBlock = buildChapterContextBlock(ctx);
 

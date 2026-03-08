@@ -10,6 +10,7 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { SocialAuthButtons } from '@/src/presentation/components/ui/social-auth-buttons';
 import { useAuthStore } from '@/src/store/auth-store';
 import { useSettingsStore } from '@/src/store/settings-store';
+import { useHeartsStore } from '@/src/store/hearts-store';
 import { useOAuth } from '@/src/hooks/useOAuth';
 import * as api from '@/src/services/api';
 import { loginRevenueCat } from '@/src/services/purchases';
@@ -53,6 +54,8 @@ export default function RegisterScreen() {
     try {
       const { user } = await api.register(email.trim(), password, name.trim() || undefined);
       setUser(user);
+      // Welcome gift: 10 bonus hearts for new users
+      useHeartsStore.getState().claimWelcomeGift();
       loginRevenueCat(user.id).catch(() => {});
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/(tabs)');

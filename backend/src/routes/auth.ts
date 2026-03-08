@@ -51,7 +51,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { email, passwordHash, name },
+      data: { email, passwordHash, name, bonusHearts: 10 },
     });
 
     const token = generateToken(user.id);
@@ -136,6 +136,7 @@ router.post('/google', async (req: Request, res: Response) => {
           name: google.name || null,
           authProvider: 'GOOGLE',
           authProviderId: google.sub,
+          bonusHearts: 10,
         },
       });
     }
@@ -193,6 +194,7 @@ router.post('/apple', async (req: Request, res: Response) => {
           name: fullName || null,
           authProvider: 'APPLE',
           authProviderId: apple.sub,
+          bonusHearts: 10,
         },
       });
     }

@@ -32,7 +32,6 @@ export function HeartCounter({ compact }: HeartCounterProps) {
   const router = useRouter();
   const dailyHearts = useHeartsStore((s) => s.dailyHearts);
   const bonusHearts = useHeartsStore((s) => s.bonusHearts);
-  const getMaxDailyHearts = useHeartsStore((s) => s.getMaxDailyHearts);
   const resetIfNewDay = useHeartsStore((s) => s.resetIfNewDay);
 
   const [refillTime, setRefillTime] = useState(getTimeUntilMidnight());
@@ -42,8 +41,7 @@ export function HeartCounter({ compact }: HeartCounterProps) {
   }, []);
 
   const total = dailyHearts + bonusHearts;
-  const maxDaily = getMaxDailyHearts();
-  const showRefill = total < maxDaily;
+  const showRefill = total === 0;
 
   // Update refill timer every 60s
   useEffect(() => {

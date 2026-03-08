@@ -1,8 +1,8 @@
 {
   "tabs": {
     "home": "Start",
-    "guide": "Guide",
-    "habits": "Habits",
+    "guide": "Ratgeber",
+    "habits": "Routine",
     "coach": "Coach",
     "books": "Bücher",
     "profile": "Profil"
@@ -384,6 +384,21 @@
     "oneTimePurchases": "Einmalkäufe",
     "monthlyPro": "Monatlich PRO",
     "annualProPlus": "Jährlich PRO+"
+  },
+  "battle": {
+    "title": "Flirt Battle",
+    "subtitle": "Übe Flirten mit KI-Charakteren und werde bewertet",
+    "cardTitle": "Flirt Battle",
+    "cardSubtitle": "Teste deine Flirt-Skills gegen KI-Gegner",
+    "messageCount": "Nachricht {{count}}/10",
+    "endBattle": "Score",
+    "startBattle": "Battle starten",
+    "chooseOpponent": "Wähle deinen Gegner",
+    "difficulty": {
+      "easy": "Leicht",
+      "medium": "Mittel",
+      "hard": "Schwer"
+    }
   },
   "exerciseModes": {
     "replyHelper": "Antwort-Helfer",
