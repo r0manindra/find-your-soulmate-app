@@ -4,12 +4,8 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, runOnJS, Easing } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import '@/src/i18n/config';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -31,7 +27,7 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({ duration: 250, fade: true });
+SplashScreen.setOptions({ duration: 400, fade: true });
 
 function AchievementListener() {
   const store = useProgressStore();
@@ -171,152 +167,12 @@ function ProgressSync() {
   return null;
 }
 
-/**
- * Seamless animated splash screen.
- *
- * Key insight: the animated overlay starts IDENTICAL to the native splash
- * (solid #E8435A + white icon at full opacity/scale) so the handoff is invisible.
- * Then it subtly enhances (gradient, glow, text) and exits cleanly.
- */
-function AnimatedSplash({ onFinish, onReady, appReady }: { onFinish: () => void; onReady: () => void; appReady: boolean }) {
-  // Start matching native splash exactly: icon visible at same size, solid red background
-  const gradientProgress = useSharedValue(0);   // 0 = solid red, 1 = gradient visible
-  const glowOpacity = useSharedValue(0);
-  const textOpacity = useSharedValue(0);
-  const textTranslateY = useSharedValue(10);
-  const iconScale = useSharedValue(1);           // Start at 1 — matches native splash exactly (no size change)
-  const overlayOpacity = useSharedValue(1);
-  const exitStarted = useRef(false);
-
-  // Phase 1-3: entrance animations (run immediately)
-  useEffect(() => {
-    // Signal ready immediately — native splash fades fast (250ms) into this identical view
-    onReady();
-
-    // Phase 1 (100–500ms): Morph solid red → gradient. Subtle enhancement.
-    gradientProgress.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
-
-    // Phase 2 (300–800ms): Subtle glow ring appears behind icon
-    glowOpacity.value = withDelay(300, withTiming(0.8, { duration: 500, easing: Easing.out(Easing.cubic) }));
-
-    // Phase 3 (400–900ms): Brand text slides up
-    textOpacity.value = withDelay(400, withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }));
-    textTranslateY.value = withDelay(400, withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
-  }, []);
-
-  // Phase 4: exit — only starts once appReady (stores hydrated, routing settled)
-  useEffect(() => {
-    if (!appReady || exitStarted.current) return;
-    exitStarted.current = true;
-
-    // Small delay to let the destination screen render beneath before we fade out
-    const exitDelay = 200;
-    iconScale.value = withDelay(exitDelay, withTiming(1.06, { duration: 300, easing: Easing.out(Easing.quad) }));
-    glowOpacity.value = withDelay(exitDelay, withTiming(0, { duration: 350 }));
-    textOpacity.value = withDelay(exitDelay, withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) }));
-    textTranslateY.value = withDelay(exitDelay, withTiming(-3, { duration: 300, easing: Easing.in(Easing.cubic) }));
-    overlayOpacity.value = withDelay(exitDelay + 200, withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, () => {
-      runOnJS(onFinish)();
-    }));
-  }, [appReady]);
-
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: iconScale.value }],
-  }));
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glowOpacity.value,
-  }));
-
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-    transform: [{ translateY: textTranslateY.value }],
-  }));
-
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
-  }));
-
-  // Gradient overlays a solid red base. gradientProgress controls gradient opacity.
-  const gradientOverlayStyle = useAnimatedStyle(() => ({
-    opacity: gradientProgress.value,
-  }));
-
-  return (
-    <Animated.View style={[splashStyles.overlay, overlayStyle]} pointerEvents="none">
-      {/* Solid red base — identical to native splash */}
-      <View style={splashStyles.solidBase}>
-        {/* Gradient fades in on top */}
-        <Animated.View style={[StyleSheet.absoluteFill, gradientOverlayStyle]}>
-          <LinearGradient
-            colors={['#E8435A', '#FF7854']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
-        </Animated.View>
-
-        <View style={splashStyles.centerContent}>
-          <View style={splashStyles.iconWrapper}>
-            <Animated.View style={[splashStyles.glowRing, glowStyle]} />
-            <Animated.View style={[splashStyles.iconContainer, iconStyle]}>
-              <CharismoIcon size={310} color="#fff" />
-            </Animated.View>
-          </View>
-          <Animated.Text style={[splashStyles.brandText, textStyle]}>
-            Charismo
-          </Animated.Text>
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
-
-const splashStyles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 999,
-  },
-  solidBase: {
-    flex: 1,
-    backgroundColor: '#E8435A', // Exactly matches native splash
-  },
-  centerContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  glowRing: {
-    position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandText: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    letterSpacing: 2,
-    marginTop: 18,
-  },
-});
-
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
-  const [showSplash, setShowSplash] = useState(true);
-  const [storesHydrated, setStoresHydrated] = useState(false);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
     if (error) throw error;
@@ -332,7 +188,7 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  // Wait for stores to hydrate so routing is settled before splash exits
+  // Wait for stores to hydrate so routing is settled before hiding splash
   useEffect(() => {
     let cancelled = false;
     const check = () => {
@@ -343,7 +199,7 @@ export default function RootLayout() {
       ) {
         // Small delay to let OnboardingGate redirect if needed
         setTimeout(() => {
-          if (!cancelled) setStoresHydrated(true);
+          if (!cancelled) setAppReady(true);
         }, 100);
       }
     };
@@ -354,27 +210,18 @@ export default function RootLayout() {
     return () => { cancelled = true; unsub1(); unsub2(); unsub3(); };
   }, []);
 
-  // Don't hide native splash until animated overlay is mounted
-  const handleSplashReady = useCallback(() => {
-    SplashScreen.hideAsync();
-  }, []);
+  // Hide native splash once fonts loaded and stores hydrated
+  useEffect(() => {
+    if (loaded && appReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, appReady]);
 
   if (!loaded) {
     return null;
   }
 
-  return (
-    <View style={{ flex: 1 }}>
-      <RootLayoutNav />
-      {showSplash && (
-        <AnimatedSplash
-          onReady={handleSplashReady}
-          onFinish={() => setShowSplash(false)}
-          appReady={storesHydrated}
-        />
-      )}
-    </View>
-  );
+  return <RootLayoutNav />;
 }
 
 /** Syncs i18n language with the persisted settings store locale on startup */
