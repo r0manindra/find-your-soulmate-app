@@ -56,7 +56,7 @@ export default function BooksScreen() {
       <FlatList
         data={sortedBooks}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={[styles.list, { paddingTop: 58 }]}
+        contentContainerStyle={[styles.list, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>

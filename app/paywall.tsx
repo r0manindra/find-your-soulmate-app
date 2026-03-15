@@ -213,7 +213,7 @@ export default function PaywallScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 58 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 70 }]} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <LinearGradient
           colors={['#E8435A', '#FF7854']}

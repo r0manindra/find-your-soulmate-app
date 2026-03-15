@@ -150,7 +150,7 @@ export default function PhrasebookScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: 58 }]}
+        contentContainerStyle={[styles.content, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(400)}>
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 20,
     paddingBottom: 12,
   },
   detailHeaderText: { flex: 1 },

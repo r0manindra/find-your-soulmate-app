@@ -291,7 +291,6 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(350).duration(400)}>
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <ProgressRing
@@ -318,9 +317,7 @@ export default function HomeScreen() {
           </View>
           <JourneyMiniMap completedChapters={completedChapters} isDark={isDark} />
         </GlassCard>
-        </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(550).duration(400)}>
         <GlassCard style={styles.tipCard}>
           <View style={styles.tipAccent} />
           <View style={styles.tipBody}>
@@ -333,7 +330,6 @@ export default function HomeScreen() {
             <Text style={[styles.tipText, isDark && styles.tipTextDark]}>{dailyTip}</Text>
           </View>
         </GlassCard>
-        </Animated.View>
       </ScrollView>
     </View>
   );

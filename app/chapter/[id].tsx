@@ -400,7 +400,7 @@ export default function ChapterDetailScreen() {
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={[styles.content, { paddingTop: 58 }]}
+        contentContainerStyle={[styles.content, { paddingTop: 70 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Chapter intro */}

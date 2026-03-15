@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.flirtiq.app",
-      "buildNumber": "55",
+      "buildNumber": "60",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -50,7 +50,9 @@
           "imageWidth": 200,
           "backgroundColor": "#E8435A"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

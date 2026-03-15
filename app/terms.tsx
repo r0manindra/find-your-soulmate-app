@@ -21,7 +21,7 @@ export default function TermsScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 58 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 70 }]} showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: textColor }]}>
           {isDE ? 'Nutzungsbedingungen' : 'Terms of Service'}
         </Text>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Platform, StyleSheet, View, Pressable, Text } from 'react-native';
+import { Platform, StyleSheet, View, Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
@@ -23,14 +23,10 @@ const hasLiquidGlass = supportsLiquidGlass();
 
 // Conditionally load NativeTabs for iOS 26+
 let NativeTabs: any = null;
-let NativeLabel: any = null;
-let NativeIcon: any = null;
 if (hasLiquidGlass) {
   try {
     const mod = require('expo-router/unstable-native-tabs');
     NativeTabs = mod.NativeTabs;
-    NativeLabel = mod.Label;
-    NativeIcon = mod.Icon;
   } catch {}
 }
 
@@ -59,7 +55,6 @@ const TAB_CONFIG: TabConfig[] = [
 // ---------------------------------------------------------------------------
 
 function NativeLiquidGlassLayout() {
-  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -70,18 +65,14 @@ function NativeLiquidGlassLayout() {
     <NativeTabs
       tintColor={foreground}
       iconColor={{ default: muted, selected: foreground }}
-      labelVisibilityMode="unlabeled"
-      backgroundColor={null}
-      screenOptions={{ headerShown: false }}
     >
       {TAB_CONFIG.map((tab) => (
         <NativeTabs.Trigger
           key={tab.name}
           name={tab.name}
-          href={tab.name === 'index' ? '/' : `/${tab.name}`}
         >
-          <NativeLabel hidden />
-          <NativeIcon
+          <NativeTabs.Trigger.Label hidden />
+          <NativeTabs.Trigger.Icon
             sf={{
               default: tab.sfSymbol as any,
               selected: tab.sfSymbolFocused as any,
