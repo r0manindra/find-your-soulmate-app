@@ -39,7 +39,7 @@ const initialState: UserProfileState = {
   socialEnergy: null,
   ageGroup: null,
   basicsLevel: null,
-  skillLevel: null,
+  skillLevel: 'beginner',
   goal: null,
   hasCompletedOnboarding: false,
   onboardingCompletedAt: null,

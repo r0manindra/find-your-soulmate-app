@@ -4,7 +4,11 @@ export type PhraseCategoryId =
   | 'conversation_deepeners'
   | 'witty_responses'
   | 'smart_vocabulary'
-  | 'closing_lines';
+  | 'closing_lines'
+  | 'texting_dms'
+  | 'confidence_boosters'
+  | 'date_conversation'
+  | 'body_language';
 
 export interface PhraseCategory {
   id: PhraseCategoryId;
@@ -59,6 +63,30 @@ export const phraseCategories: PhraseCategory[] = [
     name: { en: 'Closing Lines', de: 'Abschluss-Sprüche' },
     icon: 'checkmark-circle',
     color: '#EF4444',
+  },
+  {
+    id: 'texting_dms',
+    name: { en: 'Texting & DMs', de: 'Texten & Nachrichten' },
+    icon: 'phone-portrait',
+    color: '#6366F1',
+  },
+  {
+    id: 'confidence_boosters',
+    name: { en: 'Confidence Boosters', de: 'Selbstvertrauen stärken' },
+    icon: 'shield-checkmark',
+    color: '#14B8A6',
+  },
+  {
+    id: 'date_conversation',
+    name: { en: 'Date Conversation', de: 'Date-Gespräche' },
+    icon: 'restaurant',
+    color: '#F97316',
+  },
+  {
+    id: 'body_language',
+    name: { en: 'Body Language + Words', de: 'Körpersprache + Worte' },
+    icon: 'body',
+    color: '#A855F7',
   },
 ];
 
@@ -128,10 +156,25 @@ export const phrases: Phrase[] = [
     isPremium: false,
     forGender: 'all',
   },
+  {
+    id: 'ol_5',
+    categoryId: 'opening_lines',
+    situation: { en: 'Festival / Outdoor event', de: 'Festival / Open-Air' },
+    text: {
+      en: "This is my first time at this festival. Any must-see tips from a pro?",
+      de: 'Ich bin zum ersten Mal auf diesem Festival. Hast du als Profi irgendwelche Tipps?',
+    },
+    explanation: {
+      en: 'Flatters them as an expert. Asking for advice is disarming and opens easy conversation.',
+      de: 'Schmeichelt als Experte. Um Rat fragen entwaffnet und eröffnet lockeres Gespräch.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
 
   // Premium opening lines
   {
-    id: 'ol_5',
+    id: 'ol_6',
     categoryId: 'opening_lines',
     situation: { en: 'Dog park', de: 'Hundepark' },
     text: {
@@ -146,7 +189,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_6',
+    id: 'ol_7',
     categoryId: 'opening_lines',
     situation: { en: 'Concert / Event', de: 'Konzert / Event' },
     text: {
@@ -161,7 +204,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_7',
+    id: 'ol_8',
     categoryId: 'opening_lines',
     situation: { en: 'Grocery store', de: 'Supermarkt' },
     text: {
@@ -176,7 +219,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_8',
+    id: 'ol_9',
     categoryId: 'opening_lines',
     situation: { en: 'Waiting in line', de: 'In der Schlange' },
     text: {
@@ -191,7 +234,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_9',
+    id: 'ol_10',
     categoryId: 'opening_lines',
     situation: { en: 'Bar / Lounge', de: 'Bar / Lounge' },
     text: {
@@ -206,7 +249,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_10',
+    id: 'ol_11',
     categoryId: 'opening_lines',
     situation: { en: 'Museum / Gallery', de: 'Museum / Galerie' },
     text: {
@@ -221,7 +264,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_11',
+    id: 'ol_12',
     categoryId: 'opening_lines',
     situation: { en: 'Class / Workshop', de: 'Kurs / Workshop' },
     text: {
@@ -236,7 +279,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'ol_12',
+    id: 'ol_13',
     categoryId: 'opening_lines',
     situation: { en: 'Train / Public transit', de: 'Zug / ÖPNV' },
     text: {
@@ -246,6 +289,156 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Only use if they actually have a book. Brief, non-intrusive, respects their space.',
       de: 'Nur nutzen, wenn sie tatsächlich ein Buch haben. Kurz, unaufdringlich, respektiert den Raum.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_14',
+    categoryId: 'opening_lines',
+    situation: { en: 'Cooking class', de: 'Kochkurs' },
+    text: {
+      en: "I'm pretty sure mine isn't supposed to look like that. How's yours going?",
+      de: 'Ich bin mir ziemlich sicher, dass meins nicht so aussehen sollte. Wie läuft es bei dir?',
+    },
+    explanation: {
+      en: 'Self-deprecating humor in a shared activity. Creates instant camaraderie.',
+      de: 'Selbstironischer Humor bei gemeinsamer Aktivität. Schafft sofort Kameradschaft.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_15',
+    categoryId: 'opening_lines',
+    situation: { en: 'Farmers market', de: 'Wochenmarkt' },
+    text: {
+      en: 'Have you tried these before? I can never walk past this stand without buying something.',
+      de: 'Hast du die schon mal probiert? Ich kann nie an diesem Stand vorbeigehen, ohne etwas zu kaufen.',
+    },
+    explanation: {
+      en: 'Sharing enthusiasm about food is universally connecting. Low-pressure and genuine.',
+      de: 'Begeisterung über Essen teilen verbindet immer. Kein Druck und authentisch.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_16',
+    categoryId: 'opening_lines',
+    situation: { en: 'Shared workspace / Café working', de: 'Co-Working / Café-Arbeit' },
+    text: {
+      en: "You look like you're in the zone. I don't want to interrupt, but... is the wifi actually working for you?",
+      de: 'Du siehst aus, als wärst du voll drin. Ich will nicht stören, aber... funktioniert bei dir das WLAN?',
+    },
+    explanation: {
+      en: 'Acknowledges their focus (respectful), then asks a practical question that opens conversation.',
+      de: 'Erkennt ihren Fokus an (respektvoll), dann eine praktische Frage, die Gespräch eröffnet.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_17',
+    categoryId: 'opening_lines',
+    situation: { en: 'Hiking trail', de: 'Wanderweg' },
+    text: {
+      en: "Please tell me the view at the top is worth this. I'm running on hope at this point.",
+      de: 'Bitte sag mir, dass die Aussicht oben das wert ist. Ich laufe gerade nur noch auf Hoffnung.',
+    },
+    explanation: {
+      en: 'Shared struggle creates bonding. Humorous vulnerability on a trail is very natural.',
+      de: 'Gemeinsame Anstrengung verbindet. Humorvolle Verletzlichkeit auf einem Wanderweg ist sehr natürlich.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_18',
+    categoryId: 'opening_lines',
+    situation: { en: 'Rainy weather', de: 'Regenwetter' },
+    text: {
+      en: "Didn't check the weather either? We should start a support group.",
+      de: 'Auch nicht aufs Wetter geschaut? Wir sollten eine Selbsthilfegruppe gründen.',
+    },
+    explanation: {
+      en: 'Bonds over shared misfortune. Weather complaints are universal icebreakers in German culture.',
+      de: 'Verbindet über gemeinsames Pech. Wetter-Klagen sind universelle Eisbrecher in der deutschen Kultur.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_19',
+    categoryId: 'opening_lines',
+    situation: { en: 'Beach / Pool', de: 'Strand / Pool' },
+    text: {
+      en: "Is this spot taken? I promise I'm better company than an empty towel.",
+      de: 'Ist hier noch frei? Ich bin bessere Gesellschaft als ein leeres Handtuch, versprochen.',
+    },
+    explanation: {
+      en: 'Light, doesn\'t take itself seriously. Beach setting already has relaxed vibes.',
+      de: 'Leicht, nimmt sich nicht zu ernst. Strand-Setting hat sowieso entspannte Vibes.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_20',
+    categoryId: 'opening_lines',
+    situation: { en: 'Volunteer event', de: 'Ehrenamtliches Event' },
+    text: {
+      en: "What made you sign up for this? I came for the free snacks but stayed for the good vibes.",
+      de: 'Was hat dich dazu gebracht, dich anzumelden? Ich kam wegen der Gratis-Snacks und bin wegen der guten Stimmung geblieben.',
+    },
+    explanation: {
+      en: 'Self-deprecating + shows shared values. Volunteer events are gold for meeting genuine people.',
+      de: 'Selbstironisch + zeigt gemeinsame Werte. Ehrenamtliche Events sind Gold zum Kennenlernen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_21',
+    categoryId: 'opening_lines',
+    situation: { en: 'Laundromat', de: 'Waschsalon' },
+    text: {
+      en: "We're both here on a Saturday night doing laundry. I feel like that makes us automatically friends.",
+      de: 'Wir sind beide Samstagabend im Waschsalon. Ich finde, das macht uns automatisch zu Freunden.',
+    },
+    explanation: {
+      en: 'Shared mundane situation + humor about it. Unexpected places make for great stories.',
+      de: 'Gemeinsame alltägliche Situation + Humor darüber. Unerwartete Orte machen tolle Geschichten.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_22',
+    categoryId: 'opening_lines',
+    situation: { en: 'Delayed flight / train', de: 'Verspäteter Flug / Zug' },
+    text: {
+      en: "At this point, I think we all deserve a group chat. How long have you been waiting?",
+      de: 'An diesem Punkt verdienen wir alle einen Gruppenchat. Wie lange wartest du schon?',
+    },
+    explanation: {
+      en: 'Shared frustration is bonding. Travel delays create a temporary community feeling.',
+      de: 'Gemeinsame Frustration verbindet. Reiseverzögerungen schaffen ein temporäres Gemeinschaftsgefühl.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'ol_23',
+    categoryId: 'opening_lines',
+    situation: { en: 'Wine tasting / Food event', de: 'Weinprobe / Food-Event' },
+    text: {
+      en: "I'm pretending I can taste 'notes of oak and blackberry'. Can you actually tell the difference?",
+      de: "Ich tue so, als würde ich 'Noten von Eiche und Brombeere' schmecken. Kannst du wirklich den Unterschied erkennen?",
+    },
+    explanation: {
+      en: 'Honest vulnerability at a pretentious event. Most people are also pretending - they\'ll appreciate the honesty.',
+      de: 'Ehrliche Verletzlichkeit bei prätentiösem Event. Die meisten tun auch so - sie werden die Ehrlichkeit schätzen.',
     },
     isPremium: true,
     forGender: 'all',
@@ -301,10 +494,25 @@ export const phrases: Phrase[] = [
     isPremium: false,
     forGender: 'all',
   },
+  {
+    id: 'gc_4',
+    categoryId: 'compliments',
+    situation: { en: 'Their humor', de: 'Ihr Humor' },
+    text: {
+      en: "You're one of the few people who actually makes me laugh out loud. That's rare.",
+      de: 'Du bist eine der wenigen Personen, die mich wirklich zum Lachen bringen. Das ist selten.',
+    },
+    explanation: {
+      en: "Saying it's rare makes them feel special. Everyone wants to be funny.",
+      de: '"Selten" gibt ihnen ein besonderes Gefühl. Jeder möchte lustig sein.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
 
   // Premium compliments
   {
-    id: 'gc_4',
+    id: 'gc_5',
     categoryId: 'compliments',
     situation: { en: 'Their laugh', de: 'Ihr Lachen' },
     text: {
@@ -319,7 +527,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_5',
+    id: 'gc_6',
     categoryId: 'compliments',
     situation: { en: 'Their passion', de: 'Ihre Leidenschaft' },
     text: {
@@ -334,7 +542,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_6',
+    id: 'gc_7',
     categoryId: 'compliments',
     situation: { en: 'Their smile', de: 'Ihr Lächeln' },
     text: {
@@ -349,7 +557,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_7',
+    id: 'gc_8',
     categoryId: 'compliments',
     situation: { en: 'Their confidence', de: 'Ihr Selbstbewusstsein' },
     text: {
@@ -364,7 +572,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_8',
+    id: 'gc_9',
     categoryId: 'compliments',
     situation: { en: 'Their kindness', de: 'Ihre Freundlichkeit' },
     text: {
@@ -379,7 +587,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_9',
+    id: 'gc_10',
     categoryId: 'compliments',
     situation: { en: 'Their eyes', de: 'Ihre Augen' },
     text: {
@@ -394,7 +602,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'gc_10',
+    id: 'gc_11',
     categoryId: 'compliments',
     situation: { en: 'Their intelligence', de: 'Ihre Intelligenz' },
     text: {
@@ -404,6 +612,81 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Celebrates how they think, not just what they know. Deeply flattering.',
       de: 'Würdigt wie sie denken, nicht nur was sie wissen. Zutiefst schmeichelnd.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'gc_12',
+    categoryId: 'compliments',
+    situation: { en: 'Their voice', de: 'Ihre Stimme' },
+    text: {
+      en: "Has anyone told you you have a really calming voice? I could listen to you talk for hours.",
+      de: 'Hat dir schon mal jemand gesagt, dass du eine richtig beruhigende Stimme hast? Ich könnte dir stundenlang zuhören.',
+    },
+    explanation: {
+      en: 'Unusual compliment that catches people off guard in the best way. Feels intimate.',
+      de: 'Ungewöhnliches Kompliment, das positiv überrascht. Fühlt sich intim an.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'gc_13',
+    categoryId: 'compliments',
+    situation: { en: 'Their uniqueness', de: 'Ihre Einzigartigkeit' },
+    text: {
+      en: "I've met a lot of people, but I genuinely haven't met anyone quite like you.",
+      de: 'Ich habe viele Leute kennengelernt, aber jemanden wie dich wirklich noch nicht.',
+    },
+    explanation: {
+      en: 'Simple but powerful. Everyone wants to feel one-of-a-kind. Deliver it genuinely.',
+      de: 'Einfach aber wirkungsvoll. Jeder möchte sich einzigartig fühlen. Ehrlich rüberbringen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'gc_14',
+    categoryId: 'compliments',
+    situation: { en: 'Their creative work', de: 'Ihre kreative Arbeit' },
+    text: {
+      en: "I can really see your personality in this. It's so clearly you.",
+      de: 'Man kann deine Persönlichkeit darin richtig sehen. Es ist so eindeutig du.',
+    },
+    explanation: {
+      en: 'Connecting their work to who they are hits deeper than just "this is good".',
+      de: 'Ihre Arbeit mit ihrer Person zu verbinden trifft tiefer als nur "das ist gut".',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'gc_15',
+    categoryId: 'compliments',
+    situation: { en: 'Their presence', de: 'Ihre Präsenz' },
+    text: {
+      en: "There's something about you that makes the room feel different when you walk in. In the best way.",
+      de: 'Irgendetwas an dir verändert den Raum, wenn du reinkommst. Auf die beste Art.',
+    },
+    explanation: {
+      en: 'Describes their impact without being specific about appearance. Mysterious and powerful.',
+      de: 'Beschreibt ihre Wirkung ohne Fokus auf Aussehen. Geheimnisvoll und kraftvoll.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'gc_16',
+    categoryId: 'compliments',
+    situation: { en: 'Their storytelling', de: 'Ihr Erzählen' },
+    text: {
+      en: "You could make a trip to the grocery store sound like an adventure. Seriously, you should write a book.",
+      de: 'Du könntest einen Einkauf im Supermarkt wie ein Abenteuer klingen lassen. Ernsthaft, du solltest ein Buch schreiben.',
+    },
+    explanation: {
+      en: 'Celebrates their ability to captivate. Everyone loves being told they\'re a good storyteller.',
+      de: 'Feiert ihre Fähigkeit zu fesseln. Jeder hört gerne, dass er gut erzählen kann.',
     },
     isPremium: true,
     forGender: 'all',
@@ -459,10 +742,25 @@ export const phrases: Phrase[] = [
     isPremium: false,
     forGender: 'all',
   },
+  {
+    id: 'cd_4',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'Spontaneity question', de: 'Spontanitäts-Frage' },
+    text: {
+      en: "What's the most spontaneous thing you've ever done?",
+      de: 'Was ist das Spontanste, was du jemals gemacht hast?',
+    },
+    explanation: {
+      en: 'Invites exciting stories and reveals their adventurous side. Energy lifter.',
+      de: 'Lädt zu spannenden Geschichten ein und zeigt ihre abenteuerliche Seite.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
 
   // Premium conversation deepeners
   {
-    id: 'cd_4',
+    id: 'cd_5',
     categoryId: 'conversation_deepeners',
     situation: { en: 'On a date', de: 'Beim Date' },
     text: {
@@ -477,7 +775,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_5',
+    id: 'cd_6',
     categoryId: 'conversation_deepeners',
     situation: { en: 'Building rapport', de: 'Vertrauen aufbauen' },
     text: {
@@ -492,7 +790,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_6',
+    id: 'cd_7',
     categoryId: 'conversation_deepeners',
     situation: { en: 'Discovering values', de: 'Werte entdecken' },
     text: {
@@ -507,7 +805,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_7',
+    id: 'cd_8',
     categoryId: 'conversation_deepeners',
     situation: { en: 'Getting philosophical', de: 'Philosophisch werden' },
     text: {
@@ -522,7 +820,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_8',
+    id: 'cd_9',
     categoryId: 'conversation_deepeners',
     situation: { en: 'After they share something', de: 'Nachdem sie etwas teilen' },
     text: {
@@ -537,7 +835,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_9',
+    id: 'cd_10',
     categoryId: 'conversation_deepeners',
     situation: { en: 'Fun & playful depth', de: 'Spielerische Tiefe' },
     text: {
@@ -552,7 +850,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'cd_10',
+    id: 'cd_11',
     categoryId: 'conversation_deepeners',
     situation: { en: 'Playful vulnerability', de: 'Spielerische Offenheit' },
     text: {
@@ -562,6 +860,81 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Creates playful tension and invites authenticity. The "much" softens it with humor.',
       de: 'Schafft spielerische Spannung und lädt zur Ehrlichkeit ein. "Nicht viel" mildert es mit Humor.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cd_12',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'FORD method - Dreams', de: 'FORD-Methode - Träume' },
+    text: {
+      en: "If money and time weren't factors, what would your life look like?",
+      de: 'Wenn Geld und Zeit keine Rolle spielen würden, wie würde dein Leben aussehen?',
+    },
+    explanation: {
+      en: 'FORD = Family, Occupation, Recreation, Dreams. Dream questions create the deepest connections.',
+      de: 'FORD = Familie, Beruf, Freizeit, Träume. Traum-Fragen schaffen die tiefsten Verbindungen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cd_13',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'FORD method - Family', de: 'FORD-Methode - Familie' },
+    text: {
+      en: "Are you close with your family? What's the dynamic like?",
+      de: 'Stehst du deiner Familie nahe? Wie ist so die Dynamik bei euch?',
+    },
+    explanation: {
+      en: 'Family dynamics reveal so much. Only ask once rapport is established - too early feels intrusive.',
+      de: 'Familiendynamik verrät viel. Erst fragen, wenn Vertrauen da ist - zu früh wirkt aufdringlich.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cd_14',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'Emotional escalation', de: 'Emotionale Vertiefung' },
+    text: {
+      en: "When was the last time you did something for the first time?",
+      de: 'Wann hast du zum letzten Mal etwas zum ersten Mal gemacht?',
+    },
+    explanation: {
+      en: 'Makes them think and creates a sense of adventure. Great for sparking novelty-seeking energy.',
+      de: 'Regt zum Nachdenken an und erzeugt Abenteuerlust. Toll für Neugier-Energie.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cd_15',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'FORD method - Recreation', de: 'FORD-Methode - Freizeit' },
+    text: {
+      en: "What's something you've been wanting to try but haven't gotten around to yet?",
+      de: 'Was wolltest du schon immer mal ausprobieren, bist aber noch nicht dazu gekommen?',
+    },
+    explanation: {
+      en: 'Shows their aspirational side. Great segue into making plans together.',
+      de: 'Zeigt ihre ambitionierte Seite. Toller Übergang zum gemeinsamen Pläneschmieden.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cd_16',
+    categoryId: 'conversation_deepeners',
+    situation: { en: 'Childhood dreams', de: 'Kindheitsträume' },
+    text: {
+      en: "What did you want to be when you were 8? And how close is that to what you're doing now?",
+      de: 'Was wolltest du mit 8 werden? Und wie nah ist das an dem, was du jetzt machst?',
+    },
+    explanation: {
+      en: 'Nostalgic and revealing. The gap between childhood dreams and reality is always an interesting story.',
+      de: 'Nostalgisch und aufschlussreich. Die Lücke zwischen Kindheitsträumen und Realität ist immer eine interessante Geschichte.',
     },
     isPremium: true,
     forGender: 'all',
@@ -617,10 +990,25 @@ export const phrases: Phrase[] = [
     isPremium: false,
     forGender: 'all',
   },
+  {
+    id: 'wr_4',
+    categoryId: 'witty_responses',
+    situation: { en: 'When asked "Are you flirting with me?"', de: 'Wenn gefragt "Flirtest du mit mir?"' },
+    text: {
+      en: "Depends. Is it working?",
+      de: 'Kommt drauf an. Funktioniert es?',
+    },
+    explanation: {
+      en: 'Short, confident, and turns the question back on them. Creates tension.',
+      de: 'Kurz, selbstbewusst und dreht die Frage um. Erzeugt Spannung.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
 
   // Premium witty responses
   {
-    id: 'wr_4',
+    id: 'wr_5',
     categoryId: 'witty_responses',
     situation: { en: 'When they say "I never do this"', de: 'Wenn sie sagen "Ich mache das sonst nie"' },
     text: {
@@ -635,7 +1023,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_5',
+    id: 'wr_6',
     categoryId: 'witty_responses',
     situation: { en: 'When they compliment you', de: 'Wenn sie dir ein Kompliment machen' },
     text: {
@@ -650,7 +1038,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_6',
+    id: 'wr_7',
     categoryId: 'witty_responses',
     situation: { en: 'When there\'s an awkward silence', de: 'Bei peinlicher Stille' },
     text: {
@@ -665,7 +1053,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_7',
+    id: 'wr_8',
     categoryId: 'witty_responses',
     situation: { en: 'When they say "You seem different"', de: 'Wenn sie sagen "Du bist anders"' },
     text: {
@@ -680,7 +1068,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_8',
+    id: 'wr_9',
     categoryId: 'witty_responses',
     situation: { en: 'When they cancel plans', de: 'Wenn sie Pläne absagen' },
     text: {
@@ -695,7 +1083,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_9',
+    id: 'wr_10',
     categoryId: 'witty_responses',
     situation: { en: 'When asked about relationship status', de: 'Wenn nach Beziehungsstatus gefragt' },
     text: {
@@ -710,7 +1098,7 @@ export const phrases: Phrase[] = [
     forGender: 'all',
   },
   {
-    id: 'wr_10',
+    id: 'wr_11',
     categoryId: 'witty_responses',
     situation: { en: 'When they ask for your number', de: 'Wenn sie nach deiner Nummer fragen' },
     text: {
@@ -720,6 +1108,66 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Creates scarcity while still saying yes. Makes them feel like they earned it.',
       de: 'Erzeugt Knappheit und sagt trotzdem ja. Gibt ihnen das Gefühl, es verdient zu haben.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'wr_12',
+    categoryId: 'witty_responses',
+    situation: { en: 'Playful disagreement', de: 'Spielerische Meinungsverschiedenheit' },
+    text: {
+      en: "I completely disagree. But I respect your right to be wrong.",
+      de: 'Da bin ich komplett anderer Meinung. Aber ich respektiere dein Recht, falsch zu liegen.',
+    },
+    explanation: {
+      en: 'Creates playful tension. Disagreeing (with a smile) is more attractive than always agreeing.',
+      de: 'Erzeugt spielerische Spannung. Widersprechen (mit Lächeln) ist attraktiver als immer zustimmen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'wr_13',
+    categoryId: 'witty_responses',
+    situation: { en: 'When they say "Tell me about yourself"', de: 'Wenn sie sagen "Erzähl von dir"' },
+    text: {
+      en: "That's such a loaded question. Ask me something specific - I'm better under pressure.",
+      de: 'Das ist so eine geladene Frage. Frag mich was Konkretes - unter Druck bin ich besser.',
+    },
+    explanation: {
+      en: 'Deflects the generic question and creates a fun dynamic. Puts the ball in their court.',
+      de: 'Lenkt die generische Frage um und schafft eine lustige Dynamik. Ball liegt bei ihnen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'wr_14',
+    categoryId: 'witty_responses',
+    situation: { en: 'When they say "You\'re trouble"', de: 'Wenn sie sagen "Du bist gefährlich"' },
+    text: {
+      en: "The best kind, though. Right?",
+      de: 'Aber die beste Art. Oder?',
+    },
+    explanation: {
+      en: 'Short, confident, and turns their warning into a compliment. Less is more.',
+      de: 'Kurz, selbstbewusst und verwandelt ihre Warnung in ein Kompliment. Weniger ist mehr.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'wr_15',
+    categoryId: 'witty_responses',
+    situation: { en: 'When they say "We should hang out"', de: 'Wenn sie sagen "Wir sollten mal was machen"' },
+    text: {
+      en: "Bold of you to assume I have free time. But for you, I'll check my very busy Netflix schedule.",
+      de: 'Mutig von dir, anzunehmen, dass ich freie Zeit habe. Aber für dich checke ich meinen sehr vollen Netflix-Plan.',
+    },
+    explanation: {
+      en: 'Playful push-pull: creates scarcity then immediately shows interest. Classic banter.',
+      de: 'Spielerisches Push-Pull: erzeugt Knappheit und zeigt sofort Interesse. Klassisches Geplänkel.',
     },
     isPremium: true,
     forGender: 'all',
@@ -1066,6 +1514,923 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Directness is attractive. Framing it as "I\'d regret not asking" shows courage, not desperation.',
       de: 'Direktheit ist attraktiv. "Ich würde es bereuen" zeigt Mut, keine Verzweiflung.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // TEXTING & DMs
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Free
+  {
+    id: 'tx_1',
+    categoryId: 'texting_dms',
+    situation: { en: 'First message on dating app', de: 'Erste Nachricht auf Dating-App' },
+    text: {
+      en: "I see you're into [something from their profile]. I have so many questions. Starting with: [specific question].",
+      de: 'Ich sehe, du stehst auf [etwas aus dem Profil]. Ich habe so viele Fragen. Angefangen mit: [konkrete Frage].',
+    },
+    explanation: {
+      en: 'Shows you read their profile. A specific question gets 3x more replies than "Hey".',
+      de: 'Zeigt, dass du das Profil gelesen hast. Eine konkrete Frage bekommt 3x mehr Antworten als "Hey".',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_2',
+    categoryId: 'texting_dms',
+    situation: { en: 'Replying to a story', de: 'Auf eine Story antworten' },
+    text: {
+      en: "Okay I need the full story behind this. Where was this?",
+      de: 'Okay, ich brauche die ganze Geschichte dahinter. Wo war das?',
+    },
+    explanation: {
+      en: "Story replies feel more natural than cold DMs. Shows interest in their life, not just their looks.",
+      de: 'Story-Antworten fühlen sich natürlicher an als kalte DMs. Zeigt Interesse am Leben, nicht nur am Aussehen.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_3',
+    categoryId: 'texting_dms',
+    situation: { en: 'After getting their number', de: 'Nachdem du die Nummer bekommen hast' },
+    text: {
+      en: "Hey, it's [name] from [place]. This is the part where I'm supposed to wait three days to text you. I decided not to.",
+      de: 'Hey, hier ist [Name] von [Ort]. Das ist der Teil, wo ich eigentlich drei Tage warten soll. Hab mich dagegen entschieden.',
+    },
+    explanation: {
+      en: 'Breaks the "waiting game" with honesty. Shows confidence and genuine interest.',
+      de: 'Bricht das Wartespiel mit Ehrlichkeit. Zeigt Selbstvertrauen und echtes Interesse.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+
+  // Premium texting
+  {
+    id: 'tx_4',
+    categoryId: 'texting_dms',
+    situation: { en: 'Rescue a one-word reply', de: 'Einsilbige Antwort retten' },
+    text: {
+      en: "I can see you're a person of few words. Challenge accepted - I'll make you use a full sentence.",
+      de: 'Ich sehe, du bist ein Mensch weniger Worte. Challenge accepted - ich bringe dich dazu, einen ganzen Satz zu schreiben.',
+    },
+    explanation: {
+      en: 'Playfully calls out the dry reply without being needy. Turns it into a game.',
+      de: 'Spricht die trockene Antwort spielerisch an, ohne bedürftig zu wirken. Macht ein Spiel daraus.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_5',
+    categoryId: 'texting_dms',
+    situation: { en: 'Suggest meeting up', de: 'Treffen vorschlagen' },
+    text: {
+      en: "This is fun over text, but I have a feeling you're even better in person. Coffee Thursday or Friday?",
+      de: 'Das macht Spaß per Text, aber ich habe das Gefühl, du bist persönlich noch besser. Kaffee Donnerstag oder Freitag?',
+    },
+    explanation: {
+      en: "Compliment + specific day options. Don't ask 'sometime' - give real options.",
+      de: 'Kompliment + konkrete Tage. Nicht "irgendwann" fragen - echte Optionen geben.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_6',
+    categoryId: 'texting_dms',
+    situation: { en: 'Dating app opener - humor', de: 'Dating-App Opener - Humor' },
+    text: {
+      en: "Your profile made me stop scrolling. That's basically the modern equivalent of love at first sight.",
+      de: 'Dein Profil hat mich zum Anhalten gebracht. Das ist quasi das moderne Äquivalent von Liebe auf den ersten Blick.',
+    },
+    explanation: {
+      en: 'Light and self-aware. Acknowledges the dating app reality without being cynical.',
+      de: 'Leicht und selbstbewusst. Erkennt die Dating-App-Realität an, ohne zynisch zu sein.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_7',
+    categoryId: 'texting_dms',
+    situation: { en: 'Flirty good morning text', de: 'Flirtige Guten-Morgen-Nachricht' },
+    text: {
+      en: "Good morning. I was going to send something clever but honestly I just wanted to talk to you.",
+      de: 'Guten Morgen. Ich wollte was Cleveres schreiben, aber ehrlich gesagt wollte ich einfach mit dir reden.',
+    },
+    explanation: {
+      en: 'Vulnerability beats cleverness. Being honest about wanting to talk is refreshing.',
+      de: 'Verletzlichkeit schlägt Cleverness. Ehrlich zu sein, dass man reden will, ist erfrischend.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_8',
+    categoryId: 'texting_dms',
+    situation: { en: 'Revive a dead conversation', de: 'Totes Gespräch wiederbeleben' },
+    text: {
+      en: "I just saw [something related to your earlier conversation] and immediately thought of you. Still into [topic]?",
+      de: 'Ich habe gerade [etwas zu eurem Gespräch] gesehen und musste sofort an dich denken. Stehst du immer noch auf [Thema]?',
+    },
+    explanation: {
+      en: "Callbacks to past conversations show you remember. Much better than a random 'Hey, what's up?'",
+      de: 'Rückbezüge auf vergangene Gespräche zeigen, dass du dich erinnerst. Viel besser als ein zufälliges "Hey".',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_9',
+    categoryId: 'texting_dms',
+    situation: { en: 'Response to photo they sent', de: 'Antwort auf gesendetes Foto' },
+    text: {
+      en: "Okay, I need more context. Where is this? And how do I get invited next time?",
+      de: 'Okay, ich brauche mehr Kontext. Wo ist das? Und wie werde ich beim nächsten Mal eingeladen?',
+    },
+    explanation: {
+      en: 'Shows interest and subtly suggests you want to be part of their life.',
+      de: 'Zeigt Interesse und deutet subtil an, dass du Teil ihres Lebens sein willst.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_10',
+    categoryId: 'texting_dms',
+    situation: { en: 'Playful bet via text', de: 'Spielerische Wette per Text' },
+    text: {
+      en: "I bet I can guess your go-to coffee order in 3 tries. Loser buys the next round. Deal?",
+      de: 'Ich wette, ich kann deine Kaffeebestellung in 3 Versuchen erraten. Verlierer zahlt die nächste Runde. Deal?',
+    },
+    explanation: {
+      en: 'Creates a mini-game with built-in reason to meet. Fun, flirty, and forward.',
+      de: 'Erzeugt ein Mini-Spiel mit eingebautem Grund zum Treffen. Spaßig, flirty und vorwärts.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_11',
+    categoryId: 'texting_dms',
+    situation: { en: 'Profile-based opener', de: 'Profilbasierter Opener' },
+    text: {
+      en: "Wait - is that [place/thing] in your third photo? I was just there! Small world or great taste?",
+      de: 'Moment - ist das [Ort/Sache] auf deinem dritten Foto? Da war ich gerade erst! Kleine Welt oder guter Geschmack?',
+    },
+    explanation: {
+      en: 'Specific references prove you looked at their profile. Shared experiences create instant connection.',
+      de: 'Spezifische Referenzen beweisen, dass du das Profil angesehen hast. Gemeinsame Erfahrungen verbinden sofort.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_12',
+    categoryId: 'texting_dms',
+    situation: { en: 'After they take long to reply', de: 'Wenn sie lange zum Antworten brauchen' },
+    text: {
+      en: "No rush on replying. I'm patient. Mostly because I have zero other plans.",
+      de: 'Kein Stress mit dem Antworten. Ich bin geduldig. Hauptsächlich weil ich null andere Pläne habe.',
+    },
+    explanation: {
+      en: 'Acknowledges the slow reply without pressure. Self-deprecating humor keeps it light.',
+      de: 'Erkennt die späte Antwort an, ohne Druck. Selbstironischer Humor hält es leicht.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_13',
+    categoryId: 'texting_dms',
+    situation: { en: 'Voice note opener', de: 'Sprachnachricht als Opener' },
+    text: {
+      en: "Send a short voice note instead of text. Say: 'Hey, I figured a voice note is more personal than typing. So here goes...'",
+      de: "Schick eine kurze Sprachnachricht statt Text. Sag: 'Hey, ich dachte eine Sprachnachricht ist persönlicher als Tippen. Also los...'",
+    },
+    explanation: {
+      en: 'Voice notes stand out. They hear your tone, your laugh, your energy. Very few people do this.',
+      de: 'Sprachnachrichten fallen auf. Sie hören deinen Ton, dein Lachen, deine Energie. Sehr wenige machen das.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_14',
+    categoryId: 'texting_dms',
+    situation: { en: 'Asking about their day (not boring)', de: 'Nach ihrem Tag fragen (nicht langweilig)' },
+    text: {
+      en: "Rate your day 1-10. I'll tell you mine. Then we figure out how to make tomorrow a 10.",
+      de: 'Bewerte deinen Tag von 1-10. Ich sag dir meinen. Dann überlegen wir, wie morgen eine 10 wird.',
+    },
+    explanation: {
+      en: 'Turns the generic "how was your day?" into a mini-game with built-in next-step planning.',
+      de: 'Verwandelt das generische "wie war dein Tag?" in ein Mini-Spiel mit eingebautem nächsten Schritt.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'tx_15',
+    categoryId: 'texting_dms',
+    situation: { en: 'Sending a meme or photo', de: 'Ein Meme oder Foto schicken' },
+    text: {
+      en: "[Send relevant meme/photo] This reminded me of our conversation about [topic]. Tell me I'm wrong.",
+      de: '[Relevantes Meme/Foto senden] Das hat mich an unser Gespräch über [Thema] erinnert. Sag mir, dass ich falsch liege.',
+    },
+    explanation: {
+      en: '"This reminded me of you" is one of the most powerful texting moves. It shows you think about them.',
+      de: '"Das hat mich an dich erinnert" ist einer der stärksten Texting-Moves. Es zeigt, dass du an sie denkst.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CONFIDENCE BOOSTERS
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Free
+  {
+    id: 'cb_1',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Before approaching someone', de: 'Bevor du jemanden ansprichst' },
+    text: {
+      en: "Remind yourself: the worst that happens is a polite 'no'. That's it. Your life stays exactly the same.",
+      de: "Erinnere dich: das Schlimmste ist ein höfliches 'Nein'. Das war's. Dein Leben bleibt genau gleich.",
+    },
+    explanation: {
+      en: 'Reframing rejection shrinks it. The fear is always bigger than the reality.',
+      de: 'Ablehnung umzudeuten macht sie kleiner. Die Angst ist immer größer als die Realität.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_2',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'After a rejection', de: 'Nach einer Ablehnung' },
+    text: {
+      en: "They didn't reject you - they rejected a 30-second interaction. They don't know you. That's their loss, not your failure.",
+      de: 'Sie haben nicht dich abgelehnt - sie haben eine 30-Sekunden-Interaktion abgelehnt. Sie kennen dich nicht. Ihr Verlust, nicht dein Versagen.',
+    },
+    explanation: {
+      en: "Rejection feels personal but it's almost never about you. They could be taken, tired, or shy.",
+      de: 'Ablehnung fühlt sich persönlich an, aber es geht fast nie um dich. Sie könnten vergeben, müde oder schüchtern sein.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_3',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Feeling not good enough', de: 'Sich nicht gut genug fühlen' },
+    text: {
+      en: "You don't need to be perfect to be attractive. You need to be present, genuine, and interested in the other person.",
+      de: 'Du musst nicht perfekt sein, um attraktiv zu sein. Du musst präsent, echt und an der anderen Person interessiert sein.',
+    },
+    explanation: {
+      en: 'Attractiveness is 80% how you make someone feel, not how you look.',
+      de: 'Attraktivität besteht zu 80% daraus, wie du jemanden fühlen lässt, nicht wie du aussiehst.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+
+  // Premium confidence
+  {
+    id: 'cb_4',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Overcoming approach anxiety', de: 'Ansprechangst überwinden' },
+    text: {
+      en: "Count to 3, then go. Don't give your brain time to build the wall. 3... 2... 1... move.",
+      de: 'Zähle bis 3, dann geh. Gib deinem Gehirn keine Zeit, die Mauer aufzubauen. 3... 2... 1... los.',
+    },
+    explanation: {
+      en: "The 3-second rule. Hesitation is your brain's protection mode - override it with action.",
+      de: 'Die 3-Sekunden-Regel. Zögern ist der Schutzmodus deines Gehirns - überschreibe ihn mit Handlung.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_5',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Comparing yourself to others', de: 'Sich mit anderen vergleichen' },
+    text: {
+      en: "The person who seems effortlessly confident? They were nervous too. They just decided to act anyway.",
+      de: 'Die Person, die mühelos selbstbewusst wirkt? Die war auch nervös. Sie hat sich nur entschieden, trotzdem zu handeln.',
+    },
+    explanation: {
+      en: 'Confidence isn\'t absence of fear. It\'s feeling the fear and doing it anyway.',
+      de: 'Selbstvertrauen ist nicht die Abwesenheit von Angst. Es ist die Angst zu fühlen und trotzdem zu handeln.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_6',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'When a conversation goes badly', de: 'Wenn ein Gespräch schlecht läuft' },
+    text: {
+      en: "Bad conversations are reps. Every awkward moment is training for the next great one. You just leveled up.",
+      de: 'Schlechte Gespräche sind Wiederholungen. Jeder peinliche Moment ist Training für den nächsten großartigen. Du bist gerade aufgestiegen.',
+    },
+    explanation: {
+      en: 'Reframing failure as practice removes the sting and builds resilience.',
+      de: 'Misserfolg als Übung umzudeuten nimmt den Stachel und baut Widerstandskraft auf.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_7',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Body language power pose', de: 'Körpersprache-Power-Pose' },
+    text: {
+      en: "Before walking in: shoulders back, chin slightly up, take one deep breath. Your body tells your brain how to feel.",
+      de: 'Bevor du reingehst: Schultern zurück, Kinn leicht hoch, einen tiefen Atemzug. Dein Körper sagt deinem Gehirn, wie es sich fühlen soll.',
+    },
+    explanation: {
+      en: 'Amy Cuddy\'s research: 2 minutes of power posing changes your cortisol and testosterone levels.',
+      de: 'Amy Cuddys Forschung: 2 Minuten Power-Posing verändert deine Cortisol- und Testosteronwerte.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_8',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Handling ghosting', de: 'Ghosting verarbeiten' },
+    text: {
+      en: "Someone who ghosts you just saved you time. You want someone who's excited about you, not someone you have to convince.",
+      de: 'Jemand der dich ghostet hat dir gerade Zeit gespart. Du willst jemanden, der begeistert von dir ist, nicht jemanden, den du überzeugen musst.',
+    },
+    explanation: {
+      en: 'Ghosting says nothing about your worth. It says everything about their communication skills.',
+      de: 'Ghosting sagt nichts über deinen Wert. Es sagt alles über ihre Kommunikationsfähigkeiten.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_9',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Self-affirmation before a date', de: 'Selbstbestärkung vor einem Date' },
+    text: {
+      en: "You're not auditioning. You're showing up as yourself to see if there's a connection. That's all.",
+      de: 'Du bist nicht beim Vorsprechen. Du zeigst dich als du selbst, um zu sehen, ob es eine Verbindung gibt. Das ist alles.',
+    },
+    explanation: {
+      en: 'Reframing a date as mutual exploration removes performance pressure.',
+      de: 'Ein Date als gegenseitiges Erkunden umzudeuten nimmt den Leistungsdruck.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_10',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'When you feel like giving up', de: 'Wenn du aufgeben willst' },
+    text: {
+      en: "Every person in a happy relationship was once single and wondering if it would ever happen. Keep going.",
+      de: 'Jede Person in einer glücklichen Beziehung war einmal Single und hat sich gefragt, ob es jemals passiert. Mach weiter.',
+    },
+    explanation: {
+      en: 'Perspective is everything. The timeline is different for everyone, but it happens.',
+      de: 'Perspektive ist alles. Der Zeitplan ist für jeden anders, aber es passiert.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_11',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Dealing with nervousness', de: 'Nervosität bewältigen' },
+    text: {
+      en: "Nervousness and excitement are the same chemical in your brain. Tell yourself: I'm excited, not scared.",
+      de: 'Nervosität und Aufregung sind die gleiche Chemikalie in deinem Gehirn. Sag dir: Ich bin aufgeregt, nicht ängstlich.',
+    },
+    explanation: {
+      en: 'Anxiety reappraisal: relabeling your nerves as excitement actually improves performance.',
+      de: 'Angst-Umdeutung: deine Nervosität als Aufregung umzubenennen verbessert tatsächlich die Leistung.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_12',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Imposter syndrome', de: 'Hochstapler-Syndrom' },
+    text: {
+      en: "Nobody has it figured out. Everyone is improvising. The people who seem confident just got comfortable being uncomfortable.",
+      de: 'Niemand hat es raus. Alle improvisieren. Die Leute, die selbstbewusst wirken, haben sich nur daran gewöhnt, sich unwohl zu fühlen.',
+    },
+    explanation: {
+      en: 'Normalizes the struggle. Confidence is a practice, not a destination.',
+      de: 'Normalisiert den Kampf. Selbstvertrauen ist eine Übung, kein Ziel.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_13',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Social battery low', de: 'Soziale Batterie leer' },
+    text: {
+      en: "It's okay to not be 'on' all the time. Quality connections matter more than quantity. One genuine conversation beats ten shallow ones.",
+      de: "Es ist okay, nicht immer 'an' zu sein. Qualitätsverbindungen zählen mehr als Quantität. Ein echtes Gespräch schlägt zehn oberflächliche.",
+    },
+    explanation: {
+      en: 'Permission to be introverted. Not everyone needs to be the life of the party to attract people.',
+      de: 'Erlaubnis, introvertiert zu sein. Nicht jeder muss der Partylöwe sein, um Menschen anzuziehen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // DATE CONVERSATION
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Free
+  {
+    id: 'dc_1',
+    categoryId: 'date_conversation',
+    situation: { en: 'First date opener', de: 'Erster-Date-Opener' },
+    text: {
+      en: "So before we do the whole 'What do you do?' thing - what's the most interesting thing that happened to you this week?",
+      de: "Bevor wir das ganze 'Was machst du beruflich?'-Ding machen - was war das Interessanteste, das dir diese Woche passiert ist?",
+    },
+    explanation: {
+      en: 'Immediately sets a different tone from the usual boring interview-style date.',
+      de: 'Setzt sofort einen anderen Ton als das übliche langweilige Interview-Date.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_2',
+    categoryId: 'date_conversation',
+    situation: { en: 'Transition to deeper topics', de: 'Übergang zu tieferen Themen' },
+    text: {
+      en: "Okay, surface level stuff out of the way. Tell me something about you that would surprise me.",
+      de: 'Okay, Oberflächliches ist abgehakt. Erzähl mir was über dich, das mich überraschen würde.',
+    },
+    explanation: {
+      en: 'Explicitly signals you want depth. Most people are relieved when someone breaks the small talk.',
+      de: 'Signalisiert explizit, dass du Tiefe willst. Die meisten sind erleichtert, wenn jemand den Smalltalk bricht.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_3',
+    categoryId: 'date_conversation',
+    situation: { en: 'Storytelling prompt', de: 'Erzählaufforderung' },
+    text: {
+      en: "What's your best 'you won't believe this happened' story?",
+      de: "Was ist deine beste 'Das glaubst du nicht'-Geschichte?",
+    },
+    explanation: {
+      en: 'Everyone has one. This question makes them animated and gives you both something to laugh about.',
+      de: 'Jeder hat eine. Diese Frage macht sie lebendig und gibt euch beiden etwas zum Lachen.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+
+  // Premium date conversation
+  {
+    id: 'dc_4',
+    categoryId: 'date_conversation',
+    situation: { en: 'Beyond "What do you do?"', de: 'Jenseits von "Was machst du?"' },
+    text: {
+      en: "What do you do for fun that you could nerd out about for 20 minutes?",
+      de: 'Worüber könntest du 20 Minuten lang begeistert reden?',
+    },
+    explanation: {
+      en: "Gives them permission to be passionate. Watching someone light up about their interest is attractive.",
+      de: 'Gibt ihnen Erlaubnis, leidenschaftlich zu sein. Jemanden über sein Interesse strahlen zu sehen ist attraktiv.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_5',
+    categoryId: 'date_conversation',
+    situation: { en: 'Creating shared humor', de: 'Gemeinsamen Humor schaffen' },
+    text: {
+      en: "If our first date was a movie, what genre would it be so far?",
+      de: 'Wenn unser erstes Date ein Film wäre, welches Genre wäre es bisher?',
+    },
+    explanation: {
+      en: 'Meta-humor about the date itself creates an inside joke between you. Instantly bonds.',
+      de: 'Meta-Humor über das Date selbst schafft einen Insider-Witz zwischen euch. Verbindet sofort.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_6',
+    categoryId: 'date_conversation',
+    situation: { en: 'Travel stories', de: 'Reisegeschichten' },
+    text: {
+      en: "What's a place that completely changed how you see things?",
+      de: 'Welcher Ort hat komplett verändert, wie du Dinge siehst?',
+    },
+    explanation: {
+      en: 'Goes deeper than "Where have you traveled?" - gets at their transformative experiences.',
+      de: 'Geht tiefer als "Wo bist du gereist?" - kommt an ihre transformativen Erfahrungen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_7',
+    categoryId: 'date_conversation',
+    situation: { en: 'Food as conversation', de: 'Essen als Gesprächsthema' },
+    text: {
+      en: "What's your comfort food? The one you go to when the world is falling apart.",
+      de: 'Was ist dein Comfort Food? Das eine Gericht, wenn die Welt untergeht.',
+    },
+    explanation: {
+      en: 'Food is emotional and personal. This question feels warm and opens nostalgic stories.',
+      de: 'Essen ist emotional und persönlich. Diese Frage fühlt sich warm an und öffnet nostalgische Geschichten.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_8',
+    categoryId: 'date_conversation',
+    situation: { en: 'Childhood memories', de: 'Kindheitserinnerungen' },
+    text: {
+      en: "What's something you loved as a kid that you secretly still enjoy?",
+      de: 'Was hast du als Kind geliebt, das du heimlich immer noch genießt?',
+    },
+    explanation: {
+      en: 'Invites playfulness and nostalgia. People feel safe sharing childhood joys.',
+      de: 'Lädt zu Verspieltheit und Nostalgie ein. Menschen fühlen sich sicher, Kinderfreuden zu teilen.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_9',
+    categoryId: 'date_conversation',
+    situation: { en: 'End-of-date signal (positive)', de: 'Ende-des-Dates-Signal (positiv)' },
+    text: {
+      en: "I don't want this to end, but I also want us to have something to look forward to next time.",
+      de: 'Ich will nicht, dass das aufhört, aber ich will auch, dass wir beim nächsten Mal etwas haben, worauf wir uns freuen.',
+    },
+    explanation: {
+      en: 'Expresses interest while creating anticipation. Leaving them wanting more is powerful.',
+      de: 'Drückt Interesse aus und schafft gleichzeitig Vorfreude. Sie mehr wollen zu lassen ist wirkungsvoll.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_10',
+    categoryId: 'date_conversation',
+    situation: { en: 'Values check (gentle)', de: 'Werte-Check (sanft)' },
+    text: {
+      en: "What does a perfect weekend look like for you?",
+      de: 'Wie sieht ein perfektes Wochenende für dich aus?',
+    },
+    explanation: {
+      en: 'Reveals lifestyle compatibility without heavy questions. Are they a homebody or adventurer?',
+      de: 'Zeigt Lifestyle-Kompatibilität ohne schwere Fragen. Stubenhocker oder Abenteurer?',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_11',
+    categoryId: 'date_conversation',
+    situation: { en: 'Hypothetical game', de: 'Hypothetisches Spiel' },
+    text: {
+      en: "Quick round: would you rather have the ability to fly or be invisible? And why says a lot about you.",
+      de: 'Schnelle Runde: lieber fliegen können oder unsichtbar sein? Und das Warum sagt viel über dich.',
+    },
+    explanation: {
+      en: 'Light hypotheticals break tension. Adding "why says a lot" makes them think deeper.',
+      de: 'Leichte Hypothesen lösen Spannung. "Sagt viel über dich" bringt sie zum tieferen Nachdenken.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_12',
+    categoryId: 'date_conversation',
+    situation: { en: 'Music as bonding', de: 'Musik als Verbindung' },
+    text: {
+      en: "What song is your guilty pleasure? The one you play when nobody's watching.",
+      de: 'Was ist dein Guilty-Pleasure-Song? Der eine, den du hörst, wenn keiner zuschaut.',
+    },
+    explanation: {
+      en: 'Music preferences create instant bonding or hilarious debates. Both are wins.',
+      de: 'Musikgeschmack schafft sofortige Verbindung oder witzige Debatten. Beides ist ein Gewinn.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_13',
+    categoryId: 'date_conversation',
+    situation: { en: 'Bucket list sharing', de: 'Bucket-List teilen' },
+    text: {
+      en: "Top 3 things on your bucket list. Go. No overthinking.",
+      de: 'Top 3 Dinge auf deiner Bucket-List. Los. Nicht lang nachdenken.',
+    },
+    explanation: {
+      en: 'Fast-paced format creates energy. Their instant answers reveal real desires, not curated ones.',
+      de: 'Schnelles Format erzeugt Energie. Ihre spontanen Antworten zeigen echte Wünsche, nicht kuratierte.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_14',
+    categoryId: 'date_conversation',
+    situation: { en: 'Pet peeves (bonding through humor)', de: 'Nervige Sachen (Verbindung durch Humor)' },
+    text: {
+      en: "What's something small that irrationally annoys you? Mine is [funny example].",
+      de: 'Was nervt dich irrational? Bei mir ist es [lustiges Beispiel].',
+    },
+    explanation: {
+      en: 'Sharing pet peeves is weirdly bonding. Going first makes them comfortable sharing.',
+      de: 'Pet Peeves zu teilen verbindet seltsamerweise. Zuerst zu teilen macht es ihnen leichter.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'dc_15',
+    categoryId: 'date_conversation',
+    situation: { en: 'Two truths and a lie', de: 'Zwei Wahrheiten und eine Lüge' },
+    text: {
+      en: "Let's play two truths and a lie. I'll go first. [Share 3 things]. Guess which one is fake.",
+      de: 'Lass uns Zwei Wahrheiten und eine Lüge spielen. Ich fange an. [3 Dinge teilen]. Rate, welche gelogen ist.',
+    },
+    explanation: {
+      en: 'Turns conversation into a game. You learn fun facts about each other and create laughter.',
+      de: 'Verwandelt das Gespräch in ein Spiel. Man lernt lustige Fakten und schafft Gelächter.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // BODY LANGUAGE + WORDS
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Free
+  {
+    id: 'bl_1',
+    categoryId: 'body_language',
+    situation: { en: 'Eye contact basics', de: 'Blickkontakt-Grundlagen' },
+    text: {
+      en: "Hold eye contact for 3-5 seconds, then break it by looking to the side (not down). Looking down signals submission.",
+      de: 'Halte Blickkontakt für 3-5 Sekunden, dann brich ihn zur Seite (nicht nach unten). Nach unten schauen signalisiert Unterwerfung.',
+    },
+    explanation: {
+      en: 'The triangle technique: alternate between left eye, right eye, and mouth when talking closely.',
+      de: 'Die Dreieckstechnik: Wechsle zwischen linkem Auge, rechtem Auge und Mund beim nahen Gespräch.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_2',
+    categoryId: 'body_language',
+    situation: { en: 'Open body language', de: 'Offene Körpersprache' },
+    text: {
+      en: "Uncross your arms, face them directly, and lean in slightly when they talk. Your body should say: I'm interested.",
+      de: 'Öffne die Arme, wende dich ihnen direkt zu und lehne dich leicht vor, wenn sie reden. Dein Körper sollte sagen: Ich bin interessiert.',
+    },
+    explanation: {
+      en: 'People read body language before words. Open posture = approachable and confident.',
+      de: 'Menschen lesen Körpersprache vor Worten. Offene Haltung = zugänglich und selbstbewusst.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_3',
+    categoryId: 'body_language',
+    situation: { en: 'Mirroring', de: 'Spiegeln' },
+    text: {
+      en: "Subtly mirror their posture and gestures. If they lean in, you lean in. If they gesture with hands, you do too.",
+      de: 'Spiegele subtil ihre Haltung und Gesten. Wenn sie sich vorlehnen, lehne dich vor. Wenn sie mit Händen gestikulieren, tue es auch.',
+    },
+    explanation: {
+      en: 'Mirroring triggers unconscious rapport. It makes people feel understood without knowing why.',
+      de: 'Spiegeln löst unbewusste Verbindung aus. Es gibt Menschen das Gefühl, verstanden zu werden.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+
+  // Premium body language
+  {
+    id: 'bl_4',
+    categoryId: 'body_language',
+    situation: { en: 'Touch escalation', de: 'Berührungs-Eskalation' },
+    text: {
+      en: "Start with safe touches: light tap on shoulder while laughing, brief touch on arm to emphasize a point. Read their reaction.",
+      de: 'Beginne mit sicheren Berührungen: leichtes Tippen auf die Schulter beim Lachen, kurze Armberührung um einen Punkt zu betonen. Lies ihre Reaktion.',
+    },
+    explanation: {
+      en: 'Physical touch builds connection fast. If they lean into it, good. If they stiffen, pull back.',
+      de: 'Physische Berührung baut schnell Verbindung auf. Wenn sie sich anlehnen, gut. Wenn sie steif werden, zurück.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_5',
+    categoryId: 'body_language',
+    situation: { en: 'Voice tonality', de: 'Stimmtonalität' },
+    text: {
+      en: "Slow down your speech. Pause before key words. Lower your pitch slightly at the end of statements. Confidence sounds unhurried.",
+      de: 'Verlangsame dein Sprechtempo. Pausiere vor Schlüsselwörtern. Senke die Stimme leicht am Ende von Aussagen. Selbstvertrauen klingt ungehetzt.',
+    },
+    explanation: {
+      en: 'Fast talking = nervous. Slow, deliberate speech with pauses = powerful and magnetic.',
+      de: 'Schnelles Reden = nervös. Langsames, bewusstes Sprechen mit Pausen = kraftvoll und magnetisch.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_6',
+    categoryId: 'body_language',
+    situation: { en: 'Smile with eyes', de: 'Mit den Augen lächeln' },
+    text: {
+      en: "A genuine smile reaches your eyes (crow's feet). Practice: think of something that actually makes you happy, then smile.",
+      de: "Ein echtes Lächeln erreicht die Augen (Krähenfüße). Übe: denk an etwas, das dich wirklich glücklich macht, dann lächle.",
+    },
+    explanation: {
+      en: 'Duchenne smile (eyes + mouth) is perceived as 10x more attractive than a polite mouth-only smile.',
+      de: 'Duchenne-Lächeln (Augen + Mund) wird als 10x attraktiver wahrgenommen als ein höfliches Nur-Mund-Lächeln.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_7',
+    categoryId: 'body_language',
+    situation: { en: 'Reading interest signals', de: 'Interesse-Signale lesen' },
+    text: {
+      en: "Positive signs: they face you fully, play with hair, find excuses to touch you, lean in, maintain eye contact, laugh easily.",
+      de: 'Positive Zeichen: volle Zuwendung, mit Haaren spielen, Ausreden zum Berühren finden, sich vorlehnen, Blickkontakt halten, leicht lachen.',
+    },
+    explanation: {
+      en: 'Look for clusters (3+ signals together), not single cues. One signal means nothing; three means something.',
+      de: 'Achte auf Cluster (3+ Signale zusammen), nicht einzelne. Ein Signal bedeutet nichts; drei bedeuten etwas.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_8',
+    categoryId: 'body_language',
+    situation: { en: 'Walking with confidence', de: 'Selbstbewusst gehen' },
+    text: {
+      en: "Walk like you have somewhere to be. Head up, shoulders relaxed, moderate pace. Confident people don't rush or shuffle.",
+      de: 'Geh, als hättest du ein Ziel. Kopf hoch, Schultern entspannt, gemäßigtes Tempo. Selbstbewusste Menschen hasten oder schlurfen nicht.',
+    },
+    explanation: {
+      en: 'How you enter a room sets the first impression before you say a word.',
+      de: 'Wie du einen Raum betrittst, setzt den ersten Eindruck, bevor du ein Wort sagst.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_9',
+    categoryId: 'body_language',
+    situation: { en: 'The head tilt', de: 'Die Kopfneigung' },
+    text: {
+      en: "Tilt your head slightly while listening. It's a universal sign of interest and engagement that makes people feel heard.",
+      de: 'Neige deinen Kopf leicht beim Zuhören. Ein universelles Zeichen von Interesse, das Menschen das Gefühl gibt, gehört zu werden.',
+    },
+    explanation: {
+      en: 'Dogs do it instinctively. In humans, it exposes the neck (vulnerability signal) which builds trust.',
+      de: 'Hunde machen es instinktiv. Bei Menschen entblößt es den Hals (Verletzlichkeitssignal), was Vertrauen aufbaut.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_10',
+    categoryId: 'body_language',
+    situation: { en: 'Space and proximity', de: 'Raum und Nähe' },
+    text: {
+      en: "Gradually decrease distance during conversation. Start at arm's length, move closer as rapport builds. Let them set the final distance.",
+      de: 'Verringere den Abstand allmählich während des Gesprächs. Beginne auf Armlänge, komm näher wenn Vertrauen wächst. Lass sie den finalen Abstand bestimmen.',
+    },
+    explanation: {
+      en: 'Proxemics: intimate zone is under 50cm. Getting there naturally (not abruptly) signals mutual comfort.',
+      de: 'Proxemik: Intimzone ist unter 50cm. Natürlich (nicht abrupt) dorthin zu kommen signalisiert gegenseitiges Wohlbefinden.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_11',
+    categoryId: 'body_language',
+    situation: { en: 'Hand gestures while talking', de: 'Handgesten beim Sprechen' },
+    text: {
+      en: "Use open palm gestures when speaking. Visible palms signal honesty and openness. Hidden or clenched hands feel guarded.",
+      de: 'Benutze offene Handflächengesten beim Sprechen. Sichtbare Handflächen signalisieren Ehrlichkeit. Versteckte oder geballte Hände wirken verschlossen.',
+    },
+    explanation: {
+      en: 'TED talk speakers who gesture score higher on trust and likability. Your hands are storytelling tools.',
+      de: 'TED-Talk-Sprecher, die gestikulieren, punkten höher bei Vertrauen und Sympathie. Deine Hände sind Erzählwerkzeuge.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_12',
+    categoryId: 'body_language',
+    situation: { en: 'Reading disinterest signals', de: 'Desinteresse-Signale lesen' },
+    text: {
+      en: "Red flags: crossed arms, angled body away, short answers, checking phone, no eye contact. These mean: gracefully exit.",
+      de: 'Warnzeichen: verschränkte Arme, abgewandter Körper, kurze Antworten, aufs Handy schauen, kein Blickkontakt. Das bedeutet: elegant zurückziehen.',
+    },
+    explanation: {
+      en: "Reading disinterest is as important as reading interest. Respecting 'no' signals is attractive in itself.",
+      de: "Desinteresse zu lesen ist genauso wichtig wie Interesse. 'Nein'-Signale zu respektieren ist an sich attraktiv.",
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'bl_13',
+    categoryId: 'body_language',
+    situation: { en: 'Playful touch with words', de: 'Spielerische Berührung mit Worten' },
+    text: {
+      en: "Say 'Come here, I want to show you something' while lightly guiding them by the elbow. Physical leading + curiosity = irresistible.",
+      de: "Sag 'Komm, ich will dir was zeigen' während du sie leicht am Ellbogen führst. Physisches Führen + Neugier = unwiderstehlich.",
+    },
+    explanation: {
+      en: 'Combining a verbal cue with gentle physical guidance creates a cinematic moment.',
+      de: 'Einen verbalen Hinweis mit sanfter physischer Führung zu kombinieren erzeugt einen filmreifen Moment.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cl_11',
+    categoryId: 'closing_lines',
+    situation: { en: 'Instagram exchange', de: 'Instagram-Tausch' },
+    text: {
+      en: "I'm more of an Instagram person. What's yours? I'll slide into your DMs with something creative.",
+      de: 'Ich bin eher der Instagram-Typ. Was ist deins? Ich slide in deine DMs mit was Kreativem.',
+    },
+    explanation: {
+      en: 'Lower barrier than phone numbers. Social media feels less committal for both parties.',
+      de: 'Niedrigere Hürde als Telefonnummern. Social Media fühlt sich für beide Seiten weniger verbindlich an.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cl_12',
+    categoryId: 'closing_lines',
+    situation: { en: 'The soft close', de: 'Der sanfte Abschluss' },
+    text: {
+      en: "I don't want to keep you, but I'd genuinely love to continue this. No pressure - here's my number if you want to.",
+      de: 'Ich will dich nicht aufhalten, aber ich würde das wirklich gerne fortsetzen. Kein Druck - hier ist meine Nummer, falls du willst.',
+    },
+    explanation: {
+      en: 'Giving your number instead of asking for theirs removes all pressure. Power move that shows confidence.',
+      de: 'Deine Nummer zu geben statt zu fragen entfernt allen Druck. Power Move der Selbstvertrauen zeigt.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'cb_14',
+    categoryId: 'confidence_boosters',
+    situation: { en: 'Morning mindset', de: 'Morgen-Mindset' },
+    text: {
+      en: "Today's mantra: I don't chase. I attract. What's meant for me will recognize me.",
+      de: 'Heutiges Mantra: Ich jage nicht. Ich ziehe an. Was für mich bestimmt ist, wird mich erkennen.',
+    },
+    explanation: {
+      en: 'Abundance mindset over scarcity mindset. Chasing pushes people away; being magnetic draws them in.',
+      de: 'Überfluss-Mindset statt Mangel-Mindset. Jagen stößt ab; magnetisch sein zieht an.',
     },
     isPremium: true,
     forGender: 'all',

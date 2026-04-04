@@ -11,21 +11,7 @@
     "title": "Deine Reise",
     "progress": "Gesamt-\nfortschritt",
     "streak": "Tage-Streak",
-    "dailyTip": "Tipp des Tages",
-    "chapters": "Kapitel abgeschlossen",
-    "books": "Bücher gelesen",
-    "tips": [
-      "Selbstbewusstsein beginnt mit Blickkontakt. Übe heute, ihn 3 Sekunden zu halten.",
-      "Die besten Gespräche beginnen mit echter Neugier. Frage öfter 'warum'.",
-      "Deine Körpersprache spricht bevor du es tust. Steh aufrecht, Schultern zurück.",
-      "Ablehnung ist Umleitung. Jedes 'Nein' bringt dich näher zum richtigen 'Ja'.",
-      "Höre mehr zu als du sprichst. Die attraktivsten Menschen geben anderen das Gefühl, gehört zu werden.",
-      "Humor ist deine Superkraft. Nimm dich selbst nicht zu ernst.",
-      "Ein ehrliches Kompliment kann jemandem den ganzen Tag verschönern. Probiere es.",
-      "Ein Nein ist besser als Unwissenheit.",
-      "Zu spät ist eine verpasste Chance.",
-      "'Ich spreche sie nächstes Mal an'... wirst du nicht."
-    ]
+    "chapters": "Kapitel abgeschlossen"
   },
   "guide": {
     "title": "Der Guide",

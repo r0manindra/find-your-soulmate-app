@@ -13,6 +13,7 @@ interface ChatHistoryModalProps {
   visible: boolean;
   onClose: () => void;
   onNewChat: () => void;
+  embedded?: boolean;
 }
 
 function formatRelativeTime(timestamp: number): string {
@@ -28,7 +29,7 @@ function formatRelativeTime(timestamp: number): string {
   return `${weeks}w`;
 }
 
-export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryModalProps) {
+export function ChatHistoryModal({ visible, onClose, onNewChat, embedded }: ChatHistoryModalProps) {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -102,14 +103,9 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
     );
   };
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
+  const content = (
+    <>
+      {!embedded && (
         <View style={styles.header}>
           <Text style={[styles.title, isDark && styles.titleDark]}>
             {t('coach.chatHistory')}
@@ -118,34 +114,51 @@ export function ChatHistoryModal({ visible, onClose, onNewChat }: ChatHistoryMod
             <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
           </Pressable>
         </View>
+      )}
 
-        <Pressable onPress={handleNewChatPress} style={styles.newChatBtn}>
-          <LinearGradient
-            colors={['#E8435A', '#FF7854']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.newChatGradient}
-          >
-            <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.newChatText}>{t('coach.startNewChat')}</Text>
-          </LinearGradient>
-        </Pressable>
+      <Pressable onPress={handleNewChatPress} style={styles.newChatBtn}>
+        <LinearGradient
+          colors={['#E8435A', '#FF7854']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.newChatGradient}
+        >
+          <Ionicons name="add" size={20} color="#fff" />
+          <Text style={styles.newChatText}>{t('coach.startNewChat')}</Text>
+        </LinearGradient>
+      </Pressable>
 
-        <FlatList
-          data={conversations}
-          keyExtractor={(item) => item.id}
-          renderItem={renderConversation}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Ionicons name="chatbubbles-outline" size={40} color={isDark ? '#525252' : '#D4D4D4'} />
-              <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
-                {t('coach.noChatsYet')}
-              </Text>
-            </View>
-          }
-        />
+      <FlatList
+        data={conversations}
+        keyExtractor={(item) => item.id}
+        renderItem={renderConversation}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Ionicons name="chatbubbles-outline" size={40} color={isDark ? '#525252' : '#D4D4D4'} />
+            <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
+              {t('coach.noChatsYet')}
+            </Text>
+          </View>
+        }
+      />
+    </>
+  );
+
+  if (embedded) {
+    return <View style={{ flex: 1 }}>{content}</View>;
+  }
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]}>
+        {content}
       </SafeAreaView>
     </Modal>
   );

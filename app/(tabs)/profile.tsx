@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TextInput, Pressable, Alert, Linking, Modal, Switch, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TextInput, Pressable, Alert, Modal, Switch, StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -24,21 +24,15 @@ export default function ProfileScreen() {
   const router = useRouter();
   const progress = useProgressStore();
   const { locale, setLocale, themeMode, setThemeMode, habitNudgesEnabled, setHabitNudgesEnabled } = useSettingsStore();
-  const { user, isLoggedIn, isPremium, isProPlus, hasPdfAccess, logout } = useAuthStore();
+  const { user, isLoggedIn, isPremium, logout } = useAuthStore();
   const userProfile = useUserProfileStore();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
-  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const [devTapCount, setDevTapCount] = useState(0);
   const [showDevUnlock, setShowDevUnlock] = useState(false);
   const [devKey, setDevKey] = useState('');
-
-  const unlockedAchievements = useMemo(
-    () => achievements.filter((a) => a.condition(progress)),
-    [progress]
-  );
 
   const toggleLanguage = () => {
     const newLocale = locale === 'en' ? 'de' : 'en';
@@ -90,27 +84,6 @@ export default function ProfileScreen() {
         },
       ]
     );
-  };
-
-  const canAccessPdf = hasPdfAccess || isProPlus;
-
-  const handleDownloadPdf = async () => {
-    if (!canAccessPdf) {
-      router.push('/paywall?trigger=chapter');
-      return;
-    }
-    setDownloadingPdf(true);
-    try {
-      // Open PDF URL in browser — backend serves the PDF directly
-      const token = await api.getToken?.() ?? '';
-      const baseUrl = __DEV__ ? 'http://localhost:3000/api' : 'https://find-your-soulmate-app-production.up.railway.app/api';
-      await Linking.openURL(`${baseUrl}/pdf/guide?token=${token}`);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {
-      Alert.alert('Error', locale === 'de' ? 'PDF konnte nicht geladen werden' : 'Could not download PDF');
-    } finally {
-      setDownloadingPdf(false);
-    }
   };
 
   return (
@@ -194,38 +167,6 @@ export default function ProfileScreen() {
             </View>
           </GlassCard>
         )}
-
-        {/* Premium PDF Download */}
-        <GlassCard style={styles.pdfCard}>
-          <Pressable
-            onPress={handleDownloadPdf}
-            disabled={downloadingPdf}
-            style={styles.pdfContent}
-          >
-            <View style={styles.pdfIconContainer}>
-              <Ionicons name="document-text" size={24} color="#E8435A" />
-            </View>
-            <View style={styles.pdfInfo}>
-              <Text style={[styles.pdfTitle, isDark && styles.textDark]}>
-                {locale === 'de' ? 'PDF Guide' : 'PDF Guide'}
-              </Text>
-              <Text style={styles.pdfDesc}>
-                {downloadingPdf
-                  ? (locale === 'de' ? 'Wird geladen...' : 'Loading...')
-                  : canAccessPdf
-                    ? (locale === 'de' ? 'Tippen zum Herunterladen' : 'Tap to download')
-                    : isPremium
-                      ? (locale === 'de' ? 'Separat kaufen oder auf PRO+ upgraden' : 'Buy separately or upgrade to PRO+')
-                      : (locale === 'de' ? 'PRO+ Abo oder separat kaufen' : 'PRO+ subscription or buy separately')}
-              </Text>
-            </View>
-            <Ionicons
-              name={canAccessPdf ? 'download-outline' : 'lock-closed'}
-              size={20}
-              color={canAccessPdf ? '#E8435A' : '#A3A3A3'}
-            />
-          </Pressable>
-        </GlassCard>
 
         {/* Charismo Profile */}
         {userProfile.hasCompletedOnboarding && userProfile.socialEnergy && (
@@ -635,18 +576,6 @@ const styles = StyleSheet.create({
   authButtons: { width: '100%', gap: 10 },
   loginButton: { alignItems: 'center', paddingVertical: 12 },
   loginButtonText: { fontSize: 16, fontWeight: '600', color: '#E8435A' },
-
-  // PDF
-  pdfCard: { marginBottom: 16 },
-  pdfContent: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  pdfIconContainer: {
-    width: 48, height: 48, borderRadius: 14,
-    backgroundColor: 'rgba(232,67,90,0.08)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  pdfInfo: { flex: 1 },
-  pdfTitle: { fontSize: 17, fontWeight: '700', color: '#171717', letterSpacing: -0.2 },
-  pdfDesc: { fontSize: 13, color: '#737373', marginTop: 2 },
 
   // Charismo Profile
   charismoCard: { marginBottom: 24 },

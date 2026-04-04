@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -6,15 +6,15 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withTiming, FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeInDown } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
 import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
-import { chapters, phases } from '@/src/data/content/chapters';
-import { books } from '@/src/data/content/books';
+import { chapters } from '@/src/data/content/chapters';
+import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { useAuthStore } from '@/src/store/auth-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
@@ -122,51 +122,6 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   );
 }
 
-function JourneyMiniMap({ completedChapters, isDark }: { completedChapters: number[]; isDark: boolean }) {
-  const locale = useSettingsStore((s) => s.locale);
-
-  return (
-    <View style={styles.miniMap}>
-      {phases.map((phase) => {
-        const phaseChapters = chapters.filter((c) => c.phase === phase.id);
-        const completedInPhase = phaseChapters.filter((c) =>
-          completedChapters.includes(c.id)
-        ).length;
-        const isComplete = completedInPhase === phaseChapters.length;
-        const isActive = completedInPhase > 0 && !isComplete;
-        const progress = completedInPhase / phaseChapters.length;
-
-        return (
-          <View key={phase.id} style={styles.miniMapPhase}>
-            <View
-              style={[
-                styles.miniMapDot,
-                isDark && styles.miniMapDotDark,
-                isComplete && styles.miniMapDotComplete,
-                isActive && styles.miniMapDotActive,
-              ]}
-            >
-              {isComplete ? (
-                <Ionicons name="checkmark" size={10} color="#fff" />
-              ) : isActive ? (
-                <View
-                  style={[
-                    styles.miniMapProgress,
-                    { height: `${progress * 100}%` },
-                  ]}
-                />
-              ) : null}
-            </View>
-            <Text style={[styles.miniMapLabel, isDark && styles.miniMapLabelDark, (isComplete || isActive) && styles.miniMapLabelActive]}>
-              {phase.id}
-            </Text>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
 function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay, customIcon }: { icon: string; label: string; subtitle?: string; onPress: () => void; isDark: boolean; delay: number; customIcon?: React.ReactNode }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -196,13 +151,15 @@ function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay, cust
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const { completedChapters, completedBooks, streak, updateStreak } = useProgressStore();
+  const { completedChapters, streak, updateStreak } = useProgressStore();
   const locale = useSettingsStore((s) => s.locale);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const userGender = useUserProfileStore((s) => s.userGender);
+  const [personalizeCardDismissed, setPersonalizeCardDismissed] = useState(false);
 
   useEffect(() => {
     updateStreak();
@@ -215,12 +172,6 @@ export default function HomeScreen() {
     const lines = locale === 'de' ? MOTIVATIONAL_LINES_DE : MOTIVATIONAL_LINES_EN;
     return lines[new Date().getDate() % lines.length];
   }, [locale]);
-
-  const dailyTip = useMemo(() => {
-    const tips = t('home.tips', { returnObjects: true }) as string[];
-    const dayIndex = new Date().getDate() % tips.length;
-    return tips[dayIndex];
-  }, [t]);
 
   return (
     <View style={[styles.safeArea, isDark && styles.safeAreaDark, { paddingTop: insets.top }]}>
@@ -237,6 +188,37 @@ export default function HomeScreen() {
           <Text style={[styles.greetingSubtitle, isDark && styles.greetingSubtitleDark]}>{motivationalLine}</Text>
         </Animated.View>
 
+        {/* Personalize card for users who skipped onboarding */}
+        {!userGender && !personalizeCardDismissed && (
+          <Animated.View entering={FadeInDown.delay(80).duration(400)}>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/onboarding' as any);
+              }}
+              style={[styles.personalizeCard, isDark && styles.personalizeCardDark]}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.personalizeTitle, isDark && { color: '#F5F5F5' }]}>
+                  {locale === 'de' ? 'Erfahrung personalisieren' : 'Personalize your experience'}
+                </Text>
+                <Text style={[styles.personalizeSubtitle, isDark && { color: '#A3A3A3' }]}>
+                  {locale === 'de' ? '3 schnelle Fragen für bessere Inhalte' : '3 quick questions for better content'}
+                </Text>
+              </View>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setPersonalizeCardDismissed(true);
+                }}
+                hitSlop={8}
+              >
+                <Ionicons name="close" size={18} color="#A3A3A3" />
+              </Pressable>
+            </Pressable>
+          </Animated.View>
+        )}
+
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <ContinueCard locale={locale} />
         </Animated.View>
@@ -251,9 +233,9 @@ export default function HomeScreen() {
             delay={200}
           />
           <QuickActionButton
-            icon="checkmark-circle-outline"
-            label="Habits"
-            onPress={() => router.push('/habits' as any)}
+            icon="chatbubble-ellipses-outline"
+            label={locale === 'de' ? 'Sprüche' : 'Phrases'}
+            onPress={() => router.push('/phrasebook' as any)}
             isDark={isDark}
             delay={250}
           />
@@ -266,30 +248,6 @@ export default function HomeScreen() {
             delay={300}
           />
         </View>
-
-        {/* Phrasebook Link */}
-        <Animated.View entering={FadeInDown.delay(320).duration(400)}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/phrasebook' as any);
-            }}
-            style={[styles.phrasebookLink, isDark && styles.phrasebookLinkDark]}
-          >
-            <View style={styles.phrasebookIcon}>
-              <Ionicons name="chatbubble-ellipses" size={20} color="#8B5CF6" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
-                {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirting Phrasebook'}
-              </Text>
-              <Text style={[styles.phrasebookSubtitle, isDark && styles.phrasebookSubtitleDark]}>
-                {locale === 'de' ? 'Sprüche, Komplimente & mehr' : 'Lines, compliments & more'}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />
-          </Pressable>
-        </Animated.View>
 
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
@@ -304,30 +262,12 @@ export default function HomeScreen() {
                 <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedChapters.length}/{chapters.length}</Text>
                 <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.chapters')}</Text>
               </View>
-              <View>
-                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedBooks.length}/{books.length}</Text>
-                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.books')}</Text>
-              </View>
               <View style={styles.streakStatRow}>
                 <Ionicons name="flame" size={20} color="#FF7854" />
                 <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{streak}</Text>
                 <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.streak')}</Text>
               </View>
             </View>
-          </View>
-          <JourneyMiniMap completedChapters={completedChapters} isDark={isDark} />
-        </GlassCard>
-
-        <GlassCard style={styles.tipCard}>
-          <View style={styles.tipAccent} />
-          <View style={styles.tipBody}>
-            <View style={styles.tipHeader}>
-              <View style={styles.tipIconWrap}>
-                <Ionicons name="bulb" size={16} color="#FF7854" />
-              </View>
-              <Text style={styles.tipTitle}>{t('home.dailyTip')}</Text>
-            </View>
-            <Text style={[styles.tipText, isDark && styles.tipTextDark]}>{dailyTip}</Text>
           </View>
         </GlassCard>
       </ScrollView>
@@ -345,6 +285,30 @@ const styles = StyleSheet.create({
   titleDark: { color: '#F5F5F5' },
   greetingSubtitle: { fontSize: 15, color: '#737373', marginBottom: 20 },
   greetingSubtitleDark: { color: '#A3A3A3' },
+
+  // Personalize card
+  personalizeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    backgroundColor: 'rgba(232,67,90,0.06)',
+    borderRadius: 14,
+    marginBottom: 12,
+  },
+  personalizeCardDark: {
+    backgroundColor: 'rgba(232,67,90,0.12)',
+  },
+  personalizeTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#171717',
+  },
+  personalizeSubtitle: {
+    fontSize: 13,
+    color: '#737373',
+    marginTop: 2,
+  },
 
   // Continue Card
   continueCard: {
@@ -428,58 +392,6 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 13, color: '#737373', marginTop: 2 },
   statLabelDark: { color: '#A3A3A3' },
 
-  // Journey mini-map
-  miniMap: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 16,
-    paddingTop: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-  },
-  miniMapPhase: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  miniMapDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#E5E5E5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  miniMapDotDark: {
-    backgroundColor: '#404040',
-  },
-  miniMapDotComplete: {
-    backgroundColor: '#E8435A',
-  },
-  miniMapDotActive: {
-    backgroundColor: '#E5E5E5',
-    borderWidth: 2,
-    borderColor: '#E8435A',
-  },
-  miniMapProgress: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(232,67,90,0.3)',
-  },
-  miniMapLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#A3A3A3',
-  },
-  miniMapLabelDark: {
-    color: '#737373',
-  },
-  miniMapLabelActive: {
-    color: '#E8435A',
-  },
-
   // Quick Actions
   quickActionsRow: {
     flexDirection: 'row',
@@ -521,60 +433,4 @@ const styles = StyleSheet.create({
     gap: 6,
   },
 
-  // Phrasebook link
-  phrasebookLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    backgroundColor: 'rgba(139,92,246,0.06)',
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  phrasebookLinkDark: {
-    backgroundColor: 'rgba(139,92,246,0.12)',
-  },
-  phrasebookIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(139,92,246,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phrasebookTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#171717',
-    letterSpacing: -0.2,
-  },
-  phrasebookTitleDark: { color: '#F5F5F5' },
-  phrasebookSubtitle: {
-    fontSize: 12,
-    color: '#737373',
-    marginTop: 2,
-  },
-  phrasebookSubtitleDark: { color: '#A3A3A3' },
-
-  // Tip
-  tipCard: { marginBottom: 16, flexDirection: 'row', overflow: 'hidden' },
-  tipAccent: {
-    width: 4,
-    borderRadius: 2,
-    marginRight: 0,
-    backgroundColor: '#FF7854',
-  },
-  tipBody: { flex: 1, paddingLeft: 14 },
-  tipHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  tipIconWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,120,84,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tipTitle: { fontSize: 12, fontWeight: '700', color: '#FF7854', textTransform: 'uppercase', letterSpacing: 0.8 },
-  tipText: { fontSize: 16, lineHeight: 23, color: '#404040', fontStyle: 'italic' },
-  tipTextDark: { color: '#D4D4D4' },
 });

@@ -1,7 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import 'react-native-reanimated';
@@ -240,10 +240,7 @@ function I18nSync() {
 
 /** Redirects to onboarding if user hasn't completed it */
 function OnboardingGate() {
-  const router = useRouter();
-  const segments = useSegments();
   const hasCompletedOnboarding = useUserProfileStore((s) => s.hasCompletedOnboarding);
-  const completedChapters = useProgressStore((s) => s.completedChapters);
   const [hydrated, setHydrated] = useState(false);
 
   // Wait for both stores to hydrate before routing
@@ -267,19 +264,12 @@ function OnboardingGate() {
   useEffect(() => {
     if (!hydrated) return;
 
-    const inOnboarding = segments[0] === 'onboarding';
-
-    // Skip onboarding for existing users who already have progress
-    if (!hasCompletedOnboarding && completedChapters.length > 0) {
+    // Skip onboarding automatically — dashboard is now the first screen.
+    // Users can personalize later via the dashboard card.
+    if (!hasCompletedOnboarding) {
       useUserProfileStore.getState().skipOnboarding();
-      return;
     }
-
-    // Redirect to onboarding if not completed and not already there
-    if (!hasCompletedOnboarding && !inOnboarding) {
-      router.replace('/onboarding');
-    }
-  }, [hydrated, hasCompletedOnboarding, segments, completedChapters.length, router]);
+  }, [hydrated, hasCompletedOnboarding]);
 
   return null;
 }

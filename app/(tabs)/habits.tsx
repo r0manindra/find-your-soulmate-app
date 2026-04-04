@@ -11,12 +11,10 @@ import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { BrandButton } from '@/src/presentation/components/ui/brand-button';
 import { AddHabitModal } from '@/src/presentation/components/habits/add-habit-modal';
 import { HabitCalendar } from '@/src/presentation/components/habits/habit-calendar';
-import { WeeklyReview } from '@/src/presentation/components/habits/weekly-review';
 import { useHabitStore } from '@/src/store/habit-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { useAuthStore } from '@/src/store/auth-store';
 import { createHabitEvent } from '@/src/services/calendar';
-import { getTopNudge } from '@/src/core/habit-nudges';
 import type { Habit } from '@/src/core/entities/habit-types';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -129,30 +127,14 @@ const HabitRow = React.memo(function HabitRow({
   );
 });
 
-type TimeSlotKey = 'morning' | 'afternoon' | 'evening' | 'anytime';
+const TIME_SLOT_ORDER = ['morning', 'afternoon', 'evening', 'anytime'] as const;
 
-const TIME_SLOT_CONFIG: { key: TimeSlotKey; icon: string; en: string; de: string }[] = [
-  { key: 'morning', icon: 'sunny-outline', en: 'Morning', de: 'Morgens' },
-  { key: 'afternoon', icon: 'partly-sunny-outline', en: 'Afternoon', de: 'Nachmittags' },
-  { key: 'evening', icon: 'moon-outline', en: 'Evening', de: 'Abends' },
-  { key: 'anytime', icon: 'time-outline', en: 'Anytime', de: 'Jederzeit' },
-];
-
-function groupByTimeSlot(habits: Habit[]): Record<TimeSlotKey, Habit[]> {
-  const groups: Record<TimeSlotKey, Habit[]> = {
-    morning: [],
-    afternoon: [],
-    evening: [],
-    anytime: [],
-  };
-
-  for (const h of habits) {
-    const slot = h.scheduledTime ?? 'anytime';
-    const key = slot === null ? 'anytime' : slot;
-    groups[key].push(h);
-  }
-
-  return groups;
+function sortByTimeSlot(habits: Habit[]): Habit[] {
+  return [...habits].sort((a, b) => {
+    const aIdx = TIME_SLOT_ORDER.indexOf((a.scheduledTime ?? 'anytime') as any);
+    const bIdx = TIME_SLOT_ORDER.indexOf((b.scheduledTime ?? 'anytime') as any);
+    return aIdx - bIdx;
+  });
 }
 
 const FREE_HABIT_LIMIT = 5;
@@ -160,8 +142,6 @@ const FREE_HABIT_LIMIT = 5;
 export default function HabitsScreen() {
   const { t } = useTranslation();
   const locale = useSettingsStore((s) => s.locale);
-  const characterId = useSettingsStore((s) => s.selectedCharacterId);
-  const habitNudgesEnabled = useSettingsStore((s) => s.habitNudgesEnabled);
   const isPremium = useAuthStore((s) => s.isPremium);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -171,12 +151,9 @@ export default function HabitsScreen() {
   const completions = useHabitStore((s) => s.completions);
   const toggleCompletion = useHabitStore((s) => s.toggleCompletion);
   const archiveHabit = useHabitStore((s) => s.archiveHabit);
-  const isCompletedToday = useHabitStore((s) => s.isCompletedToday);
   const getStreak = useHabitStore((s) => s.getStreak);
-  const setHabitSchedule = useHabitStore((s) => s.setHabitSchedule);
 
   const [showModal, setShowModal] = useState(false);
-  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   const activeHabits = useMemo(
@@ -215,24 +192,7 @@ export default function HabitsScreen() {
     return { done, total, allDone: total > 0 && done === total };
   }, [habitsForDate, completions, dateStr]);
 
-  const timeGroups = useMemo(() => groupByTimeSlot(habitsForDate), [habitsForDate]);
-
-  const nudge = useMemo(() => {
-    if (!habitNudgesEnabled || nudgeDismissed || activeHabits.length === 0 || !isToday) return null;
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const contexts = activeHabits.map((h) => {
-      const streak = getStreak(h.id);
-      return {
-        habit: h,
-        streak,
-        missedYesterday:
-          streak.current === 0 &&
-          !completions.some((c) => c.habitId === h.id && c.date === yesterday),
-        completedToday: isCompletedToday(h.id),
-      };
-    });
-    return getTopNudge(contexts, characterId);
-  }, [activeHabits, completions, characterId, nudgeDismissed, getStreak, isCompletedToday, isToday]);
+  const sortedHabits = useMemo(() => sortByTimeSlot(habitsForDate), [habitsForDate]);
 
   const handleToggle = useCallback(
     (habitId: string) => toggleCompletion(habitId, dateStr),
@@ -328,89 +288,43 @@ export default function HabitsScreen() {
           isDark={isDark}
         />
 
-        {/* Progress */}
+        {/* Progress — simple count */}
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
-            <View>
-              <Text style={[styles.progressLabel, isDark && styles.progressLabelDark]}>
-                {isToday
-                  ? (locale === 'de' ? 'Heute' : 'Today')
-                  : selectedDate.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-              </Text>
-              <Text style={[styles.progressValue, isDark && styles.textDark]}>
-                {todayStats.allDone
-                  ? locale === 'de' ? 'Alles erledigt!' : 'All done!'
-                  : `${todayStats.done} / ${todayStats.total}`}
-              </Text>
-            </View>
-            <View style={styles.progressDots}>
-              {habitsForDate.map((h) => (
-                <View
-                  key={h.id}
-                  style={[
-                    styles.progressDot,
-                    isDark && styles.progressDotDark,
-                    isCompletedOnDate(h.id) && styles.progressDotDone,
-                  ]}
-                />
-              ))}
-            </View>
+            <Text style={[styles.progressLabel, isDark && styles.progressLabelDark]}>
+              {isToday
+                ? (locale === 'de' ? 'Heute' : 'Today')
+                : selectedDate.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </Text>
+            <Text style={[styles.progressValue, isDark && styles.textDark]}>
+              {todayStats.allDone
+                ? locale === 'de' ? 'Alles erledigt!' : 'All done!'
+                : `${todayStats.done}/${todayStats.total}`}
+            </Text>
           </View>
         </GlassCard>
 
-        {/* Coach Nudge */}
-        {nudge && (
-          <GlassCard style={styles.nudgeCard}>
-            <View style={styles.nudgeRow}>
-              <Text style={[styles.nudgeText, isDark && styles.textSecondaryDark]}>
-                {nudge[locale]}
-              </Text>
-              <Pressable
-                onPress={() => setNudgeDismissed(true)}
-                style={styles.nudgeDismiss}
-              >
-                <Ionicons name="close" size={16} color="#A3A3A3" />
-              </Pressable>
-            </View>
-          </GlassCard>
-        )}
-
-        {/* Habits grouped by time slot */}
-        {TIME_SLOT_CONFIG.map((slot) => {
-          const group = timeGroups[slot.key];
-          if (group.length === 0) return null;
-
-          return (
-            <View key={slot.key} style={styles.timeSlotSection}>
-              <View style={styles.timeSlotHeader}>
-                <Ionicons name={slot.icon as any} size={16} color="#A3A3A3" />
-                <Text style={[styles.timeSlotTitle, isDark && styles.textMutedDark]}>
-                  {slot[locale]}
-                </Text>
-              </View>
-              <View style={styles.habitsList}>
-                {group.map((habit) => {
-                  const completed = isCompletedOnDate(habit.id);
-                  const { current } = getStreak(habit.id);
-                  return (
-                    <HabitRow
-                      key={habit.id}
-                      habit={habit}
-                      locale={locale}
-                      isCompleted={completed}
-                      streak={current}
-                      specificTime={habit.specificTime}
-                      onToggle={() => handleToggle(habit.id)}
-                      onArchive={() => handleArchiveHabit(habit.id)}
-                      onAddToCalendar={() => handleAddToCalendar(habit.id)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-              </View>
-            </View>
-          );
-        })}
+        {/* Flat habit list sorted by time */}
+        <View style={styles.habitsList}>
+          {sortedHabits.map((habit) => {
+            const completed = isCompletedOnDate(habit.id);
+            const { current } = getStreak(habit.id);
+            return (
+              <HabitRow
+                key={habit.id}
+                habit={habit}
+                locale={locale}
+                isCompleted={completed}
+                streak={current}
+                specificTime={habit.specificTime}
+                onToggle={() => handleToggle(habit.id)}
+                onArchive={() => handleArchiveHabit(habit.id)}
+                onAddToCalendar={() => handleAddToCalendar(habit.id)}
+                isDark={isDark}
+              />
+            );
+          })}
+        </View>
 
         {/* Add Habit Button */}
         {!isPremium && activeHabits.length >= FREE_HABIT_LIMIT ? (
@@ -429,8 +343,6 @@ export default function HabitsScreen() {
           />
         )}
 
-        {/* Weekly Review */}
-        <WeeklyReview locale={locale} isDark={isDark} />
       </ScrollView>
 
       <AddHabitModal visible={showModal} onClose={closeModal} locale={locale} isDark={isDark} />
@@ -457,35 +369,9 @@ const styles = StyleSheet.create({
   progressRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
-  progressLabel: { fontSize: 13, fontWeight: '600', color: '#737373', marginBottom: 2 },
+  progressLabel: { fontSize: 13, fontWeight: '600', color: '#737373' },
   progressLabelDark: { color: '#A3A3A3' },
-  progressValue: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3 },
-  progressDots: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', maxWidth: 150, justifyContent: 'flex-end' },
-  progressDot: {
-    width: 10, height: 10, borderRadius: 5, backgroundColor: '#E5E5E5',
-  },
-  progressDotDark: { backgroundColor: '#404040' },
-  progressDotDone: { backgroundColor: '#E8435A' },
-
-  // Nudge
-  nudgeCard: { marginBottom: 16 },
-  nudgeRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  nudgeText: { flex: 1, fontSize: 14, lineHeight: 20, color: '#525252' },
-  nudgeDismiss: {
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-
-  // Time slot sections
-  timeSlotSection: { marginBottom: 8 },
-  timeSlotHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8,
-  },
-  timeSlotTitle: {
-    fontSize: 13, fontWeight: '700', color: '#A3A3A3',
-    textTransform: 'uppercase', letterSpacing: 0.5,
-  },
+  progressValue: { fontSize: 20, fontWeight: '700', color: '#171717', letterSpacing: -0.3 },
 
   // Habits list
   habitsList: { gap: 8, marginBottom: 8 },

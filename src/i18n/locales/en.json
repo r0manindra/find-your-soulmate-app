@@ -11,21 +11,7 @@
     "title": "Your Journey",
     "progress": "Overall Progress",
     "streak": "Day Streak",
-    "dailyTip": "Daily Tip",
-    "chapters": "chapters completed",
-    "books": "books read",
-    "tips": [
-      "Confidence starts with eye contact. Practice holding it for 3 seconds today.",
-      "The best conversations start with genuine curiosity. Ask 'why' more.",
-      "Your body language speaks before your words. Stand tall, shoulders back.",
-      "Rejection is redirection. Every 'no' brings you closer to the right 'yes'.",
-      "Listen more than you speak. The most attractive people make others feel heard.",
-      "Humor is your superpower. Don't take yourself too seriously.",
-      "A genuine compliment can make someone's entire day. Try it.",
-      "A no is better than not knowing.",
-      "Too late is a missed chance.",
-      "'I'll talk to her next time'... you won't."
-    ]
+    "chapters": "chapters completed"
   },
   "guide": {
     "title": "The Guide",

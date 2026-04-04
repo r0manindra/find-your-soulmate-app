@@ -9,7 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useAuthStore } from '@/src/store/auth-store';
@@ -18,14 +18,13 @@ import { useUIStore } from '@/src/store/ui-store';
 import { useHabitStore } from '@/src/store/habit-store';
 import { useChatHistoryStore } from '@/src/store/chat-history-store';
 import { coachCharacters, getCharacter } from '@/src/data/content/coach-characters';
-import { chapters } from '@/src/data/content/chapters';
 import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { getPersonalization } from '@/src/core/personalization';
 import * as api from '@/src/services/api';
 import type { JourneyContext } from '@/src/services/api';
 import type { ChatMessage } from '@/src/core/entities/types';
 import { ExerciseBanner } from '@/src/presentation/components/coach/exercise-banner';
-import { getExerciseMode, isBattleMode } from '@/src/data/content/exercise-modes';
+import { getExerciseMode } from '@/src/data/content/exercise-modes';
 import { ExerciseModeModal } from '@/src/presentation/components/coach/exercise-mode-modal';
 import { ChatHistoryModal } from '@/src/presentation/components/coach/chat-history-modal';
 import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
@@ -65,8 +64,6 @@ export default function CoachScreen() {
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
 
   const userProfile = useUserProfileStore();
-  const progressStore = useProgressStore();
-  const habitStore = useHabitStore();
   const recommendedCharacterId = userProfile.hasCompletedOnboarding
     ? getPersonalization(userProfile).recommendedCharacterId
     : null;
@@ -123,9 +120,9 @@ export default function CoachScreen() {
   const activeExerciseMode = useUIStore((s) => s.activeExerciseMode);
   const setExerciseMode = useUIStore((s) => s.setExerciseMode);
 
-  const [showCharacterPicker, setShowCharacterPicker] = useState(false);
+  const [showCoachesHistoryModal, setShowCoachesHistoryModal] = useState(false);
+  const [coachesHistoryTab, setCoachesHistoryTab] = useState<'coaches' | 'history'>('coaches');
   const [showExerciseModeModal, setShowExerciseModeModal] = useState(false);
-  const [showChatHistory, setShowChatHistory] = useState(false);
   const [showOutOfHearts, setShowOutOfHearts] = useState(false);
   const [showBattleModal, setShowBattleModal] = useState(false);
   const [input, setInput] = useState('');
@@ -133,7 +130,6 @@ export default function CoachScreen() {
 
   // Battle mode state
   const activeBattleCharacterId = useUIStore((s) => s.activeBattleCharacterId);
-  const battleMessageCount = useUIStore((s) => s.battleMessageCount);
   const setBattleCharacter = useUIStore((s) => s.setBattleCharacter);
   const incrementBattleMessageCount = useUIStore((s) => s.incrementBattleMessageCount);
   const resetBattle = useUIStore((s) => s.resetBattle);
@@ -141,7 +137,6 @@ export default function CoachScreen() {
 
   const canSpend = useHeartsStore((s) => s.canSpend);
   const spendHearts = useHeartsStore((s) => s.spendHearts);
-  const totalHearts = useHeartsStore((s) => s.dailyHearts + s.bonusHearts);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -230,7 +225,7 @@ export default function CoachScreen() {
     if (char.isPremium && !isPremium) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       router.push('/paywall?trigger=character');
-      setShowCharacterPicker(false);
+      setShowCoachesHistoryModal(false);
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -244,7 +239,7 @@ export default function CoachScreen() {
       chatStore.createConversation(id, char.greeting[locale]);
     }
 
-    setShowCharacterPicker(false);
+    setShowCoachesHistoryModal(false);
   };
 
   const handleNewChat = useCallback(() => {
@@ -431,26 +426,6 @@ export default function CoachScreen() {
   // Exercise mode button state
   const exerciseModeForButton = activeExerciseMode ? getExerciseMode(activeExerciseMode) : null;
 
-  // Exercise mode hint
-  const hasSeenHint = useSettingsStore((s) => s.hasSeenExerciseModeHint);
-  const setHasSeenHint = useSettingsStore((s) => s.setHasSeenExerciseModeHint);
-  const showHintDot = isLoggedIn && !hasSeenHint && !activeExerciseMode;
-  const hintPulse = useSharedValue(1);
-  useEffect(() => {
-    if (showHintDot) {
-      hintPulse.value = withRepeat(
-        withSequence(
-          withTiming(1.4, { duration: 600 }),
-          withTiming(1, { duration: 600 })
-        ),
-        -1,
-        true
-      );
-    }
-  }, [showHintDot]);
-  const hintPulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: hintPulse.value }],
-  }));
 
   // Scroll-to-bottom FAB
   const [showScrollFab, setShowScrollFab] = useState(false);
@@ -532,7 +507,7 @@ export default function CoachScreen() {
         keyboardVerticalOffset={0}
       >
         {/* Header with character selector */}
-        <Pressable onPress={() => !isBattleActive && setShowCharacterPicker(true)} style={styles.header}>
+        <Pressable onPress={() => { if (!isBattleActive) { setCoachesHistoryTab('coaches'); setShowCoachesHistoryModal(true); } }} style={styles.header}>
           <LinearGradient
             colors={isBattleActive
               ? ['#E8435A', '#FF7854']
@@ -562,7 +537,8 @@ export default function CoachScreen() {
                 onPress={(e) => {
                   e.stopPropagation();
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setShowChatHistory(true);
+                  setCoachesHistoryTab('history');
+                  setShowCoachesHistoryModal(true);
                 }}
                 style={styles.voiceCallBtn}
                 hitSlop={8}
@@ -574,31 +550,16 @@ export default function CoachScreen() {
           </LinearGradient>
         </Pressable>
 
-        {/* Upgrade banners */}
-        {!isLoggedIn && (
+        {/* Single banner — priority: sign-in > battle > exercise > upgrade */}
+        {!isLoggedIn ? (
           <Pressable onPress={() => router.push('/auth/register')} style={styles.upgradeBanner}>
             <Ionicons name="sparkles" size={16} color="#E8435A" />
             <Text style={styles.upgradeBannerText}>{t('coach.signInForAI')}</Text>
             <Ionicons name="chevron-forward" size={14} color="#E8435A" />
           </Pressable>
-        )}
-        {isLoggedIn && !isPremium && (
-          <Pressable onPress={() => router.push('/paywall?trigger=hearts')} style={styles.upgradeBanner}>
-            <Ionicons name="heart" size={16} color="#E8435A" />
-            <Text style={styles.upgradeBannerText}>
-              {locale === 'de' ? 'Upgrade für mehr Herzen' : 'Upgrade for more hearts'}
-            </Text>
-            <Ionicons name="chevron-forward" size={14} color="#E8435A" />
-          </Pressable>
-        )}
-
-        {/* Active battle banner */}
-        {isBattleActive && (
+        ) : isBattleActive ? (
           <BattleBanner onEndBattle={handleEndBattle} />
-        )}
-
-        {/* Active exercise banner (non-battle) */}
-        {activeExerciseMode && !isBattleActive && (
+        ) : activeExerciseMode ? (
           <ExerciseBanner
             onEndExercise={() => {
               const debriefMsg = locale === 'de'
@@ -608,7 +569,15 @@ export default function CoachScreen() {
               setExerciseMode(null);
             }}
           />
-        )}
+        ) : !isPremium ? (
+          <Pressable onPress={() => router.push('/paywall?trigger=hearts')} style={styles.upgradeBanner}>
+            <Ionicons name="heart" size={16} color="#E8435A" />
+            <Text style={styles.upgradeBannerText}>
+              {locale === 'de' ? 'Upgrade für mehr Herzen' : 'Upgrade for more hearts'}
+            </Text>
+            <Ionicons name="chevron-forward" size={14} color="#E8435A" />
+          </Pressable>
+        ) : null}
 
         {/* Messages — inverted FlatList for WhatsApp-like chat behavior */}
         <FlatList
@@ -643,44 +612,14 @@ export default function CoachScreen() {
           }
           ListFooterComponent={
             messages.length <= 1 ? (
-              <View style={styles.footerContainer}>
-                {/* Flirting Battle card */}
-                {isLoggedIn && !isBattleActive && (
-                  <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      setShowBattleModal(true);
-                    }}
-                    style={styles.battleCard}
-                  >
-                    <LinearGradient
-                      colors={['#E8435A', '#FF7854']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.battleCardGradient}
-                    >
-                      <View style={styles.battleCardContent}>
-                        <View style={styles.battleCardIcon}>
-                          <Ionicons name="flash" size={22} color="#fff" />
-                        </View>
-                        <View style={styles.battleCardText}>
-                          <Text style={styles.battleCardTitle}>{t('battle.cardTitle')}</Text>
-                          <Text style={styles.battleCardSubtitle}>{t('battle.cardSubtitle')}</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
-                      </View>
-                    </LinearGradient>
-                  </Pressable>
-                )}
-                <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
-                  <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
-                  <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
-                    {t('coach.welcomeTitle')}
-                  </Text>
-                  <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
-                    {t('coach.welcomeDesc')}
-                  </Text>
-                </View>
+              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
+                <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
+                <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
+                  {t('coach.welcomeTitle')}
+                </Text>
+                <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
+                  {t('coach.welcomeDesc')}
+                </Text>
               </View>
             ) : null
           }
@@ -709,46 +648,25 @@ export default function CoachScreen() {
             />
             <View style={[styles.floatingInputOverlay, isDark && styles.floatingInputOverlayDark]} />
             <View style={styles.floatingInputContent}>
-              {/* Exercise mode toggle button */}
-              {isLoggedIn && (
-                <View>
-                  <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      if (!hasSeenHint) setHasSeenHint(true);
-                      setShowExerciseModeModal(true);
-                    }}
-                    style={[
-                      styles.exerciseModeBtn,
-                      exerciseModeForButton
-                        ? { backgroundColor: `${exerciseModeForButton.color}20` }
-                        : isDark ? styles.exerciseModeBtnDark : {},
-                    ]}
-                  >
-                    <Ionicons
-                      name={(exerciseModeForButton?.icon ?? 'flash') as any}
-                      size={18}
-                      color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
-                    />
-                  </Pressable>
-                  {showHintDot && (
-                    <Animated.View style={[styles.hintDot, hintPulseStyle]} />
-                  )}
-                </View>
-              )}
+              {/* Exercise mode overflow button */}
               {isLoggedIn && (
                 <Pressable
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push('/paywall?trigger=hearts');
+                    setShowExerciseModeModal(true);
                   }}
-                  style={styles.inputHeartBadge}
-                  hitSlop={6}
+                  style={[
+                    styles.exerciseModeBtn,
+                    exerciseModeForButton
+                      ? { backgroundColor: `${exerciseModeForButton.color}20` }
+                      : isDark ? styles.exerciseModeBtnDark : {},
+                  ]}
                 >
-                  <Ionicons name="heart" size={12} color="#E8435A" />
-                  <Text style={styles.inputHeartText}>
-                    {totalHearts}
-                  </Text>
+                  <Ionicons
+                    name={(exerciseModeForButton?.icon ?? 'ellipsis-horizontal') as any}
+                    size={18}
+                    color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
+                  />
                 </Pressable>
               )}
               <TextInput
@@ -795,92 +713,112 @@ export default function CoachScreen() {
           onClose={() => setShowOutOfHearts(false)}
         />
 
-        {/* Chat History Modal */}
-        <ChatHistoryModal
-          visible={showChatHistory}
-          onClose={() => setShowChatHistory(false)}
-          onNewChat={handleNewChat}
-        />
-
-        {/* Character Picker Modal */}
+        {/* Coaches + History Modal (merged) */}
         <Modal
-          visible={showCharacterPicker}
+          visible={showCoachesHistoryModal}
           animationType="slide"
           presentationStyle="pageSheet"
-          onRequestClose={() => setShowCharacterPicker(false)}
+          onRequestClose={() => setShowCoachesHistoryModal(false)}
         >
           <SafeAreaView style={[styles.modalSafeArea, isDark && styles.modalSafeAreaDark]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, isDark && styles.modalTitleDark]}>
-                {locale === 'de' ? 'Wähle deinen Coach' : 'Choose Your Coach'}
+                {coachesHistoryTab === 'coaches'
+                  ? (locale === 'de' ? 'Coaches' : 'Coaches')
+                  : (locale === 'de' ? 'Chatverlauf' : 'Chat History')}
               </Text>
-              <Pressable onPress={() => setShowCharacterPicker(false)} style={[styles.modalClose, isDark && styles.modalCloseDark]}>
+              <Pressable onPress={() => setShowCoachesHistoryModal(false)} style={[styles.modalClose, isDark && styles.modalCloseDark]}>
                 <Ionicons name="close" size={24} color={isDark ? '#A3A3A3' : '#737373'} />
               </Pressable>
             </View>
-            <Text style={[styles.modalSubtitle, isDark && styles.modalSubtitleDark]}>
-              {locale === 'de'
-                ? 'Jeder Coach hat seinen eigenen Stil. Finde den, der zu dir passt.'
-                : 'Each coach has their own style. Find the one that fits you.'}
-            </Text>
-            <ScrollView contentContainerStyle={styles.characterList} showsVerticalScrollIndicator={false}>
-              {coachCharacters.filter((c) => {
-                const gender = userProfile.userGender ?? 'male';
-                if (gender === 'diverse') return true;
-                return c.forGender === gender || c.forGender === 'all';
-              }).map((char) => {
-                const isSelected = char.id === activeConvCharacterId;
-                const isLocked = char.isPremium && !isPremium;
 
-                return (
-                  <Pressable
-                    key={char.id}
-                    onPress={() => handleSelectCharacter(char.id)}
-                    style={[
-                      styles.characterCard,
-                      isDark && styles.characterCardDark,
-                      isSelected && { borderColor: char.color, borderWidth: 2 },
-                    ]}
-                  >
-                    <View style={styles.characterCardHeader}>
-                      <View style={[styles.characterIcon, { backgroundColor: `${char.color}15` }]}>
-                        <Ionicons name={char.icon as any} size={24} color={char.color} />
-                      </View>
-                      <View style={styles.characterInfo}>
-                        <View style={styles.characterNameRow}>
-                          <Text style={[styles.characterName, isDark && styles.characterNameDark]}>{char.name}</Text>
-                          {char.id === recommendedCharacterId && !isSelected && (
-                            <View style={styles.recommendedBadge}>
-                              <Ionicons name="sparkles" size={10} color="#F59E0B" />
-                              <Text style={styles.recommendedBadgeText}>
-                                {locale === 'de' ? 'Empfohlen' : 'Recommended'}
-                              </Text>
-                            </View>
-                          )}
-                          {isLocked && (
-                            <View style={styles.proBadge}>
-                              <Ionicons name="lock-closed" size={10} color="#E8435A" />
-                              <Text style={styles.proBadgeText}>PRO</Text>
-                            </View>
-                          )}
-                          {isSelected && (
-                            <Ionicons name="checkmark-circle" size={20} color={char.color} />
-                          )}
+            {/* Tabs */}
+            <View style={styles.tabRow}>
+              <Pressable
+                onPress={() => setCoachesHistoryTab('coaches')}
+                style={[styles.tab, coachesHistoryTab === 'coaches' && styles.tabActive]}
+              >
+                <Text style={[styles.tabText, coachesHistoryTab === 'coaches' && styles.tabTextActive]}>
+                  {locale === 'de' ? 'Coaches' : 'Coaches'}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setCoachesHistoryTab('history')}
+                style={[styles.tab, coachesHistoryTab === 'history' && styles.tabActive]}
+              >
+                <Text style={[styles.tabText, coachesHistoryTab === 'history' && styles.tabTextActive]}>
+                  {locale === 'de' ? 'Verlauf' : 'History'}
+                </Text>
+              </Pressable>
+            </View>
+
+            {coachesHistoryTab === 'coaches' ? (
+              <ScrollView contentContainerStyle={styles.characterList} showsVerticalScrollIndicator={false}>
+                {coachCharacters.filter((c) => {
+                  const gender = userProfile.userGender ?? 'male';
+                  if (gender === 'diverse') return true;
+                  return c.forGender === gender || c.forGender === 'all';
+                }).map((char) => {
+                  const isSelected = char.id === activeConvCharacterId;
+                  const isLocked = char.isPremium && !isPremium;
+
+                  return (
+                    <Pressable
+                      key={char.id}
+                      onPress={() => handleSelectCharacter(char.id)}
+                      style={[
+                        styles.characterCard,
+                        isDark && styles.characterCardDark,
+                        isSelected && { borderColor: char.color, borderWidth: 2 },
+                      ]}
+                    >
+                      <View style={styles.characterCardHeader}>
+                        <View style={[styles.characterIcon, { backgroundColor: `${char.color}15` }]}>
+                          <Ionicons name={char.icon as any} size={24} color={char.color} />
                         </View>
-                        <Text style={[styles.characterSubtitle, isDark && styles.characterSubtitleDark]}>{char.subtitle[locale]}</Text>
+                        <View style={styles.characterInfo}>
+                          <View style={styles.characterNameRow}>
+                            <Text style={[styles.characterName, isDark && styles.characterNameDark]}>{char.name}</Text>
+                            {char.id === recommendedCharacterId && !isSelected && (
+                              <View style={styles.recommendedBadge}>
+                                <Ionicons name="sparkles" size={10} color="#F59E0B" />
+                                <Text style={styles.recommendedBadgeText}>
+                                  {locale === 'de' ? 'Empfohlen' : 'Recommended'}
+                                </Text>
+                              </View>
+                            )}
+                            {isLocked && (
+                              <View style={styles.proBadge}>
+                                <Ionicons name="lock-closed" size={10} color="#E8435A" />
+                                <Text style={styles.proBadgeText}>PRO</Text>
+                              </View>
+                            )}
+                            {isSelected && (
+                              <Ionicons name="checkmark-circle" size={20} color={char.color} />
+                            )}
+                          </View>
+                          <Text style={[styles.characterSubtitle, isDark && styles.characterSubtitleDark]}>{char.subtitle[locale]}</Text>
+                        </View>
                       </View>
-                    </View>
-                    <Text style={[styles.characterDescription, isDark && styles.characterDescriptionDark]}>{char.description[locale]}</Text>
-                    {char.inspiration && (
-                      <Text style={styles.characterInspiration}>
-                        {locale === 'de' ? 'Inspiriert von' : 'Inspired by'}: {char.inspiration}
-                      </Text>
-                    )}
-                  </Pressable>
-                );
-              })}
-              <View style={{ height: 40 }} />
-            </ScrollView>
+                      <Text style={[styles.characterDescription, isDark && styles.characterDescriptionDark]}>{char.description[locale]}</Text>
+                      {char.inspiration && (
+                        <Text style={styles.characterInspiration}>
+                          {locale === 'de' ? 'Inspiriert von' : 'Inspired by'}: {char.inspiration}
+                        </Text>
+                      )}
+                    </Pressable>
+                  );
+                })}
+                <View style={{ height: 40 }} />
+              </ScrollView>
+            ) : (
+              <ChatHistoryModal
+                visible={true}
+                onClose={() => setShowCoachesHistoryModal(false)}
+                onNewChat={handleNewChat}
+                embedded
+              />
+            )}
           </SafeAreaView>
         </Modal>
       </KeyboardAvoidingView>
@@ -964,33 +902,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  // Footer container for welcome + battle card
-  footerContainer: { gap: 8 },
-
-  // Battle card
-  battleCard: {
-    marginBottom: 4, borderRadius: 16, overflow: 'hidden',
-  },
-  battleCardGradient: {
-    borderRadius: 16,
-  },
-  battleCardContent: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 16, paddingVertical: 14,
-  },
-  battleCardIcon: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  battleCardText: { flex: 1 },
-  battleCardTitle: {
-    fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
-  },
-  battleCardSubtitle: {
-    fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2,
-  },
-
   // Welcome card
   welcomeCard: {
     alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20,
@@ -1039,25 +950,6 @@ const styles = StyleSheet.create({
   exerciseModeBtnDark: {
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  hintDot: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E8435A',
-  },
-  inputHeartBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    paddingHorizontal: 6, paddingVertical: 4,
-    borderRadius: 10,
-    backgroundColor: 'rgba(232,67,90,0.08)',
-    marginBottom: 4,
-  },
-  inputHeartText: {
-    fontSize: 12, fontWeight: '700', color: '#E8435A',
-  },
   input: {
     flex: 1, minHeight: 32, maxHeight: 100,
     paddingHorizontal: 6, paddingVertical: 6,
@@ -1093,6 +985,22 @@ const styles = StyleSheet.create({
   },
   modalSubtitle: {
     fontSize: 15, color: '#737373', paddingHorizontal: 20, marginTop: 4, marginBottom: 20,
+  },
+  tabRow: {
+    flexDirection: 'row', paddingHorizontal: 20, gap: 4, marginBottom: 16,
+  },
+  tab: {
+    flex: 1, paddingVertical: 10, alignItems: 'center',
+    borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.04)',
+  },
+  tabActive: {
+    backgroundColor: '#E8435A',
+  },
+  tabText: {
+    fontSize: 14, fontWeight: '600', color: '#737373',
+  },
+  tabTextActive: {
+    color: '#fff',
   },
   modalSubtitleDark: { color: '#A3A3A3' },
   characterList: { paddingHorizontal: 20, gap: 12 },
