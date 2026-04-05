@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Platform, StyleSheet, View, Pressable } from 'react-native';
+import { Platform, StyleSheet, View, Pressable, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BlurView } from 'expo-blur';
@@ -91,7 +91,7 @@ function NativeLiquidGlassLayout() {
 const BUBBLE_SPRING = { damping: 8, stiffness: 320, mass: 0.6 };
 const SETTLE_SPRING = { damping: 14, stiffness: 300 };
 const TAB_ITEM_SIZE = 48;
-const ACTIVE_INDICATOR_SIZE = 40;
+const ACTIVE_INDICATOR_SIZE = 44;
 
 function BubbleTabButton({
   config,
@@ -135,12 +135,13 @@ function BubbleTabButton({
           backgroundColor: withOpacity(activeColor, 0.15),
         }]} />
       )}
-      <Animated.View style={animatedStyle}>
+      <Animated.View style={[animatedStyle, s.tabInner]}>
         <Ionicons
           name={focused ? config.ioniconFocused : config.ionicon}
-          size={23}
+          size={20}
           color={color}
         />
+        <Text style={[s.tabLabel, { color }]}>{label}</Text>
       </Animated.View>
     </Pressable>
   );
@@ -301,9 +302,18 @@ const s = StyleSheet.create({
   // Tab item
   tab: {
     width: TAB_ITEM_SIZE,
-    height: TAB_ITEM_SIZE,
+    height: TAB_ITEM_SIZE + 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 1,
   },
   activeIndicator: {
     position: 'absolute',

@@ -148,7 +148,7 @@ export default function CoachScreen() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Tab bar height for when it's visible
-  const tabBarHeight = 64 + insets.bottom + 12;
+  const tabBarHeight = 52 + insets.bottom;
 
   // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 10,
   },
   upgradeBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#E8435A' },
-  messageList: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4, flexGrow: 1 },
+  messageList: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 100, flexGrow: 1 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 8 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
@@ -923,6 +923,7 @@ const styles = StyleSheet.create({
   // Floating glass input bar
   floatingInputWrapper: {
     paddingHorizontal: 14,
+    paddingBottom: 4,
   },
   floatingInputOuter: {
     borderRadius: 22,

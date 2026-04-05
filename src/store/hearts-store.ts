@@ -95,7 +95,7 @@ export const useHeartsStore = create<HeartsStore>()(
         const { welcomeGiftClaimed } = get();
         if (!welcomeGiftClaimed) {
           set((state) => ({
-            bonusHearts: state.bonusHearts + 10,
+            bonusHearts: state.bonusHearts + 5,
             welcomeGiftClaimed: true,
           }));
         }

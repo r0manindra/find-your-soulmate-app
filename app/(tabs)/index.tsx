@@ -223,32 +223,6 @@ export default function HomeScreen() {
           <ContinueCard locale={locale} />
         </Animated.View>
 
-        {/* Quick Actions */}
-        <View style={styles.quickActionsRow}>
-          <QuickActionButton
-            icon="book-outline"
-            label={locale === 'de' ? 'Guide' : 'Guide'}
-            onPress={() => router.push('/guide' as any)}
-            isDark={isDark}
-            delay={200}
-          />
-          <QuickActionButton
-            icon="chatbubble-ellipses-outline"
-            label={locale === 'de' ? 'Sprüche' : 'Phrases'}
-            onPress={() => router.push('/phrasebook' as any)}
-            isDark={isDark}
-            delay={250}
-          />
-          <QuickActionButton
-            icon="chatbubbles-outline"
-            label="Coach"
-            customIcon={<CharismoIcon size={26} color="#E8435A" />}
-            onPress={() => router.push('/coach' as any)}
-            isDark={isDark}
-            delay={300}
-          />
-        </View>
-
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <ProgressRing

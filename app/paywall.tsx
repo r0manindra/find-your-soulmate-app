@@ -38,7 +38,6 @@ const PRO_PLUS_ANNUAL_FEATURES = {
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
     { icon: 'book' as const, text: 'All chapters unlocked', highlight: true },
-    { icon: 'document-text' as const, text: 'PDF guide included', highlight: true },
   ],
   de: [
     { icon: 'heart' as const, text: '25 Herzen/Tag', highlight: true },
@@ -46,7 +45,6 @@ const PRO_PLUS_ANNUAL_FEATURES = {
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
     { icon: 'book' as const, text: 'Alle Kapitel freigeschaltet', highlight: true },
-    { icon: 'document-text' as const, text: 'PDF-Guide inklusive', highlight: true },
   ],
 };
 
@@ -142,7 +140,7 @@ export default function PaywallScreen() {
     }
   };
 
-  const handleOneTimePurchase = async (type: 'hearts' | 'chapters' | 'bundle') => {
+  const handleOneTimePurchase = async (type: 'hearts' | 'chapters') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!isLoggedIn) {
       router.push('/auth/register');
@@ -153,7 +151,6 @@ export default function PaywallScreen() {
       let success = false;
       if (type === 'hearts') success = await purchases.purchaseHeartPack();
       else if (type === 'chapters') success = await purchases.purchaseChapterUnlock();
-      else if (type === 'bundle') success = await purchases.purchasePdfAndChaptersBundle();
 
       if (success) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -339,31 +336,6 @@ export default function PaywallScreen() {
         </Text>
 
         <View style={styles.oneTimeCards}>
-          {/* PDF + All Chapters Bundle */}
-          <Pressable
-            onPress={() => handleOneTimePurchase('bundle')}
-            disabled={oneTimeLoading === 'bundle'}
-            style={[styles.oneTimeCard, isDark && styles.oneTimeCardDark, styles.bundleCard]}
-          >
-            <View style={[styles.oneTimeIcon, { backgroundColor: 'rgba(139,92,246,0.08)' }]}>
-              <Ionicons name="gift" size={22} color="#8B5CF6" />
-            </View>
-            <View style={styles.oneTimeInfo}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={[styles.oneTimeName, isDark && styles.oneTimeNameDark]}>
-                  {locale === 'de' ? 'PDF + Alle Kapitel' : 'PDF + All Chapters'}
-                </Text>
-                <View style={styles.saveBadge}>
-                  <Text style={styles.saveBadgeText}>{locale === 'de' ? 'SPARE 30%' : 'SAVE 30%'}</Text>
-                </View>
-              </View>
-              <Text style={styles.oneTimeDesc}>
-                {locale === 'de' ? 'PDF-Guide + alle Kapitel sofort freischalten' : 'PDF guide + unlock all chapters instantly'}
-              </Text>
-            </View>
-            <Text style={[styles.oneTimePrice, isDark && styles.oneTimePriceDark]}>~9.99 €</Text>
-          </Pressable>
-
           {/* Unlock All Chapters */}
           <Pressable
             onPress={() => handleOneTimePurchase('chapters')}
@@ -528,17 +500,6 @@ const styles = StyleSheet.create({
   oneTimeCardDark: {
     backgroundColor: '#252525',
     borderColor: 'rgba(255,255,255,0.08)',
-  },
-  bundleCard: {
-    borderWidth: 1.5,
-    borderColor: 'rgba(139,92,246,0.3)',
-  },
-  saveBadge: {
-    backgroundColor: '#22C55E',
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6,
-  },
-  saveBadgeText: {
-    fontSize: 9, fontWeight: '800', color: '#fff', letterSpacing: 0.3,
   },
   oneTimeIcon: {
     width: 44, height: 44, borderRadius: 14,
