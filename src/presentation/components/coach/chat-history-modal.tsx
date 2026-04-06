@@ -8,6 +8,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { useTranslation } from 'react-i18next';
 import { useChatHistoryStore, type Conversation } from '@/src/store/chat-history-store';
 import { getCharacter } from '@/src/data/content/coach-characters';
+import { useAuthStore } from '@/src/store/auth-store';
 
 interface ChatHistoryModalProps {
   visible: boolean;
@@ -37,6 +38,7 @@ export function ChatHistoryModal({ visible, onClose, onNewChat, embedded }: Chat
   const activeConversationId = useChatHistoryStore((s) => s.activeConversationId);
   const setActiveConversation = useChatHistoryStore((s) => s.setActiveConversation);
   const deleteConversation = useChatHistoryStore((s) => s.deleteConversation);
+  const isPremium = useAuthStore((s) => s.isPremium);
 
   const handleSelect = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -58,6 +60,7 @@ export function ChatHistoryModal({ visible, onClose, onNewChat, embedded }: Chat
   const renderConversation = ({ item }: { item: Conversation }) => {
     const isActive = item.id === activeConversationId;
     const character = getCharacter(item.characterId);
+    const isLocked = character.isPremium && !isPremium;
     const lastMessage = item.messages[item.messages.length - 1];
     const preview = lastMessage?.content.slice(0, 60) ?? '';
     const title = item.title || t('coach.newChat');
@@ -70,14 +73,20 @@ export function ChatHistoryModal({ visible, onClose, onNewChat, embedded }: Chat
           isDark && styles.rowDark,
           isActive && styles.rowActive,
           isActive && isDark && styles.rowActiveDark,
+          isLocked && styles.rowLocked,
         ]}
       >
         <View style={[styles.rowIcon, { backgroundColor: `${character.color}15` }]}>
           <Ionicons name={character.icon as any} size={18} color={character.color} />
+          {isLocked && (
+            <View style={styles.lockBadge}>
+              <Ionicons name="lock-closed" size={8} color="#fff" />
+            </View>
+          )}
         </View>
         <View style={styles.rowContent}>
           <View style={styles.rowTop}>
-            <Text style={[styles.rowTitle, isDark && styles.rowTitleDark]} numberOfLines={1}>
+            <Text style={[styles.rowTitle, isDark && styles.rowTitleDark, isLocked && styles.rowTitleLocked]} numberOfLines={1}>
               {title}
             </Text>
             <Text style={styles.rowTime}>{formatRelativeTime(item.updatedAt)}</Text>
@@ -87,6 +96,11 @@ export function ChatHistoryModal({ visible, onClose, onNewChat, embedded }: Chat
             <Text style={[styles.characterBadgeText, { color: character.color }]}>
               {character.name}
             </Text>
+            {isLocked && (
+              <View style={styles.proBadgeSmall}>
+                <Text style={styles.proBadgeSmallText}>PRO</Text>
+              </View>
+            )}
           </View>
           <Text style={[styles.rowPreview, isDark && styles.rowPreviewDark]} numberOfLines={1}>
             {preview}
@@ -211,6 +225,31 @@ const styles = StyleSheet.create({
   rowTime: { fontSize: 12, color: '#A3A3A3' },
   rowPreview: { fontSize: 13, color: '#737373', marginTop: 2 },
   rowPreviewDark: { color: '#525252' },
+  rowLocked: { opacity: 0.7 },
+  rowTitleLocked: { color: '#A3A3A3' },
+  lockBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#E8435A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  proBadgeSmall: {
+    backgroundColor: 'rgba(232,67,90,0.1)',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginLeft: 4,
+  },
+  proBadgeSmallText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#E8435A',
+  },
   deleteBtn: { padding: 4 },
   empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 15, color: '#A3A3A3' },

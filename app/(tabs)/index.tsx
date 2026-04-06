@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -163,6 +163,9 @@ export default function HomeScreen() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const userGender = useUserProfileStore((s) => s.userGender);
   const [personalizeCardDismissed, setPersonalizeCardDismissed] = useState(false);
+  const { height: screenHeight } = useWindowDimensions();
+  // Tall screens (>800) get larger elements; compact screens stay tight
+  const isTall = screenHeight > 800;
 
   // Habits mini-summary
   const habits = useHabitStore((s) => s.habits);
@@ -202,7 +205,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInDown.duration(400)}>
+        <Animated.View entering={FadeInDown.duration(300)}>
           <View style={styles.headerRow}>
             <Text style={[styles.title, isDark && styles.titleDark, { flex: 1 }]}>{greeting}</Text>
             {isLoggedIn && <HeartCounter />}
@@ -212,7 +215,7 @@ export default function HomeScreen() {
 
         {/* Personalize card for users who skipped onboarding */}
         {!userGender && !personalizeCardDismissed && (
-          <Animated.View entering={FadeInDown.delay(80).duration(400)}>
+          <Animated.View entering={FadeInDown.delay(50).duration(300)}>
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -241,35 +244,39 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <Animated.View entering={FadeInDown.delay(60).duration(300)}>
           <ContinueCard locale={locale} />
         </Animated.View>
 
         {/* Phrasebook card — bigger with category preview */}
-        <Animated.View entering={FadeInDown.delay(180).duration(400)}>
+        <Animated.View entering={FadeInDown.delay(100).duration(300)}>
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push('/phrasebook' as any);
             }}
-            style={[styles.phrasebookCard, isDark && styles.phrasebookCardDark]}
+            style={[styles.phrasebookCard, isDark && styles.phrasebookCardDark, isTall && styles.phrasebookCardTall]}
           >
             <View style={styles.phrasebookHeader}>
-              <Ionicons name="chatbubble-ellipses" size={22} color="#8B5CF6" />
-              <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
-                {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
-              </Text>
+              <View style={[styles.phrasebookIconCircle, isDark && styles.phrasebookIconCircleDark]}>
+                <Ionicons name="chatbubble-ellipses" size={20} color="#8B5CF6" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
+                  {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
+                </Text>
+                <Text style={[styles.phrasebookDesc, isDark && styles.phrasebookDescDark]}>
+                  {locale === 'de'
+                    ? `${phraseCategories.length} Kategorien mit cleveren Sprüchen`
+                    : `${phraseCategories.length} categories of clever lines`}
+                </Text>
+              </View>
               <Ionicons name="chevron-forward" size={18} color={isDark ? '#525252' : '#D4D4D4'} />
             </View>
-            <Text style={[styles.phrasebookDesc, isDark && styles.phrasebookDescDark]}>
-              {locale === 'de'
-                ? `${phraseCategories.length} Kategorien mit cleveren Sprüchen`
-                : `${phraseCategories.length} categories of clever lines`}
-            </Text>
             <View style={styles.phrasebookGrid}>
-              {phraseCategories.slice(0, 6).map((cat) => (
+              {phraseCategories.slice(0, isTall ? 8 : 6).map((cat) => (
                 <View key={cat.id} style={[styles.phrasebookChip, { backgroundColor: `${cat.color}12` }]}>
-                  <Ionicons name={cat.icon as any} size={12} color={cat.color} />
+                  <Ionicons name={cat.icon as any} size={13} color={cat.color} />
                   <Text style={[styles.phrasebookChipText, { color: cat.color }]} numberOfLines={1}>
                     {cat.name[locale]}
                   </Text>
@@ -281,7 +288,7 @@ export default function HomeScreen() {
 
         {/* Today's Habits mini-summary */}
         {activeHabits.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(220).duration(400)}>
+          <Animated.View entering={FadeInDown.delay(140).duration(300)}>
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -320,7 +327,7 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-        <Animated.View entering={FadeInDown.delay(260).duration(400)}>
+        <Animated.View entering={FadeInDown.delay(180).duration(300)}>
           <GlassCard style={styles.progressCard}>
             <View style={styles.progressRow}>
               <ProgressRing
@@ -456,32 +463,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Phrasebook card — bigger
+  // Phrasebook card
   phrasebookCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0,0,0,0.06)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   phrasebookCardDark: {
     backgroundColor: '#252525',
     borderColor: 'rgba(255,255,255,0.08)',
   },
+  phrasebookCardTall: {
+    padding: 18,
+  },
   phrasebookHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 6,
+    gap: 12,
+    marginBottom: 14,
+  },
+  phrasebookIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(139,92,246,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  phrasebookIconCircleDark: {
+    backgroundColor: 'rgba(139,92,246,0.15)',
   },
   phrasebookTitle: {
-    flex: 1,
     fontSize: 17,
     fontWeight: '700',
     color: '#171717',
@@ -491,24 +511,24 @@ const styles = StyleSheet.create({
   phrasebookDesc: {
     fontSize: 13,
     color: '#737373',
-    marginBottom: 12,
+    marginTop: 2,
   },
   phrasebookDescDark: { color: '#A3A3A3' },
   phrasebookGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 7,
   },
   phrasebookChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
   phrasebookChipText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
   },
 

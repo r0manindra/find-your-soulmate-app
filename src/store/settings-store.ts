@@ -15,6 +15,8 @@ interface SettingsStore {
   setHasSeenExerciseModeHint: (seen: boolean) => void;
   habitNudgesEnabled: boolean;
   setHabitNudgesEnabled: (enabled: boolean) => void;
+  hasSeenCoachIntro: boolean;
+  setHasSeenCoachIntro: (seen: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -30,6 +32,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setHasSeenExerciseModeHint: (seen) => set({ hasSeenExerciseModeHint: seen }),
       habitNudgesEnabled: true,
       setHabitNudgesEnabled: (enabled) => set({ habitNudgesEnabled: enabled }),
+      hasSeenCoachIntro: false,
+      setHasSeenCoachIntro: (seen) => set({ hasSeenCoachIntro: seen }),
     }),
     {
       name: 'settings-storage',

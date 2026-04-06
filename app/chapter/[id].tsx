@@ -21,9 +21,28 @@ import { chapters, phases } from '@/src/data/content/chapters';
 import { chapterLessons } from '@/src/data/content/chapter-lessons';
 import { chapterLessonsDe } from '@/src/data/content/chapter-lessons-de';
 import { getBooksForChapter } from '@/src/data/content/books';
+import { phraseCategories, type PhraseCategoryId } from '@/src/data/content/phrasebook';
 import { useHeartsStore } from '@/src/store/hearts-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 import { OutOfHeartsModal } from '@/src/presentation/components/ui/out-of-hearts-modal';
+
+// Chapter → related phrasebook categories
+const CHAPTER_PHRASES: Record<number, PhraseCategoryId[]> = {
+  2: ['confidence_boosters', 'body_language'],
+  3: ['body_language'],
+  4: ['opening_lines', 'confidence_boosters'],
+  7: ['conversation_deepeners'],
+  8: ['witty_responses', 'smart_vocabulary'],
+  9: ['compliments'],
+  10: ['texting_dms', 'story_replies'],
+  11: ['date_conversation', 'conversation_deepeners'],
+  12: ['conversation_deepeners'],
+  13: ['body_language'],
+  15: ['closing_lines', 'texting_dms'],
+  17: ['body_language'],
+  24: ['body_language', 'confidence_boosters'],
+  25: ['opening_lines'],
+};
 
 function formatParagraphs(text: string): string[] {
   // Split on ". " followed by a capital letter — groups ~2-3 sentences per paragraph
@@ -315,6 +334,49 @@ export default function ChapterDetailScreen() {
                   </GlassCard>
                 </Pressable>
               ))}
+            </>
+          );
+        })()}
+
+        {/* Phrasebook link for relevant chapters */}
+        {(() => {
+          const catIds = CHAPTER_PHRASES[chapterId];
+          if (!catIds) return null;
+          const cats = catIds.map((id) => phraseCategories.find((c) => c.id === id)).filter(Boolean);
+          if (cats.length === 0) return null;
+          return (
+            <>
+              <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                {locale === 'de' ? 'Passende Phrasen' : 'Related Phrases'}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/phrasebook' as any);
+                }}
+              >
+                <GlassCard style={styles.phrasebookLinkCard}>
+                  <View style={styles.phrasebookLinkRow}>
+                    <View style={styles.phrasebookLinkIcon}>
+                      <Ionicons name="chatbubble-ellipses" size={18} color="#8B5CF6" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.phrasebookLinkTitle, isDark && { color: '#F5F5F5' }]}>
+                        {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
+                      </Text>
+                      <View style={styles.phrasebookChips}>
+                        {cats.map((cat) => (
+                          <View key={cat!.id} style={[styles.phrasebookChip, { backgroundColor: `${cat!.color}12` }]}>
+                            <Ionicons name={cat!.icon as any} size={11} color={cat!.color} />
+                            <Text style={[styles.phrasebookChipLabel, { color: cat!.color }]}>{cat!.name[locale]}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#A3A3A3" />
+                  </View>
+                </GlassCard>
+              </Pressable>
             </>
           );
         })()}
@@ -696,6 +758,46 @@ const styles = StyleSheet.create({
   },
   takeawayTextDark: {
     color: '#F5F5F5',
+  },
+
+  // Phrasebook link
+  phrasebookLinkCard: { marginHorizontal: 20, marginBottom: 16 },
+  phrasebookLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  phrasebookLinkIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(139,92,246,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  phrasebookLinkTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+    marginBottom: 6,
+  },
+  phrasebookChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  phrasebookChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  phrasebookChipLabel: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 
   // Books link

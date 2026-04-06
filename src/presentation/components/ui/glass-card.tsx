@@ -76,11 +76,13 @@ export function GlassCard({
   }
 
   // Native fallback — expo-blur
+  // Solid background prevents flash while BlurView initializes
   return (
     <View
       style={[
         containerStyle,
         {
+          backgroundColor: isDark ? 'rgba(30,30,35,0.85)' : 'rgba(255,255,255,0.85)',
           borderWidth: GLASS.border.width,
           borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
         },

@@ -62,6 +62,8 @@ export default function CoachScreen() {
   const locale = useSettingsStore((s) => s.locale);
   const selectedCharacterId = useSettingsStore((s) => s.selectedCharacterId);
   const setCharacterId = useSettingsStore((s) => s.setCharacterId);
+  const hasSeenCoachIntro = useSettingsStore((s) => s.hasSeenCoachIntro);
+  const setHasSeenCoachIntro = useSettingsStore((s) => s.setHasSeenCoachIntro);
 
   const userProfile = useUserProfileStore();
   const recommendedCharacterId = userProfile.hasCompletedOnboarding
@@ -143,13 +145,16 @@ export default function CoachScreen() {
   const isDark = colorScheme === 'dark';
   const activeConvCharacterId = activeConversation?.characterId ?? selectedCharacterId;
   const activeCharacter = getCharacter(activeConvCharacterId);
+  // Lock chat if active conversation uses a premium character the user no longer has access to
+  const isConvLocked = activeCharacter.isPremium && !isPremium;
   const insets = useSafeAreaInsets();
   const setChatInputFocused = useUIStore((s) => s.setChatInputFocused);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  // Tab bar height — pill is 72px tall, wrapper adds insets.bottom + 12 from bottom
-  const tabBarHeight = 88 + insets.bottom;
+  // Tab bar: pill ~56px content + 16px padding + wrapper bottom = insets.bottom + 12
+  // Input should sit just above the pill with a small gap
+  const tabBarHeight = 76 + insets.bottom;
 
   // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
@@ -179,9 +184,11 @@ export default function CoachScreen() {
   // Animated bottom padding — smooth transition when keyboard opens/closes
   const inputBottomPaddingValue = useSharedValue(tabBarHeight);
   useEffect(() => {
-    const target = (isInputFocused && keyboardVisible) ? (insets.bottom || 4) : tabBarHeight;
+    // When keyboard is open: no extra padding (sits right above keyboard)
+    // When keyboard is closed: push above the floating tab bar
+    const target = (isInputFocused && keyboardVisible) ? 0 : tabBarHeight;
     inputBottomPaddingValue.value = withTiming(target, { duration: 250 });
-  }, [isInputFocused, keyboardVisible, tabBarHeight, insets.bottom]);
+  }, [isInputFocused, keyboardVisible, tabBarHeight]);
 
   const animatedInputWrapperStyle = useAnimatedStyle(() => ({
     marginBottom: inputBottomPaddingValue.value,
@@ -307,7 +314,7 @@ export default function CoachScreen() {
 
   const sendMessage = useCallback(async (messageText?: string) => {
     const text = messageText ?? input;
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || isConvLocked) return;
 
     const convId = chatStore.activeConversationId;
     if (!convId) return;
@@ -412,7 +419,7 @@ export default function CoachScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, incrementChatCount, isLoggedIn, activeConvCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore, canSpend, spendHearts, incrementBattleMessageCount, resetBattle]);
+  }, [input, isLoading, isConvLocked, incrementChatCount, isLoggedIn, activeConvCharacterId, locale, t, buildJourneyContext, activeExerciseMode, chatStore, canSpend, spendHearts, incrementBattleMessageCount, resetBattle]);
 
   // Inverted list data — newest messages at top of reversed array (rendered at bottom visually)
   const invertedMessages = useMemo(() => [...messages].reverse(), [messages]);
@@ -615,15 +622,66 @@ export default function CoachScreen() {
           }
           ListFooterComponent={
             messages.length <= 1 ? (
-              <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
-                <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
-                <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
-                  {t('coach.welcomeTitle')}
-                </Text>
-                <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
-                  {t('coach.welcomeDesc')}
-                </Text>
-              </View>
+              !hasSeenCoachIntro ? (
+                <View style={[styles.introCard, isDark && styles.introCardDark]}>
+                  <Ionicons name="sparkles" size={24} color={activeCharacter.color} />
+                  <Text style={[styles.introTitle, isDark && styles.introTitleDark]}>
+                    {locale === 'de' ? 'Willkommen bei Charismo!' : 'Welcome to Charismo!'}
+                  </Text>
+                  <Text style={[styles.introDesc, isDark && styles.introDescDark]}>
+                    {locale === 'de'
+                      ? 'Dein persönlicher Flirt- & Social-Skills-Coach.'
+                      : 'Your personal flirting & social skills coach.'}
+                  </Text>
+                  <View style={styles.introFeatures}>
+                    <View style={styles.introFeatureRow}>
+                      <View style={[styles.introFeatureIcon, { backgroundColor: 'rgba(232,67,90,0.1)' }]}>
+                        <Ionicons name="heart" size={14} color="#E8435A" />
+                      </View>
+                      <Text style={[styles.introFeatureText, isDark && styles.introFeatureTextDark]}>
+                        {locale === 'de' ? '1 Nachricht = 1 Herz' : '1 message = 1 heart'}
+                      </Text>
+                    </View>
+                    <View style={styles.introFeatureRow}>
+                      <View style={[styles.introFeatureIcon, { backgroundColor: 'rgba(139,92,246,0.1)' }]}>
+                        <Ionicons name="people" size={14} color="#8B5CF6" />
+                      </View>
+                      <Text style={[styles.introFeatureText, isDark && styles.introFeatureTextDark]}>
+                        {locale === 'de' ? '6 Coaches mit einzigartigen Stilen' : '6 coaches with unique styles'}
+                      </Text>
+                    </View>
+                    <View style={styles.introFeatureRow}>
+                      <View style={[styles.introFeatureIcon, { backgroundColor: 'rgba(14,165,233,0.1)' }]}>
+                        <Ionicons name="game-controller" size={14} color="#0EA5E9" />
+                      </View>
+                      <Text style={[styles.introFeatureText, isDark && styles.introFeatureTextDark]}>
+                        {locale === 'de' ? 'Übungsmodi & Flirt-Battles' : 'Practice modes & flirt battles'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setHasSeenCoachIntro(true);
+                    }}
+                    style={[styles.introGotIt, { backgroundColor: `${activeCharacter.color}15` }]}
+                  >
+                    <Text style={[styles.introGotItText, { color: activeCharacter.color }]}>
+                      {locale === 'de' ? 'Verstanden!' : 'Got it!'}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={[styles.welcomeCard, isDark && styles.welcomeCardDark]}>
+                  <Ionicons name="sparkles" size={20} color={activeCharacter.color} />
+                  <Text style={[styles.welcomeTitle, isDark && styles.welcomeTitleDark]}>
+                    {t('coach.welcomeTitle')}
+                  </Text>
+                  <Text style={[styles.welcomeDesc, isDark && styles.welcomeDescDark]}>
+                    {t('coach.welcomeDesc')}
+                  </Text>
+                </View>
+              )
             ) : null
           }
         />
@@ -641,60 +699,84 @@ export default function CoachScreen() {
           </Animated.View>
         )}
 
-        {/* Floating Glass Input */}
-        <Animated.View style={[styles.floatingInputWrapper, animatedInputWrapperStyle]}>
-          <View style={styles.floatingInputOuter}>
-            <BlurView
-              intensity={isDark ? 40 : 80}
-              tint={isDark ? 'dark' : 'light'}
-              style={StyleSheet.absoluteFill}
-            />
-            <View style={[styles.floatingInputOverlay, isDark && styles.floatingInputOverlayDark]} />
-            <View style={styles.floatingInputContent}>
-              {/* Exercise mode overflow button */}
-              {isLoggedIn && (
-                <Pressable
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowExerciseModeModal(true);
-                  }}
-                  style={[
-                    styles.exerciseModeBtn,
-                    exerciseModeForButton
-                      ? { backgroundColor: `${exerciseModeForButton.color}20` }
-                      : isDark ? styles.exerciseModeBtnDark : {},
-                  ]}
-                >
-                  <Ionicons
-                    name={(exerciseModeForButton?.icon ?? 'ellipsis-horizontal') as any}
-                    size={18}
-                    color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
-                  />
-                </Pressable>
-              )}
-              <TextInput
-                style={[styles.input, isDark && styles.inputDark]}
-                value={input}
-                onChangeText={setInput}
-                placeholder={t('coach.placeholder', { name: activeCharacter.name })}
-                placeholderTextColor="#A3A3A3"
-                multiline
-                maxLength={500}
-                onSubmitEditing={() => sendMessage()}
-                returnKeyType="send"
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
+        {/* Floating Glass Input — or locked banner */}
+        {isConvLocked ? (
+          <Animated.View style={[styles.floatingInputWrapper, animatedInputWrapperStyle]}>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push('/paywall?trigger=character');
+              }}
+              style={[styles.lockedBanner, isDark && styles.lockedBannerDark]}
+            >
+              <Ionicons name="lock-closed" size={16} color="#E8435A" />
+              <Text style={styles.lockedBannerText}>
+                {locale === 'de'
+                  ? `${activeCharacter.name} ist ein Premium-Coach`
+                  : `${activeCharacter.name} is a Premium coach`}
+              </Text>
+              <View style={styles.lockedUpgradeBtn}>
+                <Text style={styles.lockedUpgradeBtnText}>
+                  {locale === 'de' ? 'Upgrade' : 'Upgrade'}
+                </Text>
+              </View>
+            </Pressable>
+          </Animated.View>
+        ) : (
+          <Animated.View style={[styles.floatingInputWrapper, animatedInputWrapperStyle]}>
+            <View style={styles.floatingInputOuter}>
+              <BlurView
+                intensity={isDark ? 40 : 80}
+                tint={isDark ? 'dark' : 'light'}
+                style={StyleSheet.absoluteFill}
               />
-              <Pressable
-                onPress={() => sendMessage()}
-                style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
-                disabled={!input.trim() || isLoading}
-              >
-                <Ionicons name="arrow-up" size={20} color="#fff" />
-              </Pressable>
+              <View style={[styles.floatingInputOverlay, isDark && styles.floatingInputOverlayDark]} />
+              <View style={styles.floatingInputContent}>
+                {/* Exercise mode overflow button */}
+                {isLoggedIn && (
+                  <Pressable
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowExerciseModeModal(true);
+                    }}
+                    style={[
+                      styles.exerciseModeBtn,
+                      exerciseModeForButton
+                        ? { backgroundColor: `${exerciseModeForButton.color}20` }
+                        : isDark ? styles.exerciseModeBtnDark : {},
+                    ]}
+                  >
+                    <Ionicons
+                      name={(exerciseModeForButton?.icon ?? 'ellipsis-horizontal') as any}
+                      size={18}
+                      color={exerciseModeForButton?.color ?? (isDark ? '#A3A3A3' : '#737373')}
+                    />
+                  </Pressable>
+                )}
+                <TextInput
+                  style={[styles.input, isDark && styles.inputDark]}
+                  value={input}
+                  onChangeText={setInput}
+                  placeholder={t('coach.placeholder', { name: activeCharacter.name })}
+                  placeholderTextColor="#A3A3A3"
+                  multiline
+                  maxLength={500}
+                  onSubmitEditing={() => sendMessage()}
+                  returnKeyType="send"
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+                <Pressable
+                  onPress={() => sendMessage()}
+                  style={[styles.sendButton, { backgroundColor: activeCharacter.color }, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
+                  disabled={!input.trim() || isLoading}
+                >
+                  <Ionicons name="arrow-up" size={20} color="#fff" />
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
+        )}
 
         {/* Battle Character Modal */}
         <BattleCharacterModal
@@ -922,6 +1004,79 @@ const styles = StyleSheet.create({
     lineHeight: 18, marginTop: 3,
   },
   welcomeDescDark: { color: '#A3A3A3' },
+
+  // First-time intro card
+  introCard: {
+    alignItems: 'center', paddingVertical: 20, paddingHorizontal: 24,
+    marginBottom: 8, borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
+  introCardDark: { backgroundColor: 'rgba(255,255,255,0.03)' },
+  introTitle: {
+    fontSize: 18, fontWeight: '700', color: '#171717',
+    letterSpacing: -0.3, marginTop: 10,
+  },
+  introTitleDark: { color: '#F5F5F5' },
+  introDesc: {
+    fontSize: 14, color: '#737373', textAlign: 'center',
+    lineHeight: 20, marginTop: 4, marginBottom: 16,
+  },
+  introDescDark: { color: '#A3A3A3' },
+  introFeatures: {
+    width: '100%', gap: 10, marginBottom: 16,
+  },
+  introFeatureRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+  },
+  introFeatureIcon: {
+    width: 30, height: 30, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  introFeatureText: {
+    fontSize: 14, fontWeight: '500', color: '#404040',
+  },
+  introFeatureTextDark: { color: '#D4D4D4' },
+  introGotIt: {
+    paddingHorizontal: 24, paddingVertical: 10, borderRadius: 12,
+  },
+  introGotItText: {
+    fontSize: 15, fontWeight: '700',
+  },
+
+  // Locked conversation banner
+  lockedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 22,
+    backgroundColor: 'rgba(232,67,90,0.06)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(232,67,90,0.15)',
+  },
+  lockedBannerDark: {
+    backgroundColor: 'rgba(232,67,90,0.1)',
+    borderColor: 'rgba(232,67,90,0.2)',
+  },
+  lockedBannerText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#E8435A',
+  },
+  lockedUpgradeBtn: {
+    backgroundColor: '#E8435A',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  lockedUpgradeBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#fff',
+  },
 
   // Floating glass input bar
   floatingInputWrapper: {
