@@ -1,9 +1,14 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+
 export const env = {
   port: parseInt(process.env.PORT || '3000', 10),
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret',
+  jwtSecret: jwtSecret || 'dev-secret-local-only',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -19,4 +24,5 @@ export const env = {
   proPlusHeartsPerDay: 25,
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   appleBundleId: process.env.APPLE_BUNDLE_ID || 'com.flirtiq.app',
+  webhookSecret: process.env.WEBHOOK_SECRET || '',
 };

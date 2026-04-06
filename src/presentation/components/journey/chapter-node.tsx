@@ -7,6 +7,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withRepeat,
+  withTiming,
   FadeIn,
 } from 'react-native-reanimated';
 import type { Chapter } from '@/src/core/entities/types';
@@ -40,10 +42,27 @@ export function ChapterNode({
   onAction,
 }: ChapterNodeProps) {
   const scale = useSharedValue(1);
+  const pulseScale = useSharedValue(1);
   const nodeSize = status === 'active' ? 64 : 56;
+
+  // Pulse animation for active chapter glow ring
+  React.useEffect(() => {
+    if (status === 'active') {
+      pulseScale.value = withRepeat(
+        withTiming(1.15, { duration: 1500 }),
+        -1,
+        true,
+      );
+    }
+  }, [status]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
+  }));
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+    opacity: 2 - pulseScale.value, // 1.0 → 0.85
   }));
 
   const handlePressIn = () => {
@@ -72,15 +91,18 @@ export function ChapterNode({
           style={[animatedStyle, styles.nodeContainer]}
         >
           {status === 'active' && (
-            <LinearGradient
-              colors={['#E8435A', '#FF7854']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={[
-                styles.glowRing,
-                { width: nodeSize + 8, height: nodeSize + 8, borderRadius: (nodeSize + 8) / 2 },
-              ]}
-            />
+            <Animated.View style={[
+              styles.glowRing,
+              { width: nodeSize + 8, height: nodeSize + 8, borderRadius: (nodeSize + 8) / 2 },
+              pulseStyle,
+            ]}>
+              <LinearGradient
+                colors={['#E8435A', '#FF7854']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[StyleSheet.absoluteFill, { borderRadius: (nodeSize + 8) / 2 }]}
+              />
+            </Animated.View>
           )}
           <View
             style={[
@@ -143,11 +165,21 @@ export function ChapterNode({
                 status === 'completed' && styles.actionButtonCompleted,
               ]}
             >
-              <Text style={[styles.actionText, status === 'completed' && styles.actionTextCompleted]}>
-                {status === 'completed'
-                  ? locale === 'de' ? 'Nochmal lesen' : 'Read Again'
-                  : locale === 'de' ? 'Kapitel öffnen' : 'Open Chapter'}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={[styles.actionText, status === 'completed' && styles.actionTextCompleted]}>
+                  {status === 'completed'
+                    ? locale === 'de' ? 'Nochmal lesen' : 'Read Again'
+                    : heartCost != null
+                      ? locale === 'de' ? 'Freischalten' : 'Unlock'
+                      : locale === 'de' ? 'Kapitel öffnen' : 'Open Chapter'}
+                </Text>
+                {heartCost != null && status !== 'completed' && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                    <Ionicons name="heart" size={12} color="#E8435A" />
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#E8435A' }}>{heartCost}</Text>
+                  </View>
+                )}
+              </View>
             </Pressable>
           </GlassCard>
         </Animated.View>

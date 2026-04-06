@@ -137,6 +137,7 @@ export default function CoachScreen() {
 
   const canSpend = useHeartsStore((s) => s.canSpend);
   const spendHearts = useHeartsStore((s) => s.spendHearts);
+  const heartsAvailable = useHeartsStore((s) => s.dailyHearts + s.bonusHearts);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -148,7 +149,7 @@ export default function CoachScreen() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Tab bar height for when it's visible
-  const tabBarHeight = 52 + insets.bottom;
+  const tabBarHeight = 80 + insets.bottom;
 
   // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
@@ -533,6 +534,16 @@ export default function CoachScreen() {
               );
             })()}
             <View style={styles.headerRight}>
+              {isLoggedIn && (
+                <View style={styles.limitBadge}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                    <Ionicons name="heart" size={11} color="#fff" />
+                    <Text style={styles.limitText}>
+                      {heartsAvailable}
+                    </Text>
+                  </View>
+                </View>
+              )}
               <Pressable
                 onPress={(e) => {
                   e.stopPropagation();
@@ -569,14 +580,6 @@ export default function CoachScreen() {
               setExerciseMode(null);
             }}
           />
-        ) : !isPremium ? (
-          <Pressable onPress={() => router.push('/paywall?trigger=hearts')} style={styles.upgradeBanner}>
-            <Ionicons name="heart" size={16} color="#E8435A" />
-            <Text style={styles.upgradeBannerText}>
-              {locale === 'de' ? 'Upgrade für mehr Herzen' : 'Upgrade for more hearts'}
-            </Text>
-            <Ionicons name="chevron-forward" size={14} color="#E8435A" />
-          </Pressable>
         ) : null}
 
         {/* Messages — inverted FlatList for WhatsApp-like chat behavior */}
@@ -923,7 +926,6 @@ const styles = StyleSheet.create({
   // Floating glass input bar
   floatingInputWrapper: {
     paddingHorizontal: 14,
-    paddingBottom: 4,
   },
   floatingInputOuter: {
     borderRadius: 22,

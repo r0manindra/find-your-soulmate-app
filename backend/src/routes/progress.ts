@@ -36,7 +36,7 @@ router.post('/sync', async (req: AuthRequest, res: Response) => {
     res.json({ progress: user });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      res.status(400).json({ error: 'Invalid input' });
       return;
     }
     console.error('Sync error:', err);

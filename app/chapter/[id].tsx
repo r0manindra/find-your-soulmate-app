@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, Pressable, TextInput, FlatList, Modal,
-  KeyboardAvoidingView, Platform, StyleSheet,
+  KeyboardAvoidingView, Platform, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -555,10 +555,34 @@ export default function ChapterDetailScreen() {
           const nextChapter = chapters.find((c) => c.id === chapterId + 1) ??
             chapters.find((c) => !completedChapters.includes(c.id) && c.id !== chapterId);
           if (!nextChapter) return null;
+          const nextIsFree = nextChapter.phase === 0;
+          const nextIsCompleted = completedChapters.includes(nextChapter.id);
+          const nextNeedsHearts = !nextIsFree && !nextIsCompleted && !hasChapterUnlock;
           return (
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                if (nextNeedsHearts) {
+                  const hearts = useHeartsStore.getState();
+                  if (!hearts.canSpend(HEART_COSTS.CHAPTER)) {
+                    router.push('/paywall?trigger=hearts');
+                    return;
+                  }
+                  Alert.alert(
+                    locale === 'de' ? 'Kapitel freischalten' : 'Unlock Chapter',
+                    locale === 'de'
+                      ? `Dieses Kapitel kostet ${HEART_COSTS.CHAPTER} Herzen. Fortfahren?`
+                      : `This chapter costs ${HEART_COSTS.CHAPTER} hearts. Continue?`,
+                    [
+                      { text: locale === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
+                      {
+                        text: locale === 'de' ? 'Freischalten' : 'Unlock',
+                        onPress: () => router.replace(`/chapter/${nextChapter.id}`),
+                      },
+                    ],
+                  );
+                  return;
+                }
                 router.replace(`/chapter/${nextChapter.id}`);
               }}
               style={styles.nextChapterContainer}
@@ -586,6 +610,12 @@ export default function ChapterDetailScreen() {
                         : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
                     </Text>
                   </View>
+                  {nextNeedsHearts && (
+                    <View style={styles.nextChapterHeartBadge}>
+                      <Ionicons name="heart" size={10} color="#fff" />
+                      <Text style={styles.nextChapterHeartText}>{HEART_COSTS.CHAPTER}</Text>
+                    </View>
+                  )}
                   <View style={styles.nextChapterArrow}>
                     <Ionicons name="arrow-forward" size={20} color="#fff" />
                   </View>
@@ -1105,6 +1135,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
+  },
+  nextChapterHeartBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  nextChapterHeartText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
   },
   nextChapterArrow: {
     width: 36,

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -18,6 +18,8 @@ import { useUserProfileStore } from '@/src/store/user-profile-store';
 import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { useAuthStore } from '@/src/store/auth-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
+import { useHeartsStore } from '@/src/store/hearts-store';
+import { phraseCategories } from '@/src/data/content/phrasebook';
 
 function getGreeting(locale: 'en' | 'de'): string {
   const hour = new Date().getHours();
@@ -47,6 +49,7 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
   const { completedChapters } = useProgressStore();
   const router = useRouter();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const hasChapterUnlock = useAuthStore((s) => s.hasChapterUnlock);
   const scale = useSharedValue(1);
 
   // Chapter order: Phase 0 (21-25), then Phase 1-5 (1-20)
@@ -77,9 +80,34 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
       }}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        if (nextChapter) {
-          router.push(`/chapter/${nextChapter.id}`);
+        if (!nextChapter) return;
+
+        const isFree = nextChapter.phase === 0;
+        const isCompleted = completedChapters.includes(nextChapter.id);
+        const needsHearts = isLoggedIn && !isFree && !isCompleted && !hasChapterUnlock;
+
+        if (needsHearts) {
+          const hearts = useHeartsStore.getState();
+          if (!hearts.canSpend(HEART_COSTS.CHAPTER)) {
+            router.push('/paywall?trigger=hearts');
+            return;
+          }
+          Alert.alert(
+            locale === 'de' ? 'Kapitel freischalten' : 'Unlock Chapter',
+            locale === 'de'
+              ? `Dieses Kapitel kostet ${HEART_COSTS.CHAPTER} Herzen. Fortfahren?`
+              : `This chapter costs ${HEART_COSTS.CHAPTER} hearts. Continue?`,
+            [
+              { text: locale === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
+              {
+                text: locale === 'de' ? 'Freischalten' : 'Unlock',
+                onPress: () => router.push(`/chapter/${nextChapter.id}`),
+              },
+            ],
+          );
+          return;
         }
+        router.push(`/chapter/${nextChapter.id}`);
       }}
     >
       <LinearGradient
@@ -223,6 +251,37 @@ export default function HomeScreen() {
           <ContinueCard locale={locale} />
         </Animated.View>
 
+        {/* Phrasebook shortcut */}
+        <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/phrasebook' as any);
+            }}
+            style={[styles.phrasebookCard, isDark && styles.phrasebookCardDark]}
+          >
+            <View style={styles.phrasebookContent}>
+              <Ionicons name="chatbubble-ellipses" size={22} color="#8B5CF6" />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
+                  {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
+                </Text>
+                <Text style={[styles.phrasebookSubtitle, isDark && styles.phrasebookSubtitleDark]}>
+                  {locale === 'de' ? `${phraseCategories.length} Kategorien` : `${phraseCategories.length} categories`}
+                </Text>
+              </View>
+              <View style={styles.phrasebookIcons}>
+                {phraseCategories.slice(0, 4).map((cat) => (
+                  <View key={cat.id} style={[styles.phrasebookDot, { backgroundColor: cat.color }]}>
+                    <Ionicons name={cat.icon as any} size={10} color="#fff" />
+                  </View>
+                ))}
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={isDark ? '#737373' : '#A3A3A3'} />
+            </View>
+          </Pressable>
+        </Animated.View>
+
         <GlassCard style={styles.progressCard}>
           <View style={styles.progressRow}>
             <ProgressRing
@@ -353,6 +412,53 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Phrasebook card
+  phrasebookCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  phrasebookCardDark: {
+    backgroundColor: '#252525',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  phrasebookContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  phrasebookTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#171717',
+  },
+  phrasebookTitleDark: { color: '#F5F5F5' },
+  phrasebookSubtitle: {
+    fontSize: 12,
+    color: '#737373',
+    marginTop: 1,
+  },
+  phrasebookSubtitleDark: { color: '#A3A3A3' },
+  phrasebookIcons: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  phrasebookDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },

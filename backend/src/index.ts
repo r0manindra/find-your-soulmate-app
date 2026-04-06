@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import { prisma } from './config/prisma';
@@ -14,18 +15,49 @@ const app = express();
 // Trust proxy (Railway runs behind a reverse proxy)
 app.set('trust proxy', 1);
 
-// Middleware
-app.use(cors());
+// Security headers
+app.use(helmet());
+
+// CORS — restrict to app origins
+app.use(cors({
+  origin: env.nodeEnv === 'production'
+    ? ['https://charismo.app', 'charismo://', 'exp://']
+    : true,
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '1mb' }));
 
-// Rate limiting
+// Global rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use('/api/', limiter);
+
+// Stricter rate limiting for auth endpoints (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts, please try again later' },
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
+// Stricter rate limiting for AI endpoints (cost protection)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please slow down' },
+});
+app.use('/api/coach/message', aiLimiter);
+app.use('/api/quiz/generate', aiLimiter);
 
 // Routes
 app.use('/api/auth', authRoutes);

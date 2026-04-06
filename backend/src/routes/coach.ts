@@ -16,30 +16,30 @@ import { VALID_CHARACTER_IDS } from '../services/characters';
 const contextSchema = z.object({
   profile: z.object({
     gender: z.enum(['male', 'female', 'diverse']).nullable(),
-    ageGroup: z.string().nullable(),
-    skillLevel: z.string().nullable(),
-    socialEnergy: z.string().nullable(),
-    basicsLevel: z.string().nullable(),
-    goal: z.string().nullable(),
+    ageGroup: z.string().max(50).nullable(),
+    skillLevel: z.string().max(50).nullable(),
+    socialEnergy: z.string().max(50).nullable(),
+    basicsLevel: z.string().max(50).nullable(),
+    goal: z.string().max(100).nullable(),
   }),
   progress: z.object({
-    completedChapters: z.array(z.number()),
-    currentChapterId: z.number().nullable(),
-    streak: z.number(),
+    completedChapters: z.array(z.number().int().min(1).max(25)).max(25),
+    currentChapterId: z.number().int().min(1).max(25).nullable(),
+    streak: z.number().int().min(0).max(9999),
     graduated: z.boolean(),
   }),
   habits: z.object({
-    active: z.array(z.object({ name: z.string(), currentStreak: z.number() })),
-    todayCompleted: z.number(),
-    todayTotal: z.number(),
-    weeklyCompletionRate: z.number(),
+    active: z.array(z.object({ name: z.string().max(100), currentStreak: z.number().int().min(0) })).max(50),
+    todayCompleted: z.number().int().min(0),
+    todayTotal: z.number().int().min(0),
+    weeklyCompletionRate: z.number().min(0).max(1),
   }),
   locale: z.enum(['en', 'de']),
 }).optional();
 
 const messageSchema = z.object({
-  message: z.string().min(1).max(2000),
-  characterId: z.string().optional().default('charismo'),
+  message: z.string().min(1).max(4000),
+  characterId: z.string().max(50).optional().default('charismo'),
   context: contextSchema,
   exerciseMode: z.enum([
     'opening_line_lab',
@@ -50,7 +50,7 @@ const messageSchema = z.object({
     'reply_helper',
     'flirting_battle',
   ]).optional(),
-  conversationId: z.string().optional(),
+  conversationId: z.string().max(100).optional(),
 });
 
 // POST /api/coach/message
@@ -203,7 +203,7 @@ router.post('/message', async (req: AuthRequest, res: Response) => {
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      res.status(400).json({ error: 'Invalid input' });
       return;
     }
     console.error('Coach error:', err);

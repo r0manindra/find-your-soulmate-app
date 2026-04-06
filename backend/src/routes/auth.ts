@@ -67,7 +67,10 @@ router.post('/register', async (req: Request, res: Response) => {
     res.status(201).json({ token, user: userResponse(user) });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      // Only expose validation messages for user-facing fields
+      const msg = err.errors[0]?.message;
+      const safeMessages = ['Password must be at least 8 characters', 'You must be at least 16 years old'];
+      res.status(400).json({ error: safeMessages.includes(msg) ? msg : 'Invalid input' });
       return;
     }
     console.error('Register error:', err);
@@ -105,7 +108,7 @@ router.post('/login', async (req: Request, res: Response) => {
     res.json({ token, user: userResponse(user) });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      res.status(400).json({ error: 'Invalid input' });
       return;
     }
     console.error('Login error:', err);
@@ -153,7 +156,7 @@ router.post('/google', async (req: Request, res: Response) => {
     res.json({ token, user: userResponse(user) });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      res.status(400).json({ error: 'Invalid input' });
       return;
     }
     console.error('Google auth error:', err);
@@ -211,7 +214,7 @@ router.post('/apple', async (req: Request, res: Response) => {
     res.json({ token, user: userResponse(user) });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      res.status(400).json({ error: err.errors[0].message });
+      res.status(400).json({ error: 'Invalid input' });
       return;
     }
     console.error('Apple auth error:', err);
@@ -246,32 +249,6 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
     res.json({ user });
   } catch (err) {
     console.error('Me error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// POST /api/auth/dev-unlock — dev key to activate subscription tier
-const DEV_KEY = 'charismo2026';
-
-router.post('/dev-unlock', authMiddleware, async (req: AuthRequest, res: Response) => {
-  try {
-    const { key, tier } = req.body;
-    if (key !== DEV_KEY) {
-      res.status(403).json({ error: 'Invalid key' });
-      return;
-    }
-
-    // Default to PRO_PLUS for full access; accept 'pro' for Pro-only
-    const status = tier === 'pro' ? 'PRO' : 'PRO_PLUS';
-
-    await prisma.user.update({
-      where: { id: req.userId },
-      data: { subscriptionStatus: status },
-    });
-
-    res.json({ success: true, subscriptionStatus: status });
-  } catch (err) {
-    console.error('Dev unlock error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, useWindowDimensions, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, useWindowDimensions, StyleSheet, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,7 @@ import { useSettingsStore } from '@/src/store/settings-store';
 import { chapters, phases } from '@/src/data/content/chapters';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 import { useAuthStore } from '@/src/store/auth-store';
+import { useHeartsStore } from '@/src/store/hearts-store';
 import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { PhaseHeader } from './phase-header';
 import { ChapterNode } from './chapter-node';
@@ -101,6 +102,7 @@ export function JourneyPath() {
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const hasChapterUnlock = useAuthStore((s) => s.hasChapterUnlock);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
 
@@ -111,9 +113,32 @@ export function JourneyPath() {
   const handleAction = useCallback(
     (id: number) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const ch = chapters.find((c) => c.id === id);
+      const isFree = ch?.phase === 0;
+      const isCompleted = completedChapters.includes(id);
+      const needsHearts = isLoggedIn && !isFree && !isCompleted && !hasChapterUnlock;
+
+      if (needsHearts) {
+        const hearts = useHeartsStore.getState();
+        if (!hearts.canSpend(HEART_COSTS.CHAPTER)) {
+          router.push('/paywall?trigger=hearts');
+          return;
+        }
+        Alert.alert(
+          locale === 'de' ? 'Kapitel freischalten' : 'Unlock Chapter',
+          locale === 'de'
+            ? `Dieses Kapitel kostet ${HEART_COSTS.CHAPTER} Herzen. Fortfahren?`
+            : `This chapter costs ${HEART_COSTS.CHAPTER} hearts. Continue?`,
+          [
+            { text: locale === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
+            { text: locale === 'de' ? 'Freischalten' : 'Unlock', onPress: () => router.push(`/chapter/${id}`) },
+          ],
+        );
+        return;
+      }
       router.push(`/chapter/${id}`);
     },
-    [router]
+    [router, locale, completedChapters, isLoggedIn, hasChapterUnlock]
   );
 
   return (
