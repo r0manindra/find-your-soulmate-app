@@ -8,7 +8,8 @@ export type PhraseCategoryId =
   | 'texting_dms'
   | 'confidence_boosters'
   | 'date_conversation'
-  | 'body_language';
+  | 'body_language'
+  | 'story_replies';
 
 export interface PhraseCategory {
   id: PhraseCategoryId;
@@ -87,6 +88,12 @@ export const phraseCategories: PhraseCategory[] = [
     name: { en: 'Body Language + Words', de: 'Körpersprache + Worte' },
     icon: 'body',
     color: '#A855F7',
+  },
+  {
+    id: 'story_replies',
+    name: { en: 'Story Replies', de: 'Story-Antworten' },
+    icon: 'camera',
+    color: '#E8435A',
   },
 ];
 
@@ -2431,6 +2438,314 @@ export const phrases: Phrase[] = [
     explanation: {
       en: 'Abundance mindset over scarcity mindset. Chasing pushes people away; being magnetic draws them in.',
       de: 'Überfluss-Mindset statt Mangel-Mindset. Jagen stößt ab; magnetisch sein zieht an.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // STORY REPLIES — Witty, playful replies to Instagram/Snapchat stories
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Free
+  {
+    id: 'sr_1',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a surfing/beach story', de: 'Surf-/Strand-Story' },
+    text: {
+      en: "Serious question — are you one of those people who's 50% above water or 50% below water the whole time?",
+      de: 'Ernste Frage — bist du einer von denen die 50% über Wasser oder 50% unter Wasser sind die ganze Zeit?',
+    },
+    explanation: {
+      en: "Absurd humor that makes them laugh. It's unexpected and way more memorable than 'cool waves!'.",
+      de: 'Absurder Humor der zum Lachen bringt. Unerwartet und viel einprägsamer als ein „coole Wellen!".',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_2',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a travel/airplane story', de: 'Reise-/Flugzeug-Story' },
+    text: {
+      en: "Is that runway long enough or could I land a plane on your ego too?",
+      de: 'Ist die Landebahn lang genug oder könnte ich auch auf deinem Ego landen?',
+    },
+    explanation: {
+      en: "A playful roast that shows you're not intimidated. Works best when they already seem confident.",
+      de: 'Ein spielerischer Roast der zeigt, dass du nicht eingeschüchtert bist. Funktioniert am besten bei selbstbewussten Leuten.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_3',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a food/cooking story', de: 'Essen-/Koch-Story' },
+    text: {
+      en: "Ok but did you actually make that or is this your one dish you photograph every time?",
+      de: 'Ok aber hast du das wirklich gemacht oder ist das dein einziges Gericht das du jedes Mal fotografierst?',
+    },
+    explanation: {
+      en: "Teasing them shows confidence. If they did cook it, they'll defend it proudly — instant conversation.",
+      de: 'Sie aufzuziehen zeigt Selbstvertrauen. Wenn sie es gekocht haben, verteidigen sie es stolz — sofortiges Gespräch.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_4',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a gym/workout story', de: 'Gym-/Workout-Story' },
+    text: {
+      en: "Do you also film yourself going to the fridge at 2am or just the gym parts?",
+      de: 'Filmst du dich auch beim Gang zum Kühlschrank um 2 Uhr nachts oder nur die Gym-Teile?',
+    },
+    explanation: {
+      en: "Self-aware humor about gym culture. Everyone secretly relates to this — it's funny because it's true.",
+      de: 'Selbstironischer Humor über Gym-Kultur. Jeder kann sich heimlich damit identifizieren — es ist lustig weil es wahr ist.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_5',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a sunset/view story', de: 'Sonnenuntergang-/Aussicht-Story' },
+    text: {
+      en: "Nice view. But I have a very important question: left or right Twix?",
+      de: 'Schöne Aussicht. Aber ich hab eine sehr wichtige Frage: links oder rechts Twix?',
+    },
+    explanation: {
+      en: "A complete topic switch that catches them off guard. The randomness is the charm — they'll reply out of curiosity.",
+      de: 'Ein kompletter Themawechsel der überrascht. Die Zufälligkeit ist der Charme — sie antworten aus Neugier.',
+    },
+    isPremium: false,
+    forGender: 'all',
+  },
+
+  // Premium
+  {
+    id: 'sr_6',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a coffee/brunch story', de: 'Kaffee-/Brunch-Story' },
+    text: {
+      en: "That oat milk latte probably costs more than my rent. Worth it though?",
+      de: 'Der Hafermilch Latte kostet wahrscheinlich mehr als meine Miete. Lohnt es sich?',
+    },
+    explanation: {
+      en: 'Relatable millennial/Gen Z humor about overpriced coffee. Lighthearted and opens the door to a real chat.',
+      de: 'Relatable Millennial/Gen Z Humor über überteuerten Kaffee. Locker und öffnet die Tür zu einem echten Gespräch.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_7',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a pet/dog story', de: 'Haustier-/Hunde-Story' },
+    text: {
+      en: "I was going to say something smooth but honestly your dog just stole my whole attention. What's their name?",
+      de: 'Ich wollte was Smoothes sagen aber ehrlich gesagt hat dein Hund meine ganze Aufmerksamkeit gestohlen. Wie heißt er?',
+    },
+    explanation: {
+      en: "Self-aware, disarming, and you're asking about something they clearly love. Triple win.",
+      de: 'Selbstbewusst, entwaffnend, und du fragst nach etwas das sie offensichtlich lieben. Dreifacher Gewinn.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_8',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a concert/festival story', de: 'Konzert-/Festival-Story' },
+    text: {
+      en: "Your music taste is either a green flag or a dealbreaker and I need to know which one right now.",
+      de: 'Dein Musikgeschmack ist entweder ein Green Flag oder ein Dealbreaker und ich muss es jetzt sofort wissen.',
+    },
+    explanation: {
+      en: "Creates instant tension and a reason for them to prove themselves. Playfully high-stakes framing for a fun topic.",
+      de: 'Erzeugt sofortige Spannung und einen Grund sich zu beweisen. Spielerisch dramatische Rahmung für ein lockeres Thema.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_9',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a mirror selfie/outfit story', de: 'Spiegel-Selfie-/Outfit-Story' },
+    text: {
+      en: "Ok but how many attempts did it take? Be honest. I won't judge... much.",
+      de: 'Ok aber wie viele Versuche hat es gebraucht? Sei ehrlich. Ich urteile nicht... viel.',
+    },
+    explanation: {
+      en: "Playful teasing that everyone can relate to. Shows you don't take social media too seriously.",
+      de: 'Spielerisches Aufziehen mit dem sich jeder identifizieren kann. Zeigt, dass du Social Media nicht zu ernst nimmst.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_10',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a hiking/nature story', de: 'Wander-/Natur-Story' },
+    text: {
+      en: "Beautiful. Quick question though: would you survive a zombie apocalypse or are you the first one gone?",
+      de: 'Wunderschön. Kurze Frage aber: würdest du eine Zombie-Apokalypse überleben oder bist du der Erste der geht?',
+    },
+    explanation: {
+      en: "Random hypothetical that turns their nature post into an adventure conversation. People love debating this.",
+      de: 'Zufällige hypothetische Frage die ihren Natur-Post in ein Abenteuer-Gespräch verwandelt. Jeder diskutiert das gerne.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_11',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a club/party story', de: 'Club-/Party-Story' },
+    text: {
+      en: "Scale of 1-10, how much are you regretting this tomorrow morning?",
+      de: 'Auf einer Skala von 1-10, wie sehr bereust du das morgen früh?',
+    },
+    explanation: {
+      en: "Relatable party humor. It's funny, not preachy, and gives them a reason to update you the next day.",
+      de: 'Relatable Party-Humor. Lustig, nicht belehrend, und gibt ihnen einen Grund dich am nächsten Tag zu updaten.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_12',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a study/work story', de: 'Lern-/Arbeits-Story' },
+    text: {
+      en: "You look way too productive. What's the secret — panic, caffeine, or both?",
+      de: 'Du siehst viel zu produktiv aus. Was ist das Geheimnis — Panik, Koffein oder beides?',
+    },
+    explanation: {
+      en: "Validates their effort while being funny. Everyone procrastinates — they'll laugh because it's relatable.",
+      de: 'Würdigt ihren Einsatz und ist dabei lustig. Jeder prokrastiniert — sie lachen weil es relatable ist.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_13',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a vacation/pool story', de: 'Urlaubs-/Pool-Story' },
+    text: {
+      en: "Not me being at work looking at this. Very rude honestly. Where is that?",
+      de: 'Nicht ich der das auf der Arbeit sieht. Sehr unhöflich ehrlich gesagt. Wo ist das?',
+    },
+    explanation: {
+      en: "Light jealousy humor that makes them feel good about their trip while starting a real conversation.",
+      de: 'Leichter Neid-Humor der sie gut fühlen lässt über ihren Trip und gleichzeitig ein echtes Gespräch startet.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_14',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a new haircut/glow-up story', de: 'Neuer Haarschnitt-/Glow-Up-Story' },
+    text: {
+      en: "Alright who gave you permission to just casually upgrade like that?",
+      de: 'Ok wer hat dir die Erlaubnis gegeben einfach so ein Upgrade zu machen?',
+    },
+    explanation: {
+      en: "A compliment disguised as a joke. Way smoother than 'you look good' — it's memorable and flattering.",
+      de: "Ein Kompliment als Witz verpackt. Viel smoother als 'du siehst gut aus' — einprägsam und schmeichelnd.",
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_15',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a boring/mundane story', de: 'Langweilige/alltägliche Story' },
+    text: {
+      en: "This is the most honest story I've seen all week. Everyone else is faking. You're real.",
+      de: 'Das ist die ehrlichste Story die ich die ganze Woche gesehen hab. Alle anderen faken. Du bist echt.',
+    },
+    explanation: {
+      en: "Flipping the script — turning their 'boring' content into a genuine compliment about authenticity.",
+      de: 'Den Spieß umdrehen — ihren „langweiligen" Content in ein echtes Kompliment über Authentizität verwandeln.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_16',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a book/reading story', de: 'Buch-/Lese-Story' },
+    text: {
+      en: "A person who reads? In this economy? You just became 10x more interesting.",
+      de: 'Jemand der liest? In dieser Wirtschaft? Du bist gerade 10x interessanter geworden.',
+    },
+    explanation: {
+      en: "Humor + genuine appreciation. Makes them feel seen for something they're proud of.",
+      de: 'Humor + echte Wertschätzung. Gibt ihnen das Gefühl für etwas gesehen zu werden, worauf sie stolz sind.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_17',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a car/driving story', de: 'Auto-/Fahr-Story' },
+    text: {
+      en: "Cool car but more importantly — are you a road trip sing-along person or a silent driver type?",
+      de: 'Cooles Auto aber wichtiger — bist du ein Roadtrip-Mitsing-Mensch oder ein stiller Fahrer-Typ?',
+    },
+    explanation: {
+      en: 'Redirects from a shallow topic to a personality question. Creates a fun either-or dynamic.',
+      de: 'Leitet von einem oberflächlichen Thema zu einer Persönlichkeitsfrage um. Erzeugt eine lustige Entweder-Oder-Dynamik.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_18',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a skiing/snow story', de: 'Ski-/Schnee-Story' },
+    text: {
+      en: "Be honest — how many times did you fall before filming the cool version?",
+      de: 'Sei ehrlich — wie oft bist du gefallen bevor du die coole Version gefilmt hast?',
+    },
+    explanation: {
+      en: 'Teasing that assumes the best (they got a cool shot) while being relatable. Everyone faceplants on the slopes.',
+      de: 'Aufziehen das vom Besten ausgeht (sie haben einen coolen Shot) und gleichzeitig relatable ist.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_19',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a spa/self-care story', de: 'Spa-/Selfcare-Story' },
+    text: {
+      en: "Living your best life while I'm here debating what to have for dinner. Teach me your ways.",
+      de: 'Du lebst dein bestes Leben während ich hier überlege was ich zum Abendessen esse. Bring mir deine Wege bei.',
+    },
+    explanation: {
+      en: 'Self-deprecating humor that puts them on a pedestal without being cringey. Feels natural.',
+      de: 'Selbstironischer Humor der sie auf ein Podest stellt ohne cringe zu sein. Fühlt sich natürlich an.',
+    },
+    isPremium: true,
+    forGender: 'all',
+  },
+  {
+    id: 'sr_20',
+    categoryId: 'story_replies',
+    situation: { en: 'They post a throwback/childhood story', de: 'Throwback-/Kindheits-Story' },
+    text: {
+      en: "Little you had no idea you'd grow up to have this much main character energy.",
+      de: 'Das kleine Du hatte keine Ahnung, dass du mit so viel Hauptcharakter-Energie aufwachsen würdest.',
+    },
+    explanation: {
+      en: 'A creative compliment that bridges past and present. Shows you actually look at their stories thoughtfully.',
+      de: 'Ein kreatives Kompliment das Vergangenheit und Gegenwart verbindet. Zeigt, dass du ihre Stories aufmerksam anschaust.',
     },
     isPremium: true,
     forGender: 'all',

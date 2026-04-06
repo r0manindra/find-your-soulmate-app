@@ -10,7 +10,6 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeInDown } fr
 import { useColorScheme } from '@/components/useColorScheme';
 import { GlassCard } from '@/src/presentation/components/ui/glass-card';
 import { ProgressRing } from '@/src/presentation/components/ui/progress-ring';
-import { CharismoIcon } from '@/src/presentation/components/ui/charismo-icon';
 import { useProgressStore } from '@/src/store/progress-store';
 import { useSettingsStore } from '@/src/store/settings-store';
 import { chapters } from '@/src/data/content/chapters';
@@ -19,6 +18,7 @@ import { HeartCounter } from '@/src/presentation/components/ui/heart-counter';
 import { useAuthStore } from '@/src/store/auth-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 import { useHeartsStore } from '@/src/store/hearts-store';
+import { useHabitStore } from '@/src/store/habit-store';
 import { phraseCategories } from '@/src/data/content/phrasebook';
 
 function getGreeting(locale: 'en' | 'de'): string {
@@ -69,6 +69,10 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
 
   if (!nextChapter) return null;
 
+  const isFree = nextChapter.phase === 0;
+  const isCompleted = completedChapters.includes(nextChapter.id);
+  const needsHearts = isLoggedIn && !isFree && !isCompleted && !hasChapterUnlock;
+
   return (
     <AnimatedPressable
       style={animatedStyle}
@@ -81,10 +85,6 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         if (!nextChapter) return;
-
-        const isFree = nextChapter.phase === 0;
-        const isCompleted = completedChapters.includes(nextChapter.id);
-        const needsHearts = isLoggedIn && !isFree && !isCompleted && !hasChapterUnlock;
 
         if (needsHearts) {
           const hearts = useHeartsStore.getState();
@@ -122,7 +122,9 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
           </View>
           <View style={styles.continueText}>
             <Text style={styles.continueLabel}>
-              {locale === 'de' ? 'Weiter mit' : 'Continue with'}
+              {needsHearts
+                ? locale === 'de' ? 'Freischalten' : 'Unlock'
+                : locale === 'de' ? 'Weiter mit' : 'Continue with'}
             </Text>
             <Text style={styles.continueTitle} numberOfLines={1}>
               {nextChapter.title[locale]}
@@ -134,46 +136,19 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
             </Text>
           </View>
           <View style={styles.continueRight}>
-            {isLoggedIn && nextChapter.phase !== 0 && !completedChapters.includes(nextChapter.id) && (
+            {needsHearts && (
               <View style={styles.heartCostBadge}>
                 <Ionicons name="heart" size={10} color="#fff" />
                 <Text style={styles.heartCostText}>{HEART_COSTS.CHAPTER}</Text>
               </View>
             )}
             <View style={styles.continueArrow}>
-              <Ionicons name="play" size={20} color="#fff" />
+              <Ionicons name={needsHearts ? 'lock-open' : 'play'} size={20} color="#fff" />
             </View>
           </View>
         </View>
       </LinearGradient>
     </AnimatedPressable>
-  );
-}
-
-function QuickActionButton({ icon, label, subtitle, onPress, isDark, delay, customIcon }: { icon: string; label: string; subtitle?: string; onPress: () => void; isDark: boolean; delay: number; customIcon?: React.ReactNode }) {
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return (
-    <Animated.View style={{ flex: 1 }} entering={FadeInDown.delay(delay).duration(400).springify()}>
-      <AnimatedPressable
-        style={[animatedStyle, styles.quickAction, isDark && styles.quickActionDark]}
-        onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 400 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 400 }); }}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onPress();
-        }}
-      >
-        {customIcon ?? <Ionicons name={icon as any} size={24} color="#E8435A" />}
-        <Text style={[styles.quickActionLabel, isDark && styles.quickActionLabelDark]}>{label}</Text>
-        {subtitle ? (
-          <Text style={[styles.quickActionStat, isDark && styles.quickActionStatDark]}>{subtitle}</Text>
-        ) : null}
-      </AnimatedPressable>
-    </Animated.View>
   );
 }
 
@@ -188,6 +163,25 @@ export default function HomeScreen() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const userGender = useUserProfileStore((s) => s.userGender);
   const [personalizeCardDismissed, setPersonalizeCardDismissed] = useState(false);
+
+  // Habits mini-summary
+  const habits = useHabitStore((s) => s.habits);
+  const completions = useHabitStore((s) => s.completions);
+  const activeHabits = useMemo(() => habits.filter((h) => !h.isArchived), [habits]);
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayDow = useMemo(() => new Date().getDay(), []);
+  const habitsForToday = useMemo(() => {
+    return activeHabits.filter((h) => {
+      if (h.scheduledDays && h.scheduledDays.length > 0) {
+        return h.scheduledDays.includes(todayDow);
+      }
+      return true;
+    });
+  }, [activeHabits, todayDow]);
+  const habitsDone = useMemo(() => {
+    const completedIds = new Set(completions.filter((c) => c.date === todayStr).map((c) => c.habitId));
+    return habitsForToday.filter((h) => completedIds.has(h.id)).length;
+  }, [habitsForToday, completions, todayStr]);
 
   useEffect(() => {
     updateStreak();
@@ -251,8 +245,8 @@ export default function HomeScreen() {
           <ContinueCard locale={locale} />
         </Animated.View>
 
-        {/* Phrasebook shortcut */}
-        <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+        {/* Phrasebook card — bigger with category preview */}
+        <Animated.View entering={FadeInDown.delay(180).duration(400)}>
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -260,49 +254,95 @@ export default function HomeScreen() {
             }}
             style={[styles.phrasebookCard, isDark && styles.phrasebookCardDark]}
           >
-            <View style={styles.phrasebookContent}>
+            <View style={styles.phrasebookHeader}>
               <Ionicons name="chatbubble-ellipses" size={22} color="#8B5CF6" />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
-                  {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
-                </Text>
-                <Text style={[styles.phrasebookSubtitle, isDark && styles.phrasebookSubtitleDark]}>
-                  {locale === 'de' ? `${phraseCategories.length} Kategorien` : `${phraseCategories.length} categories`}
-                </Text>
-              </View>
-              <View style={styles.phrasebookIcons}>
-                {phraseCategories.slice(0, 4).map((cat) => (
-                  <View key={cat.id} style={[styles.phrasebookDot, { backgroundColor: cat.color }]}>
-                    <Ionicons name={cat.icon as any} size={10} color="#fff" />
-                  </View>
-                ))}
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={isDark ? '#737373' : '#A3A3A3'} />
+              <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
+                {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color={isDark ? '#525252' : '#D4D4D4'} />
+            </View>
+            <Text style={[styles.phrasebookDesc, isDark && styles.phrasebookDescDark]}>
+              {locale === 'de'
+                ? `${phraseCategories.length} Kategorien mit cleveren Sprüchen`
+                : `${phraseCategories.length} categories of clever lines`}
+            </Text>
+            <View style={styles.phrasebookGrid}>
+              {phraseCategories.slice(0, 6).map((cat) => (
+                <View key={cat.id} style={[styles.phrasebookChip, { backgroundColor: `${cat.color}12` }]}>
+                  <Ionicons name={cat.icon as any} size={12} color={cat.color} />
+                  <Text style={[styles.phrasebookChipText, { color: cat.color }]} numberOfLines={1}>
+                    {cat.name[locale]}
+                  </Text>
+                </View>
+              ))}
             </View>
           </Pressable>
         </Animated.View>
 
-        <GlassCard style={styles.progressCard}>
-          <View style={styles.progressRow}>
-            <ProgressRing
-              progress={overallProgress}
-              size={130}
-              label={t('home.progress')}
-              isDark={isDark}
-            />
-            <View style={styles.statsColumn}>
-              <View>
-                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedChapters.length}/{chapters.length}</Text>
-                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.chapters')}</Text>
+        {/* Today's Habits mini-summary */}
+        {activeHabits.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(220).duration(400)}>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(tabs)/habits');
+              }}
+              style={[styles.habitsMiniCard, isDark && styles.habitsMiniCardDark]}
+            >
+              <View style={styles.habitsMiniLeft}>
+                <Text style={styles.habitsMiniEmoji}>
+                  {habitsDone === habitsForToday.length && habitsForToday.length > 0 ? '🎉' : '📋'}
+                </Text>
+                <View>
+                  <Text style={[styles.habitsMiniTitle, isDark && styles.habitsMiniTitleDark]}>
+                    {locale === 'de' ? 'Heutige Habits' : "Today's Habits"}
+                  </Text>
+                  <Text style={[styles.habitsMiniSubtitle, isDark && styles.habitsMiniSubtitleDark]}>
+                    {habitsDone === habitsForToday.length && habitsForToday.length > 0
+                      ? locale === 'de' ? 'Alles erledigt!' : 'All done!'
+                      : `${habitsDone}/${habitsForToday.length} ${locale === 'de' ? 'erledigt' : 'done'}`}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.streakStatRow}>
-                <Ionicons name="flame" size={20} color="#FF7854" />
-                <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{streak}</Text>
-                <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.streak')}</Text>
+              <View style={styles.habitsMiniDots}>
+                {habitsForToday.slice(0, 5).map((h, i) => {
+                  const done = completions.some((c) => c.habitId === h.id && c.date === todayStr);
+                  return (
+                    <View
+                      key={h.id}
+                      style={[styles.habitsMiniDot, done && styles.habitsMiniDotDone]}
+                    />
+                  );
+                })}
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={isDark ? '#525252' : '#D4D4D4'} />
+            </Pressable>
+          </Animated.View>
+        )}
+
+        <Animated.View entering={FadeInDown.delay(260).duration(400)}>
+          <GlassCard style={styles.progressCard}>
+            <View style={styles.progressRow}>
+              <ProgressRing
+                progress={overallProgress}
+                size={130}
+                label={t('home.progress')}
+                isDark={isDark}
+              />
+              <View style={styles.statsColumn}>
+                <View>
+                  <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{completedChapters.length}/{chapters.length}</Text>
+                  <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.chapters')}</Text>
+                </View>
+                <View style={styles.streakStatRow}>
+                  <Ionicons name="flame" size={20} color="#FF7854" />
+                  <Text style={[styles.statNumber, isDark && styles.statNumberDark]}>{streak}</Text>
+                  <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>{t('home.streak')}</Text>
+                </View>
               </View>
             </View>
-          </View>
-        </GlassCard>
+          </GlassCard>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -347,7 +387,7 @@ const styles = StyleSheet.create({
   continueCard: {
     borderRadius: 20,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: '#E8435A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
@@ -416,12 +456,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Phrasebook card
+  // Phrasebook card — bigger
   phrasebookCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 14,
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0,0,0,0.06)',
     shadowColor: '#000',
@@ -434,33 +474,98 @@ const styles = StyleSheet.create({
     backgroundColor: '#252525',
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  phrasebookContent: {
+  phrasebookHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 6,
+  },
+  phrasebookTitle: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#171717',
+    letterSpacing: -0.2,
+  },
+  phrasebookTitleDark: { color: '#F5F5F5' },
+  phrasebookDesc: {
+    fontSize: 13,
+    color: '#737373',
+    marginBottom: 12,
+  },
+  phrasebookDescDark: { color: '#A3A3A3' },
+  phrasebookGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  phrasebookChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  phrasebookChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  // Habits mini card
+  habitsMiniCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  phrasebookTitle: {
+  habitsMiniCardDark: {
+    backgroundColor: '#252525',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  habitsMiniLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  habitsMiniEmoji: {
+    fontSize: 24,
+  },
+  habitsMiniTitle: {
     fontSize: 15,
     fontWeight: '600',
     color: '#171717',
   },
-  phrasebookTitleDark: { color: '#F5F5F5' },
-  phrasebookSubtitle: {
+  habitsMiniTitleDark: { color: '#F5F5F5' },
+  habitsMiniSubtitle: {
     fontSize: 12,
     color: '#737373',
     marginTop: 1,
   },
-  phrasebookSubtitleDark: { color: '#A3A3A3' },
-  phrasebookIcons: {
+  habitsMiniSubtitleDark: { color: '#A3A3A3' },
+  habitsMiniDots: {
     flexDirection: 'row',
     gap: 4,
   },
-  phrasebookDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  habitsMiniDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E5E5E5',
+  },
+  habitsMiniDotDone: {
+    backgroundColor: '#E8435A',
   },
 
   // Progress card
@@ -472,45 +577,10 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 13, color: '#737373', marginTop: 2 },
   statLabelDark: { color: '#A3A3A3' },
 
-  // Quick Actions
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
-  },
-  quickAction: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 18,
-    borderRadius: 16,
-    backgroundColor: 'rgba(232,67,90,0.06)',
-    gap: 4,
-  },
-  quickActionDark: {
-    backgroundColor: 'rgba(232,67,90,0.12)',
-  },
-  quickActionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#525252',
-  },
-  quickActionLabelDark: {
-    color: '#A3A3A3',
-  },
-  quickActionStat: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#A3A3A3',
-  },
-  quickActionStatDark: {
-    color: '#737373',
-  },
-
   // Streak (compact, in progress card)
   streakStatRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-
 });

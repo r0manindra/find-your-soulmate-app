@@ -64,20 +64,8 @@ export default function PhrasebookScreen() {
   if (selectedCategory && activeCategory) {
     return (
       <SafeAreaView style={[styles.safeArea, isDark && styles.safeAreaDark]} edges={['top']}>
-        {/* Category detail header */}
-        <View style={[styles.detailHeader, { paddingLeft: 62 }]}>
-          <View style={styles.detailHeaderText}>
-            <Text style={[styles.detailTitle, isDark && styles.detailTitleDark]}>
-              {activeCategory.name[locale]}
-            </Text>
-            <Text style={[styles.detailSubtitle, isDark && styles.detailSubtitleDark]}>
-              {filteredPhrases.length} {locale === 'de' ? 'Sprüche' : 'phrases'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Floating back button */}
-        <View style={[styles.floatingBack, { top: insets.top + 8 }]}>
+        {/* Category detail header with back button inline */}
+        <View style={styles.detailHeader}>
           <LiquidGlassIconButton
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -88,6 +76,14 @@ export default function PhrasebookScreen() {
             size={42}
             iconSize={22}
           />
+          <View style={styles.detailHeaderText}>
+            <Text style={[styles.detailTitle, isDark && styles.detailTitleDark]}>
+              {activeCategory.name[locale]}
+            </Text>
+            <Text style={[styles.detailSubtitle, isDark && styles.detailSubtitleDark]}>
+              {filteredPhrases.length} {locale === 'de' ? 'Sprüche' : 'phrases'}
+            </Text>
+          </View>
         </View>
 
         {/* Saved filter toggle */}
@@ -269,9 +265,9 @@ const styles = StyleSheet.create({
   detailHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 12,
     paddingBottom: 12,
   },
   detailHeaderText: { flex: 1 },

@@ -45,8 +45,8 @@ type TabConfig = {
 const TAB_CONFIG: TabConfig[] = [
   { name: 'index', ionicon: 'home-outline', ioniconFocused: 'home', sfSymbol: 'house', sfSymbolFocused: 'house.fill' },
   { name: 'guide', ionicon: 'book-outline', ioniconFocused: 'book', sfSymbol: 'book', sfSymbolFocused: 'book.fill' },
-  { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle', sfSymbol: 'checkmark.circle', sfSymbolFocused: 'checkmark.circle.fill' },
   { name: 'coach', ionicon: 'flame-outline', ioniconFocused: 'flame', sfSymbol: 'flame', sfSymbolFocused: 'flame.fill' },
+  { name: 'habits', ionicon: 'checkmark-circle-outline', ioniconFocused: 'checkmark-circle', sfSymbol: 'checkmark.circle', sfSymbolFocused: 'checkmark.circle.fill' },
   { name: 'profile', ionicon: 'person-outline', ioniconFocused: 'person', sfSymbol: 'person', sfSymbolFocused: 'person.fill' },
 ];
 

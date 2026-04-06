@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -143,6 +144,7 @@ export default function HabitsScreen() {
   const { t } = useTranslation();
   const locale = useSettingsStore((s) => s.locale);
   const isPremium = useAuthStore((s) => s.isPremium);
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
@@ -329,11 +331,20 @@ export default function HabitsScreen() {
         {/* Add Habit Button */}
         {!isPremium && activeHabits.length >= FREE_HABIT_LIMIT ? (
           <GlassCard style={styles.limitCard}>
+            <Ionicons name="lock-closed" size={20} color="#E8435A" style={{ marginBottom: 6 }} />
             <Text style={[styles.limitText, isDark && styles.textMutedDark]}>
               {locale === 'de'
-                ? 'Limit von 5 Habits erreicht. Upgrade für unbegrenzte Habits!'
-                : 'Limit of 5 habits reached. Upgrade for unlimited habits!'}
+                ? 'Du hast 5 von 5 Habits erreicht'
+                : "You've reached 5 of 5 habits"}
             </Text>
+            <BrandButton
+              title={locale === 'de' ? 'Upgrade für mehr Habits' : 'Upgrade for More Habits'}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push('/paywall?trigger=habits' as any);
+              }}
+              style={{ marginTop: 10, width: '100%' }}
+            />
           </GlassCard>
         ) : (
           <BrandButton
@@ -424,8 +435,8 @@ const styles = StyleSheet.create({
   emptyButton: { width: '100%' },
 
   // Habit limit
-  limitCard: { marginBottom: 16 },
+  limitCard: { marginBottom: 16, alignItems: 'center', paddingVertical: 20 },
   limitText: {
-    fontSize: 14, color: '#737373', textAlign: 'center', lineHeight: 20,
+    fontSize: 15, fontWeight: '600', color: '#737373', textAlign: 'center', lineHeight: 20,
   },
 });

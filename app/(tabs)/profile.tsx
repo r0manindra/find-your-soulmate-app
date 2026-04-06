@@ -61,13 +61,6 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleGraduate = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.push('/modal');
-    // Delay graduate() so the modal is presented before the achievement listener fires
-    setTimeout(() => progress.graduate(), 600);
-  };
-
   const handleReset = () => {
     Alert.alert(
       t('profile.resetProgress'),
@@ -433,19 +426,6 @@ export default function ProfileScreen() {
           </Pressable>
         </GlassCard>
 
-        {/* Graduate button */}
-        <GlassCard style={styles.graduateCard}>
-          <Ionicons name="school" size={48} color="#E8435A" style={{ textAlign: 'center', alignSelf: 'center' }} />
-          <Text style={[styles.graduateTitle, isDark && styles.textDark]}>{t('profile.graduate')}</Text>
-          <Text style={styles.graduateDesc}>{t('profile.graduateDesc')}</Text>
-          <BrandButton
-            title={t('profile.graduate')}
-            variant="glass"
-            onPress={handleGraduate}
-            icon={<Ionicons name="ribbon" size={18} color={isDark ? '#F5F5F5' : '#171717'} />}
-          />
-        </GlassCard>
-
         {/* Reset */}
         <Pressable onPress={handleReset} style={styles.resetButton}>
           <Text style={styles.resetText}>{t('profile.resetProgress')}</Text>
@@ -708,11 +688,6 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
-
-  // Graduate
-  graduateCard: { marginTop: 8, marginBottom: 20, alignItems: 'center', paddingVertical: 24 },
-  graduateTitle: { fontSize: 22, fontWeight: '700', color: '#171717', letterSpacing: -0.3, marginTop: 12, textAlign: 'center' },
-  graduateDesc: { fontSize: 14, color: '#737373', textAlign: 'center', marginTop: 6, marginBottom: 16, paddingHorizontal: 16 },
 
   // Text variants
   textDark: { color: '#F5F5F5' },

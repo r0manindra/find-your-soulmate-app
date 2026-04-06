@@ -148,8 +148,8 @@ export default function CoachScreen() {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  // Tab bar height for when it's visible
-  const tabBarHeight = 80 + insets.bottom;
+  // Tab bar height — pill is 72px tall, wrapper adds insets.bottom + 12 from bottom
+  const tabBarHeight = 88 + insets.bottom;
 
   // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
