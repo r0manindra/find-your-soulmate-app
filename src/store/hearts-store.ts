@@ -88,7 +88,7 @@ export const useHeartsStore = create<HeartsStore>()(
       },
 
       addBonusHearts: (amount) => {
-        set((state) => ({ bonusHearts: state.bonusHearts + amount }));
+        set((state) => ({ bonusHearts: Math.min(state.bonusHearts + amount, 100) }));
       },
 
       claimWelcomeGift: () => {

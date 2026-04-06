@@ -115,12 +115,15 @@ router.post('/spend', async (req: AuthRequest, res: Response) => {
     remaining -= dailyDeduct;
     const bonusDeduct = remaining;
 
+    // Hard cap: bonus hearts can never exceed 100 (prevents client manipulation)
+    const newBonus = Math.min(Math.max(0, user.bonusHearts - bonusDeduct), 100);
+
     await prisma.user.update({
       where: { id: req.userId },
       data: {
         dailyHeartsUsed: dailyUsed + dailyDeduct,
         lastHeartsResetDate: today,
-        bonusHearts: user.bonusHearts - bonusDeduct,
+        bonusHearts: newBonus,
       },
     });
 

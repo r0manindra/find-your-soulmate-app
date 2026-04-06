@@ -18,13 +18,13 @@ type PaywallTrigger = 'character' | 'exercise' | 'hearts' | 'chapter' | 'habits'
 
 const PRO_MONTHLY_FEATURES = {
   en: [
-    { icon: 'heart' as const, text: '15 hearts/day', highlight: true },
+    { icon: 'heart' as const, text: '15 hearts/day (refreshed daily)', highlight: true },
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
   ],
   de: [
-    { icon: 'heart' as const, text: '15 Herzen/Tag', highlight: true },
+    { icon: 'heart' as const, text: '15 Herzen/Tag (täglich erneuert)', highlight: true },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
@@ -33,14 +33,14 @@ const PRO_MONTHLY_FEATURES = {
 
 const PRO_PLUS_ANNUAL_FEATURES = {
   en: [
-    { icon: 'heart' as const, text: '25 hearts/day', highlight: true },
+    { icon: 'heart' as const, text: '25 hearts/day (refreshed daily)', highlight: true },
     { icon: 'people' as const, text: 'All coach characters' },
     { icon: 'flash' as const, text: 'All exercise modes (incl. Reply Helper)' },
     { icon: 'checkmark-done' as const, text: 'Unlimited habit tracking' },
     { icon: 'book' as const, text: 'All chapters unlocked', highlight: true },
   ],
   de: [
-    { icon: 'heart' as const, text: '25 Herzen/Tag', highlight: true },
+    { icon: 'heart' as const, text: '25 Herzen/Tag (täglich erneuert)', highlight: true },
     { icon: 'people' as const, text: 'Alle Coach-Charaktere' },
     { icon: 'flash' as const, text: 'Alle Übungsmodi (inkl. Antwort-Helfer)' },
     { icon: 'checkmark-done' as const, text: 'Unbegrenztes Habit-Tracking' },
