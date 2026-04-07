@@ -152,9 +152,11 @@ export default function CoachScreen() {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  // Tab bar: pill ~56px content + 16px padding + wrapper bottom = insets.bottom + 12
-  // Input should sit just above the pill with a small gap
-  const tabBarHeight = 76 + insets.bottom;
+  // Floating pill tab bar: 56px tabs + 16px padding + 1px border = 73px pill
+  // Wrapper adds insets.bottom + 12px below the pill
+  // Total from screen bottom to pill top = insets.bottom + 85
+  // Add 4px gap so input doesn't touch the pill
+  const tabBarHeight = 89 + insets.bottom;
 
   // Track keyboard visibility & scroll chat to bottom when keyboard opens
   useEffect(() => {
@@ -184,11 +186,11 @@ export default function CoachScreen() {
   // Animated bottom padding — smooth transition when keyboard opens/closes
   const inputBottomPaddingValue = useSharedValue(tabBarHeight);
   useEffect(() => {
-    // When keyboard is open: no extra padding (sits right above keyboard)
-    // When keyboard is closed: push above the floating tab bar
-    const target = (isInputFocused && keyboardVisible) ? 0 : tabBarHeight;
+    // When keyboard is open: KAV handles the push, so no extra margin needed
+    // When keyboard is closed: push input above the floating tab bar pill
+    const target = keyboardVisible ? 0 : tabBarHeight;
     inputBottomPaddingValue.value = withTiming(target, { duration: 250 });
-  }, [isInputFocused, keyboardVisible, tabBarHeight]);
+  }, [keyboardVisible, tabBarHeight]);
 
   const animatedInputWrapperStyle = useAnimatedStyle(() => ({
     marginBottom: inputBottomPaddingValue.value,
@@ -592,6 +594,7 @@ export default function CoachScreen() {
         {/* Messages — inverted FlatList for WhatsApp-like chat behavior */}
         <FlatList
           ref={flatListRef}
+          style={{ flex: 1 }}
           data={invertedMessages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
@@ -941,7 +944,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,67,90,0.06)', borderRadius: 10,
   },
   upgradeBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#E8435A' },
-  messageList: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 100, flexGrow: 1 },
+  messageList: { paddingHorizontal: 14, paddingTop: 4, paddingBottom: 20, flexGrow: 1 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, marginBottom: 8 },
   messageRowUser: { justifyContent: 'flex-end' },
   avatarContainer: {
