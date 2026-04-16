@@ -313,20 +313,15 @@ export default function PaywallScreen() {
             title={
               loading
                 ? (locale === 'de' ? 'Wird geladen...' : 'Loading...')
-                : (locale === 'de' ? 'Kostenlos testen' : 'Start Free Trial')
+                : (locale === 'de' ? 'Jetzt abonnieren' : 'Subscribe Now')
             }
             onPress={handleSubscribe}
             disabled={loading}
           />
-          <Text style={[styles.trialNote, isDark && styles.trialNoteDark]}>
-            {locale === 'de'
-              ? '7 Tage kostenlos testen. Jederzeit kündbar.'
-              : '7-day free trial. Cancel anytime.'}
-          </Text>
           <Text style={[styles.terms, isDark && styles.termsDark]}>
             {locale === 'de'
-              ? 'Die Zahlung wird nach Ablauf der Testphase über deinen App Store Account abgerechnet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der aktuellen Laufzeit gekündigt wird.'
-              : 'Payment will be charged to your App Store account after the trial period. Subscription renews automatically unless cancelled at least 24 hours before the end of the current period.'}
+              ? 'Die Zahlung wird über deinen App Store Account abgerechnet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der aktuellen Laufzeit gekündigt wird.'
+              : 'Payment will be charged to your App Store account. Subscription renews automatically unless cancelled at least 24 hours before the end of the current period.'}
           </Text>
         </View>
 
@@ -470,11 +465,6 @@ const styles = StyleSheet.create({
 
   // CTA
   ctaContainer: { gap: 8, marginBottom: 24 },
-  trialNote: {
-    fontSize: 14, fontWeight: '600', color: '#171717',
-    textAlign: 'center',
-  },
-  trialNoteDark: { color: '#F5F5F5' },
   terms: {
     fontSize: 11, color: '#A3A3A3', textAlign: 'center',
     lineHeight: 16, paddingHorizontal: 16,
