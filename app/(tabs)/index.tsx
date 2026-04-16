@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -19,7 +19,6 @@ import { useAuthStore } from '@/src/store/auth-store';
 import { HEART_COSTS } from '@/src/config/heart-costs';
 import { useHeartsStore } from '@/src/store/hearts-store';
 import { useHabitStore } from '@/src/store/habit-store';
-import { phraseCategories } from '@/src/data/content/phrasebook';
 
 function getGreeting(locale: 'en' | 'de'): string {
   const hour = new Date().getHours();
@@ -116,36 +115,44 @@ function ContinueCard({ locale }: { locale: 'en' | 'de' }) {
         end={{ x: 1, y: 1 }}
         style={styles.continueCard}
       >
-        <View style={styles.continueContent}>
+        <View style={styles.continueTopRow}>
           <View style={styles.continueIconContainer}>
             <Ionicons name={nextChapter.ionicon as any} size={28} color="#fff" />
           </View>
-          <View style={styles.continueText}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.continueLabel}>
               {needsHearts
                 ? locale === 'de' ? 'Freischalten' : 'Unlock'
                 : locale === 'de' ? 'Weiter mit' : 'Continue with'}
             </Text>
-            <Text style={styles.continueTitle} numberOfLines={1}>
+            <Text style={styles.continueTitle} numberOfLines={2}>
               {nextChapter.title[locale]}
             </Text>
-            <Text style={styles.continueSubtitle} numberOfLines={1}>
-              {nextChapter.phase === 0
-                ? nextChapter.subtitle[locale]
-                : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
-            </Text>
           </View>
-          <View style={styles.continueRight}>
-            {needsHearts && (
-              <View style={styles.heartCostBadge}>
-                <Ionicons name="heart" size={10} color="#fff" />
-                <Text style={styles.heartCostText}>{HEART_COSTS.CHAPTER}</Text>
-              </View>
-            )}
-            <View style={styles.continueArrow}>
-              <Ionicons name={needsHearts ? 'lock-open' : 'play'} size={20} color="#fff" />
+          {needsHearts && (
+            <View style={styles.heartCostBadge}>
+              <Ionicons name="heart" size={10} color="#fff" />
+              <Text style={styles.heartCostText}>{HEART_COSTS.CHAPTER}</Text>
             </View>
+          )}
+        </View>
+        <Text style={styles.continueSubtitle}>
+          {nextChapter.phase === 0
+            ? nextChapter.subtitle[locale]
+            : `${locale === 'de' ? 'Kapitel' : 'Chapter'} ${nextChapter.id} · ${nextChapter.subtitle[locale]}`}
+        </Text>
+        <Text style={styles.continueDescription} numberOfLines={3}>
+          {nextChapter.summary[locale]}
+        </Text>
+        <View style={styles.continueCta}>
+          <View style={styles.continueArrow}>
+            <Ionicons name={needsHearts ? 'lock-open' : 'play'} size={18} color="#fff" />
           </View>
+          <Text style={styles.continueCtaText}>
+            {needsHearts
+              ? locale === 'de' ? 'Kapitel freischalten' : 'Unlock chapter'
+              : locale === 'de' ? 'Jetzt lesen' : 'Read now'}
+          </Text>
         </View>
       </LinearGradient>
     </AnimatedPressable>
@@ -163,9 +170,6 @@ export default function HomeScreen() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const userGender = useUserProfileStore((s) => s.userGender);
   const [personalizeCardDismissed, setPersonalizeCardDismissed] = useState(false);
-  const { height: screenHeight } = useWindowDimensions();
-  // Tall screens (>800) get larger elements; compact screens stay tight
-  const isTall = screenHeight > 800;
 
   // Habits mini-summary
   const habits = useHabitStore((s) => s.habits);
@@ -246,44 +250,6 @@ export default function HomeScreen() {
 
         <Animated.View entering={FadeInDown.delay(60).duration(300)}>
           <ContinueCard locale={locale} />
-        </Animated.View>
-
-        {/* Phrasebook card — bigger with category preview */}
-        <Animated.View entering={FadeInDown.delay(100).duration(300)}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/phrasebook' as any);
-            }}
-            style={[styles.phrasebookCard, isDark && styles.phrasebookCardDark, isTall && styles.phrasebookCardTall]}
-          >
-            <View style={styles.phrasebookHeader}>
-              <View style={[styles.phrasebookIconCircle, isDark && styles.phrasebookIconCircleDark]}>
-                <Ionicons name="chatbubble-ellipses" size={20} color="#8B5CF6" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.phrasebookTitle, isDark && styles.phrasebookTitleDark]}>
-                  {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
-                </Text>
-                <Text style={[styles.phrasebookDesc, isDark && styles.phrasebookDescDark]}>
-                  {locale === 'de'
-                    ? `${phraseCategories.length} Kategorien mit cleveren Sprüchen`
-                    : `${phraseCategories.length} categories of clever lines`}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={isDark ? '#525252' : '#D4D4D4'} />
-            </View>
-            <View style={styles.phrasebookGrid}>
-              {phraseCategories.slice(0, isTall ? 8 : 6).map((cat) => (
-                <View key={cat.id} style={[styles.phrasebookChip, { backgroundColor: `${cat.color}12` }]}>
-                  <Ionicons name={cat.icon as any} size={13} color={cat.color} />
-                  <Text style={[styles.phrasebookChipText, { color: cat.color }]} numberOfLines={1}>
-                    {cat.name[locale]}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </Pressable>
         </Animated.View>
 
         {/* Today's Habits mini-summary */}
@@ -392,8 +358,8 @@ const styles = StyleSheet.create({
 
   // Continue Card
   continueCard: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 22,
+    padding: 22,
     marginBottom: 12,
     shadowColor: '#E8435A',
     shadowOffset: { width: 0, height: 4 },
@@ -401,10 +367,11 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  continueContent: {
+  continueTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+    marginBottom: 10,
   },
   continueIconContainer: {
     width: 52,
@@ -414,9 +381,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  continueText: {
-    flex: 1,
-  },
   continueLabel: {
     fontSize: 12,
     fontWeight: '600',
@@ -425,20 +389,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   continueTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: '#fff',
     letterSpacing: -0.3,
     marginTop: 2,
   },
   continueSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 2,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 6,
   },
-  continueRight: {
-    alignItems: 'center',
-    gap: 6,
+  continueDescription: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 20,
+    marginBottom: 14,
   },
   heartCostBadge: {
     flexDirection: 'row',
@@ -454,82 +420,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
-  continueArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  continueCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: 'rgba(255,255,255,0.2)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  continueArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Phrasebook card
-  phrasebookCard: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.06)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  phrasebookCardDark: {
-    backgroundColor: '#252525',
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  phrasebookCardTall: {
-    padding: 18,
-  },
-  phrasebookHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 14,
-  },
-  phrasebookIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(139,92,246,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phrasebookIconCircleDark: {
-    backgroundColor: 'rgba(139,92,246,0.15)',
-  },
-  phrasebookTitle: {
-    fontSize: 17,
+  continueCtaText: {
+    fontSize: 15,
     fontWeight: '700',
-    color: '#171717',
-    letterSpacing: -0.2,
-  },
-  phrasebookTitleDark: { color: '#F5F5F5' },
-  phrasebookDesc: {
-    fontSize: 13,
-    color: '#737373',
-    marginTop: 2,
-  },
-  phrasebookDescDark: { color: '#A3A3A3' },
-  phrasebookGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 7,
-  },
-  phrasebookChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  phrasebookChipText: {
-    fontSize: 12,
-    fontWeight: '600',
+    color: '#fff',
   },
 
   // Habits mini card

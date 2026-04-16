@@ -31,7 +31,11 @@
       },
       "package": "com.flirtiq.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -60,9 +64,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e9778525-72c1-4529-8e3f-c6aaa149943f"
+        "projectId": "fa2c341c-68a8-4a43-a745-214854ad3f7a"
       }
     },
-    "owner": "r0manindra"
+    "owner": "rowing"
   }
 }

@@ -237,6 +237,30 @@ export default function ProfileScreen() {
           </Pressable>
         </GlassCard>
 
+        {/* Phrasebook Link */}
+        <GlassCard style={styles.booksLinkCard}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/phrasebook' as any);
+            }}
+            style={styles.booksLinkContent}
+          >
+            <View style={[styles.booksIconContainer, { backgroundColor: 'rgba(139,92,246,0.1)' }]}>
+              <Ionicons name="chatbubble-ellipses" size={24} color="#8B5CF6" />
+            </View>
+            <View style={styles.booksLinkInfo}>
+              <Text style={[styles.booksLinkTitle, isDark && styles.textDark]}>
+                {locale === 'de' ? 'Flirt-Phrasebook' : 'Flirt Phrasebook'}
+              </Text>
+              <Text style={styles.booksLinkSubtitle}>
+                {locale === 'de' ? 'Clevere Sprüche & Antworten' : 'Clever lines & responses'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#A3A3A3" />
+          </Pressable>
+        </GlassCard>
+
         {/* Achievements */}
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>{t('profile.achievements')}</Text>
         <View style={styles.achievementsGrid}>
@@ -306,9 +330,14 @@ export default function ProfileScreen() {
 
           <View style={styles.settingDivider} />
           <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, isDark && styles.textDark]}>
-              {locale === 'de' ? 'Habit-Erinnerungen' : 'Habit Nudges'}
-            </Text>
+            <View>
+              <Text style={[styles.settingLabel, isDark && styles.textDark]}>
+                {locale === 'de' ? 'Benachrichtigungen' : 'Notifications'}
+              </Text>
+              <Text style={styles.settingHint}>
+                {locale === 'de' ? 'Habit-Erinnerungen & Tipps' : 'Habit reminders & tips'}
+              </Text>
+            </View>
             <Switch
               value={habitNudgesEnabled}
               onValueChange={(val) => {
@@ -610,6 +639,7 @@ const styles = StyleSheet.create({
   settingCard: { marginBottom: 16 },
   settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   settingLabel: { fontSize: 17, fontWeight: '500', color: '#171717' },
+  settingHint: { fontSize: 12, color: '#A3A3A3', marginTop: 2 },
   languageToggle: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 12, padding: 3 },
   langOption: { paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
   langActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },

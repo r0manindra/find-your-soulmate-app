@@ -186,9 +186,9 @@ export default function CoachScreen() {
   // Animated bottom padding — smooth transition when keyboard opens/closes
   const inputBottomPaddingValue = useSharedValue(tabBarHeight);
   useEffect(() => {
-    // When keyboard is open: KAV handles the push, so no extra margin needed
+    // When keyboard is open: small bottom padding so input sits snug against keyboard
     // When keyboard is closed: push input above the floating tab bar pill
-    const target = keyboardVisible ? 0 : tabBarHeight;
+    const target = keyboardVisible ? 4 : tabBarHeight;
     inputBottomPaddingValue.value = withTiming(target, { duration: 250 });
   }, [keyboardVisible, tabBarHeight]);
 
@@ -514,7 +514,7 @@ export default function CoachScreen() {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={insets.top}
       >
         {/* Header with character selector */}
         <Pressable onPress={() => { if (!isBattleActive) { setCoachesHistoryTab('coaches'); setShowCoachesHistoryModal(true); } }} style={styles.header}>
