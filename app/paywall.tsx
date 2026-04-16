@@ -98,7 +98,8 @@ export default function PaywallScreen() {
   useEffect(() => {
     purchases.getOfferings().then((o) => {
       if (o) setOfferings(o);
-    }).catch(() => {});
+      else console.warn('[Paywall] getOfferings returned null');
+    }).catch((e) => console.warn('[Paywall] getOfferings error:', e));
   }, []);
 
   const handleSubscribe = async () => {

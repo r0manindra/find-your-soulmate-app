@@ -184,7 +184,7 @@ export default function RootLayout() {
       const user = useAuthStore.getState().user;
       initPurchases(user?.id).then(() => {
         checkSubscriptionStatus();
-      }).catch(() => { /* RevenueCat not configured yet */ });
+      }).catch((e) => { console.warn('[RevenueCat] Init failed:', e); });
     }
   }, [loaded]);
 

@@ -16,18 +16,30 @@ const ENTITLEMENT_LEGACY_PREMIUM = 'premium';
 type SubscriptionTier = 'free' | 'pro' | 'pro_plus';
 
 let isInitialized = false;
+let initPromise: Promise<void> | null = null;
 
 export async function initPurchases(userId?: string) {
   if (isInitialized) return;
+  if (initPromise) return initPromise;
 
-  const apiKey = Platform.OS === 'ios' ? REVENUECAT_IOS_KEY : REVENUECAT_ANDROID_KEY;
+  initPromise = (async () => {
+    const apiKey = Platform.OS === 'ios' ? REVENUECAT_IOS_KEY : REVENUECAT_ANDROID_KEY;
 
-  if (__DEV__) {
-    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    if (__DEV__) {
+      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    }
+
+    Purchases.configure({ apiKey, appUserID: userId || undefined });
+    isInitialized = true;
+  })();
+
+  return initPromise;
+}
+
+async function ensureInitialized() {
+  if (!isInitialized) {
+    await initPurchases();
   }
-
-  Purchases.configure({ apiKey, appUserID: userId || undefined });
-  isInitialized = true;
 }
 
 export interface TieredOfferings {
@@ -39,7 +51,13 @@ export interface TieredOfferings {
 
 export async function getOfferings(): Promise<TieredOfferings | null> {
   try {
+    await ensureInitialized();
     const offerings = await Purchases.getOfferings();
+
+    // Debug: log available offering identifiers
+    const offeringKeys = Object.keys(offerings.all);
+    console.warn('[RevenueCat] Available offerings:', offeringKeys.join(', ') || 'NONE');
+    console.warn('[RevenueCat] Current offering:', offerings.current?.identifier ?? 'NONE');
 
     const proOffering = offerings.all['pro'] || null;
     const proPlusOffering = offerings.all['pro_plus'] || offerings.current || null;
@@ -58,6 +76,7 @@ export async function getOfferings(): Promise<TieredOfferings | null> {
 
 export async function purchasePackage(pkg: PurchasesPackage): Promise<SubscriptionTier | false> {
   try {
+    await ensureInitialized();
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     return checkSubscriptionTier(customerInfo);
   } catch (e: any) {
@@ -70,6 +89,7 @@ export async function purchasePackage(pkg: PurchasesPackage): Promise<Subscripti
 
 export async function restorePurchases(): Promise<SubscriptionTier | false> {
   try {
+    await ensureInitialized();
     const customerInfo = await Purchases.restorePurchases();
     const tier = checkSubscriptionTier(customerInfo);
     return tier === 'free' ? false : tier;
@@ -81,6 +101,7 @@ export async function restorePurchases(): Promise<SubscriptionTier | false> {
 
 export async function checkSubscriptionStatus(): Promise<SubscriptionTier> {
   try {
+    await ensureInitialized();
     const customerInfo = await Purchases.getCustomerInfo();
     return checkSubscriptionTier(customerInfo);
   } catch (e) {
